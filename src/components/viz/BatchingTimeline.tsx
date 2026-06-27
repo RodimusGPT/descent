@@ -7,6 +7,7 @@ import {
   utilization,
 } from '@/lib/batching';
 import { CATEGORICAL, COLOR, withAlpha } from '@/lib/encoding';
+import { useInView } from '@/lib/use-in-view';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -46,6 +47,8 @@ export function BatchingTimeline({
   slots = SAMPLE_SLOTS,
 }: BatchingTimelineProps) {
   const reduced = usePrefersReducedMotion();
+  const rootRef = useRef<HTMLElement>(null);
+  const inView = useInView(rootRef);
   const [mode, setMode] = useState<Mode>('static');
 
   const staticSched = useMemo(() => scheduleStatic(workload, slots), [workload, slots]);
@@ -71,7 +74,8 @@ export function BatchingTimeline({
 
   const [playing, setPlaying] = useState(!reduced);
   useEffect(() => {
-    if (reduced || !playing) return;
+    // Pause the reveal clock when reduced, paused, or scrolled out of view.
+    if (reduced || !playing || !inView) return;
     timer.current = setInterval(() => {
       setRevealed((c) => {
         if (c >= nCols) return c;
@@ -81,7 +85,7 @@ export function BatchingTimeline({
     return () => {
       if (timer.current) clearInterval(timer.current);
     };
-  }, [reduced, playing, nCols]);
+  }, [reduced, playing, nCols, inView]);
 
   const atEnd = revealed >= nCols;
 
@@ -123,6 +127,7 @@ export function BatchingTimeline({
 
   return (
     <section
+      ref={rootRef}
       className="mx-auto flex w-full max-w-[900px] flex-col gap-4 rounded-xl border p-4 font-sans text-ink sm:p-6"
       style={panel}
       aria-label="Static versus continuous batching timeline"

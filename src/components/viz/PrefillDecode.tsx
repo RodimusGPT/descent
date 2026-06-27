@@ -1,6 +1,7 @@
 import { Token } from '@/components/scroll/Token';
 import { COLOR, withAlpha } from '@/lib/encoding';
 import { MODEL_PRESETS, type ModelPreset, kvCacheBytes, recomputeWork } from '@/lib/memory';
+import { useInView } from '@/lib/use-in-view';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -43,6 +44,8 @@ export interface PrefillDecodeProps {
 
 export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
   const reduced = usePrefersReducedMotion();
+  const rootRef = useRef<HTMLElement>(null);
+  const inView = useInView(rootRef);
 
   const [frame, setFrame] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -55,7 +58,8 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
   // --- animation clock (gated entirely on reduced motion) -------------------
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (reduced || !playing) return;
+    // Pause the clock when reduced, paused, or scrolled out of view.
+    if (reduced || !playing || !inView) return;
     timer.current = setInterval(() => {
       setFrame((f) => {
         if (f >= LAST_FRAME) {
@@ -68,7 +72,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
     return () => {
       if (timer.current) clearInterval(timer.current);
     };
-  }, [reduced, playing]);
+  }, [reduced, playing, inView]);
 
   const atEnd = frame >= LAST_FRAME;
 
@@ -139,6 +143,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
 
   return (
     <section
+      ref={rootRef}
       className="flex w-full flex-col gap-4 rounded-xl border p-4 font-sans text-ink sm:p-6"
       style={panel}
       aria-label="Prefill and decode with KV cache"

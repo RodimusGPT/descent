@@ -40,6 +40,7 @@ function createEngine(hooks: Hooks): Engine {
   let animating = false;
   let raf: number | null = null;
   let animRaf: number | null = null;
+  let measureRaf: number | null = null;
   let dwell: number | null = null;
 
   const maxScroll = () => document.documentElement.scrollHeight - window.innerHeight;
@@ -135,9 +136,15 @@ function createEngine(hooks: Hooks): Engine {
   const onScroll = () => {
     if (raf === null) raf = requestAnimationFrame(update);
   };
+  // Coalesce resize / page-height bursts (hydration, animating visuals) into one
+  // re-measure per frame — measure() reads layout for every stop.
   const onResize = () => {
-    measure();
-    onScroll();
+    if (measureRaf !== null) return;
+    measureRaf = requestAnimationFrame(() => {
+      measureRaf = null;
+      measure();
+      onScroll();
+    });
   };
 
   const dwellMs = (i: number): number => {
@@ -215,6 +222,7 @@ function createEngine(hooks: Hooks): Engine {
       window.removeEventListener('resize', onResize);
       ro.disconnect();
       if (raf !== null) cancelAnimationFrame(raf);
+      if (measureRaf !== null) cancelAnimationFrame(measureRaf);
     },
   };
 }

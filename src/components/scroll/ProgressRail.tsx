@@ -80,24 +80,32 @@ export function ProgressRail({ parts, currentSlug }: ProgressRailProps) {
     const onScroll = () => {
       if (raf === null) raf = requestAnimationFrame(update);
     };
-    const onResize = () => {
-      measure();
-      onScroll();
+    // Re-measuring reads layout (getBoundingClientRect over every section), so coalesce
+    // resize / page-height bursts (island hydration, animating visuals) to one per frame.
+    let measureRaf: number | null = null;
+    const scheduleMeasure = () => {
+      if (measureRaf !== null) return;
+      measureRaf = requestAnimationFrame(() => {
+        measureRaf = null;
+        measure();
+        update();
+      });
     };
 
     measure();
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', scheduleMeasure, { passive: true });
     // Re-measure when the page height changes (islands hydrating, blocks expanding…).
-    const ro = new ResizeObserver(onResize);
+    const ro = new ResizeObserver(scheduleMeasure);
     ro.observe(document.body);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', scheduleMeasure);
       ro.disconnect();
       if (raf !== null) cancelAnimationFrame(raf);
+      if (measureRaf !== null) cancelAnimationFrame(measureRaf);
     };
   }, [parts, currentSlug, staticIndex, denom]);
 
