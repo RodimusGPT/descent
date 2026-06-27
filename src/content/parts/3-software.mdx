@@ -26,13 +26,18 @@ batches. Its central drama is an asymmetry.
 ### Prefill vs decode
 
 Reading your prompt — **prefill** — happens in one big parallel pass over all the prompt tokens
-at once. It is **compute-bound**, and it sets the *time to first token*. Generating the answer —
-**decode** — happens one token at a time, each step depending on the last. It is
-**memory-bound**, and it sets the speed *between* tokens.
+at once. It is **compute-bound** — lots of arithmetic for each weight it loads — and it sets the
+*time to first token*. Generating the answer — **decode** — emits one token at a time, each step
+depending on the last. It is **memory-bound**: producing a single token still means reading *all*
+of the model's weights, so the limit is how fast they stream from memory, not raw FLOPs — and
+this sets the speed *between* tokens.
 
 To avoid recomputing the past at every step, the engine keeps a **KV cache**: the attention keys
-and values for every token already seen. That single trick turns generation from O(n²) work into
-O(n) — which is why serving a long conversation is mostly a memory problem.
+and values for every token already seen. Without it, each new token would reprocess the whole
+sequence — O(n²) work to write an n-token reply; the cache cuts that recompute to O(1) per step,
+leaving only the attention scan over the growing cache. That cache *is* the memory pressure — it
+swells with context and batch — which is why **GQA / MQA** (and MLA), sharing keys and values
+across heads as Part 1 promised, pay off right here.
 
 </div>
 <PrefillDecode slot="visual" client:visible />
@@ -43,9 +48,10 @@ O(n) — which is why serving a long conversation is mostly a memory problem.
 
 ### Batching & scheduling
 
-A GPU is happiest with a **big batch** — many sequences in flight at once. But they finish at
-different times, and naive **static batching** makes the whole batch wait for its slowest member,
-leaving finished slots idle. **Continuous batching** schedules *per iteration*: the instant a
+A single memory-bound stream barely keeps the GPU busy, so engines run **many at once** — and a
+GPU is happiest with a **big batch** anyway. But sequences finish at different times, and naive
+**static batching** makes the whole batch wait for its slowest member, leaving finished slots
+idle. **Continuous batching** schedules *per iteration*: the instant a
 sequence finishes, a waiting one takes its slot. Utilization climbs.
 
 Two tricks ride along. **Chunked prefill** breaks a long prompt into pieces and interleaves them

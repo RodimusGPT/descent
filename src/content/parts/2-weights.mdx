@@ -17,8 +17,9 @@ import MemoryBudget from '@/components/viz/MemoryBudget';
 import Distillation from '@/components/viz/Distillation';
 
 We keep calling the model "numbers." This part takes that literally. Underneath the
-abstractions of Part 1, a model is just billions of stored values — and the single most
-consequential engineering choice is how to write *one* of them down, billions of times over.
+abstractions of Part 1, a model is just billions of stored values, and the question now is how to
+make them all *fit*: first by writing each number more cheaply, then by a different route that
+trains a smaller model in the first place.
 
 <Beat caption="Zoom in: model → layer → matrix → one weight. It is numbers all the way down.">
 <div slot="text">
@@ -49,11 +50,20 @@ Sixteen bits halves it, in two flavors. **FP16** spends 5 bits on exponent and 1
 for it.
 
 That trade is why BF16 is the modern default: for deep nets, *range* matters more than the last
-digits of precision. Flip the bits below and watch the value change.
+digits of precision. Newer hardware pushes further still — to **8-bit floats** (FP8, in E4M3 or
+E5M2 flavors) for the heaviest matmuls. Flip the bits below and watch the value change.
 
 </div>
 <FloatExploder slot="visual" client:visible />
 </Beat>
+
+<DeeperBlock summary="How a float becomes a value">
+A floating-point number is read as
+$(-1)^{\text{sign}} \times 1.\text{mantissa} \times 2^{\,\text{exp} - \text{bias}}$. The field
+widths set the trade-off: FP32 is 1/8/23, FP16 is 1/5/10, BF16 is 1/8/7. BF16 keeps FP32's 8
+exponent bits — and therefore its *range* — while dropping mantissa bits, so it covers the same
+magnitudes with coarser steps.
+</DeeperBlock>
 
 <Beat wide caption="Drop the precision: the smooth distribution stair-steps into discrete levels, and the size falls.">
 <div slot="text">
@@ -63,7 +73,8 @@ digits of precision. Flip the bits below and watch the value change.
 We can go further by leaving floating point behind. **Quantization** stores each weight in fewer
 bits — 8, 4, even 2 — mapping the range of values onto a small set of levels. You lose precision,
 but a surprising rule holds: a **bigger model at lower precision usually beats a smaller model at
-higher precision**, and the quality loss from quantizing is *smaller* on bigger models.
+higher precision**, and the quality loss from quantizing is *smaller* on bigger models — they
+carry more redundancy, so rounding any single weight matters less.
 
 Formats like GGUF's **k-quants** even mix precision per layer, spending bits where they matter.
 Drag the precision down and watch the distribution stair-step — and the model size fall with it.
@@ -71,6 +82,13 @@ Drag the precision down and watch the distribution stair-step — and the model 
 </div>
 <QuantizationSlider slot="visual" client:visible />
 </Beat>
+
+<DeeperBlock summary="The quantization map">
+Integer quantization stores a weight as $q = \operatorname{round}(w/s) + z$ — a scale $s$ and an
+optional zero-point $z$ — and recovers it as $\hat{w} = s\,(q - z)$. Fewer bits means fewer levels
+($2^b$ of them), so the step $s$ is coarser and the rounding error larger. The whole craft is
+choosing $s$, and how finely to share it, so the levels land where the weights actually sit.
+</DeeperBlock>
 
 <Beat wide caption="One scale for the whole tensor wastes range; a scale per block recovers it.">
 <div slot="text">
@@ -100,8 +118,9 @@ a bit per value but recovers most of the accuracy of formats several bits wider.
 ### The memory budget
 
 Now the budget. Weight memory is just **params × bytes per weight**: 7 billion params at FP16
-(2 bytes) is 14 GB; at Q4 (half a byte) it is 3.5 GB — hence the rule of thumb that a model's
-size in billions, times ~0.6, is roughly its **Q4 footprint in gigabytes**.
+(2 bytes) is 14 GB; at Q4 it is ~3.5 GB in theory — though real 4-bit formats also store per-block
+scales, which nudges that up. A safe rule of thumb is a model's size in billions times **~0.6** ≈
+its **Q4 footprint in gigabytes** (so 7B ≈ 4 GB).
 
 But weights are not the whole story: the **KV cache** sits on top and grows with context length
 and batch. The bar stacks weights and KV cache against a card's VRAM — pick the knobs and see
@@ -111,6 +130,14 @@ whether it fits.
 <MemoryBudget slot="visual" client:visible />
 </Beat>
 
+<DeeperBlock summary="Sizing the KV cache">
+The KV cache stores a key and value vector for every token seen so far:
+$$\text{KV bytes} \approx 2 \times n_\text{layers} \times n_\text{kv} \times d_\text{head} \times \text{seqlen} \times \text{batch} \times \text{bytes}.$$
+The leading 2 is K and V. It grows *linearly* with context length and batch — and because it
+scales with $n_\text{kv}$ (the number of key/value heads), this is exactly the term GQA/MQA
+shrink, back in Part 1.
+</DeeperBlock>
+
 <Beat caption="A different route: a small student learns from a big teacher's outputs, not its weights.">
 <div slot="text">
 
@@ -119,8 +146,9 @@ whether it fits.
 Quantization shrinks a model by storing it more cheaply. **Distillation** is a different route
 entirely: train a small **student** to imitate a big **teacher's** outputs — often its
 step-by-step reasoning traces. The student never sees the teacher's weights, only its behavior —
-and yet a surprisingly small number of examples, sometimes ~1,000, can transfer a lot of
-capability.
+sometimes just its sampled text, sometimes its full next-token probabilities (the *dark
+knowledge* in the options it *didn't* pick). And yet a surprisingly small number of examples,
+sometimes ~1,000, can transfer a lot of capability.
 
 Quantization *compresses*; distillation *transfers*. They are often combined: distill, then
 quantize.

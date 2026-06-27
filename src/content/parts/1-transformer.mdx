@@ -19,8 +19,8 @@ import SamplingPlayground from '@/components/viz/SamplingPlayground';
 import Autoregression from '@/components/viz/Autoregression';
 
 The model that answered you is a **transformer**. Strip away the branding and it is a tall
-stack of the same simple operations, applied over and over to a list of numbers. Let us walk
-down through it — from the words you typed to the single token it chose to say next.
+stack of the same simple operations, applied over and over to a list of numbers. Let's follow
+one token through it — from the word you typed to the next token the model chose to say.
 
 <Beat caption="Text → subword tokens → integer ids. Edit the text to re-tokenize.">
 <div slot="text">
@@ -32,8 +32,9 @@ are **tokens** — not quite words, not quite letters, but **subword** chunks le
 A common word like *the* is usually one token; a rarer one like *tokenization* splits into
 several. Spaces and punctuation count too.
 
-Each chunk maps to an integer **id** from a fixed vocabulary of tens of thousands of entries.
-From here on the model never sees your letters — only this sequence of ids.
+Each chunk maps to an integer **id** from a fixed vocabulary of tens of thousands — sometimes a
+few hundred thousand — entries. From here on the model never sees your letters — only this
+sequence of ids.
 
 </div>
 <Tokenizer slot="visual" client:visible />
@@ -52,6 +53,10 @@ Tokens with similar meanings get similar vectors, so they sit near each other. M
 *directions* carry relationships: the step from *king* to *queen* is about the same as from
 *man* to *woman*. Click a word to see its nearest neighbors.
 
+One thing a lookup *can't* capture is **order** — *the cat* and *cat the* would map to the very
+same set of vectors. So before the layers begin, the model also stamps each token with where it
+sits in the sequence.
+
 </div>
 <EmbeddingSpace slot="visual" client:visible />
 </Beat>
@@ -63,13 +68,22 @@ distances. The *intuition* (neighbors and directions carry meaning) survives eve
 exact geometry does not.
 </DeeperBlock>
 
+<DeeperBlock summary="How word order gets in">
+Attention by itself is order-blind — shuffle the tokens and it returns the same answer. Models
+fix this with **positional encoding**. Most modern LLMs use **RoPE** (rotary position
+embeddings): each token's query and key vectors are *rotated* by an angle proportional to its
+position, so the attention score between two tokens depends on their *relative* distance. Earlier
+models simply added a fixed or learned position vector to each embedding.
+</DeeperBlock>
+
 <Beat caption="One pre-norm layer: norm → attention → add, then norm → FFN → add, repeated N times.">
 <div slot="text">
 
 ### The stack
 
-With every token now a vector, the real work begins. The model is a stack of **N identical
-layers** — dozens in a large model. Each does two things in turn: an **attention** sublayer,
+With every token now a vector, the real work begins. The model is a stack of **N layers of the
+same shape** — dozens in a large model, each with its own learned weights. Each does two things
+in turn: an **attention** sublayer,
 where tokens exchange information, and a **feed-forward** sublayer, which transforms each token
 on its own.
 
@@ -95,10 +109,11 @@ cousin of LayerNorm that drops mean-centering.
 
 ### Attention
 
-Attention is the mechanism that makes transformers work. At each layer, **every token looks at
-every other token** and decides how much to borrow from each. A pronoun reaches back to the noun
-it refers to; a verb pulls in its subject. The weights are *soft* — spread across many tokens,
-more on some, less on others.
+Attention is the mechanism that makes transformers work. At each layer, **every token looks back
+at the tokens before it** (itself included) and decides how much to borrow from each — it can't
+peek ahead, and that one restriction is exactly what lets the model generate left to right. A
+pronoun reaches back to the noun it refers to; a verb pulls in its subject. The weights are
+*soft* — spread across many tokens, more on some, less on others.
 
 Click a token in the fan to make it the one doing the looking. Warmer, thicker lines show where
 its attention flows; switch heads to see a completely different pattern.
@@ -137,8 +152,8 @@ softmax into a near-one-hot spike, which would kill the gradient.
 
 ### The feed-forward network — and Mixture-of-Experts
 
-Between attention sublayers sits the **feed-forward network**: two big matrix multiplies with a
-nonlinearity between, run on each token independently. This is where **most of a model's
+Between attention sublayers sits the **feed-forward network**: a couple of big matrix multiplies
+with a nonlinearity between, run on each token independently. This is where **most of a model's
 parameters live**, and much of its stored knowledge with them.
 
 **Mixture-of-Experts** replaces that single FFN with many **expert** FFNs plus a small
@@ -150,14 +165,23 @@ of a hundred-plus billion total.
 <MoERouter slot="visual" client:visible />
 </Beat>
 
+<DeeperBlock summary="What the FFN actually computes">
+Most current models use a **gated** feed-forward block (SwiGLU) rather than the classic
+two-matrix one:
+$$\text{FFN}(x) = \big(\text{Swish}(xW_{\text{gate}}) \odot xW_{\text{up}}\big)\,W_{\text{down}},$$
+three projections, with the gate path supplying the nonlinearity. The hidden dimension is several
+times $d_{\text{model}}$ — which is why this block holds the lion's share of the parameters.
+</DeeperBlock>
+
 <Beat wide caption="The next-token distribution, reshaped by temperature / top-k / top-p before sampling.">
 <div slot="text">
 
 ### From logits to a token
 
-At the top of the stack, the final vector is projected back out to the whole vocabulary, giving
-one score — a **logit** — for every possible next token. Softmax turns those into probabilities.
-But we rarely just take the most likely one; that gets repetitive.
+At the top of the stack, the vector at the **last position** — the one that has been gathering
+context across the whole prompt — is projected back out to the whole vocabulary, giving one
+score — a **logit** — for every possible next token. Softmax turns those into probabilities. But
+we rarely just take the most likely one; that gets repetitive.
 
 **Temperature** flattens or sharpens the distribution. **Top-k** keeps only the k most likely
 candidates. **Top-p** (nucleus) keeps the smallest set covering probability p. Then we **sample**
@@ -166,6 +190,14 @@ one token from what survives. Drag the sliders and watch the distribution reshap
 </div>
 <SamplingPlayground slot="visual" client:visible />
 </Beat>
+
+<DeeperBlock summary="Temperature, precisely">
+Sampling starts from a softmax with a **temperature** $T$:
+$$p_i = \frac{e^{z_i/T}}{\sum_j e^{z_j/T}}.$$
+As $T \to 0$ the distribution collapses onto the single most-likely token (greedy decoding);
+$T = 1$ is the model's raw distribution; $T > 1$ flattens it toward uniform. Top-k and top-p then
+*truncate* this distribution — discarding the unlikely tail — before the draw.
+</DeeperBlock>
 
 <Beat caption="Append the sampled token, feed it back, repeat. The context grows by one each step.">
 <div slot="text">
