@@ -21,6 +21,15 @@ Legend: ☐ to check · each item names where to look.
 - ☐ Part accents: model parts (1, 2) tinted purple, hardware part (4) teal, neutral amber —
   visible in each section's "Part N · Title" eyebrow and the rail dots.
 
+**Guided descent — autoplay (the "Descend" control, bottom-right)**
+- ☐ Press **Descend**: does it smooth-scroll down stop-by-stop (each narration step + each
+  section), pausing long enough to read each? Does the sticky visual + rail advance with it?
+- ☐ Does **any manual scroll / wheel / arrow key instantly pause it** (never fights you)? Does
+  the button flip to "Pause", and resume from where you are on the next press?
+- ☐ Does the **speed** control (1× / 1.5× / 2× / 0.5×) visibly change the pace?
+- ☐ Reduced motion: does it step **instantly** between stops instead of gliding, still guided?
+- ☐ Is the dwell time sensible — longer on dense steps, shorter on sparse ones? (Tune feel later.)
+
 **`ScrollScene` primitive (visible in every part's placeholder scene)**
 - ☐ Sticky visual pane stays put while narration scrolls; the active step's narration is
   full-opacity, others dimmed.

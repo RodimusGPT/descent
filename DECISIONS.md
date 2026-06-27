@@ -50,6 +50,14 @@ Choices not fully fixed by the GOAL spec. Format: decision — rationale.
   screens). All entries are in-page anchors; reduced-motion uses instant (not smooth) scroll.
 - **`ProgressRail` keeps an optional `currentSlug` "focused part" mode** even though no route uses
   it now — cheap to keep, and ready if per-part deep-pages return later.
+- **Guided-descent autoplay (`DescentTour`).** A floating, opt-in "Descend" control that walks the
+  reader down stop-by-stop — every ScrollScene narration step (`[data-scrollstep]`) plus each
+  section header (`[data-tour-stop]`), in document order. It drives the page scroll, so the
+  existing scrollama + rail advance the visuals for free. Dwell per stop is proportional to that
+  stop's reading length (≈200 wpm, 2–9 s), with a 1× / 1.5× / 2× / 0.5× speed control. Guardrails:
+  never auto-starts; any manual wheel/touch/scroll-key pauses it instantly; reduced-motion steps
+  instantly instead of gliding (WCAG 2.2.2). Step-level only for now — driving each interactive's
+  own animation at its stop ("full cinematic") is a deliberate later layer.
 
 ## M1–M3 — Signature interactives
 
