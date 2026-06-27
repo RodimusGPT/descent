@@ -21,14 +21,13 @@ Legend: ☐ to check · each item names where to look.
 - ☐ Part accents: model parts (1, 2) tinted purple, hardware part (4) teal, neutral amber —
   visible in each section's "Part N · Title" eyebrow and the rail dots.
 
-**Guided descent — autoplay (the "Descend" control, bottom-right)**
-- ☐ Press **Descend**: does it smooth-scroll down stop-by-stop (each narration step + each
-  section), pausing long enough to read each? Does the sticky visual + rail advance with it?
-- ☐ Does **any manual scroll / wheel / arrow key instantly pause it** (never fights you)? Does
-  the button flip to "Pause", and resume from where you are on the next press?
-- ☐ Does the **speed** control (1× / 1.5× / 2× / 0.5×) visibly change the pace?
-- ☐ Reduced motion: does it step **instantly** between stops instead of gliding, still guided?
-- ☐ Is the dwell time sensible — longer on dense steps, shorter on sparse ones? (Tune feel later.)
+**Step-through navigator (the control, bottom-center)**
+- ☐ Do **◀ Prev / Next ▶** move you one stop at a time (each beat + section), at your own pace?
+  Does the visual + rail advance with each step?
+- ☐ Does the **"n / N" counter** track your position as you also scroll freely by hand?
+- ☐ Optional **auto-play** (▷): does it advance hands-free, and does any manual scroll / wheel /
+  arrow key instantly stop it? Does the speed chip (1×/1.5×/2×/0.5×) change the pace?
+- ☐ Reduced motion: do steps jump **instantly** instead of gliding?
 
 **`ScrollScene` primitive (visible in every part's placeholder scene)**
 - ☐ Sticky visual pane stays put while narration scrolls; the active step's narration is
@@ -98,6 +97,11 @@ Read Part 1 top-to-bottom in the page; exercise each visual in isolation at the 
 - ☐ **Reads as one descent:** tokenization → embeddings → the stack → attention → Q/K/V →
   FFN/MoE → logits→token → autoregression. Does each beat flow into the next? Do the
   `DeeperBlock` math asides (attention eq., RMSNorm, 2-D caveat) render as real KaTeX?
+- ☐ **Two-column beats (desktop):** is the prose paired with its visual side-by-side, and does
+  the visual stay **sticky** in view while you read the related text? Do the wide beats
+  (attention, Q/K/V, sampling) break to full width sensibly? Does it **stack cleanly on mobile**?
+- ☐ Do the interactives keep their own styling inside the figures (no prose color/spacing leaking
+  into readouts/labels)?
 - ☐ **Tokenizer** (`/dev/tokenizer`): edit the text — do tokens/ids update live? Do compound
   words visibly split into subwords? Do the four kinds (word/subword/punct/space) read clearly?
 - ☐ **EmbeddingSpace** (`/dev/embeddings`): are the 5 clusters visually separated? Click a word —

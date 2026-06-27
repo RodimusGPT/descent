@@ -33,14 +33,17 @@
 @layer components {
   /*
    * Prose for MDX part content. Text elements stay at a readable measure and are
-   * centered, while wide block elements (the ScrollScene <section>) span the full
-   * container so the scrollytelling layout has room for two columns.
+   * centered, while wide block elements span the full container.
+   *
+   * The `:not(figure *)` guard is important: interactives are always embedded inside a
+   * <figure> (Figure.astro / Beat.astro), so these typography rules must NOT reach into
+   * them — otherwise a bare <p> in a viz would inherit prose color/margins.
    */
   .descent-prose > :where(p, h2, h3, ul, ol, blockquote, details, hr) {
     max-width: 42rem;
     margin-inline: auto;
   }
-  .descent-prose h2 {
+  .descent-prose :where(h2):not(figure *) {
     font-size: 1.5rem;
     line-height: 2rem;
     font-weight: 600;
@@ -48,40 +51,40 @@
     margin-top: 3rem;
     margin-bottom: 1rem;
   }
-  .descent-prose h3 {
+  .descent-prose :where(h3):not(figure *) {
     font-size: 1.2rem;
     font-weight: 600;
     color: var(--color-ink);
     margin-top: 2rem;
     margin-bottom: 0.5rem;
   }
-  .descent-prose p {
+  .descent-prose :where(p):not(figure *) {
     color: var(--color-muted);
     line-height: 1.75;
     margin-block: 1rem;
   }
-  .descent-prose strong {
+  .descent-prose :where(strong):not(figure *) {
     color: var(--color-ink);
     font-weight: 600;
   }
-  .descent-prose a {
+  .descent-prose :where(a):not(figure *) {
     color: var(--color-active);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
-  .descent-prose code {
+  .descent-prose :where(code):not(figure *) {
     font-family: var(--font-mono);
     font-size: 0.9em;
     background-color: var(--color-surface-raised);
     padding: 0.1em 0.35em;
     border-radius: 0.25rem;
   }
-  .descent-prose ul {
+  .descent-prose :where(ul):not(figure *) {
     list-style: disc;
     padding-left: 1.5rem;
     color: var(--color-muted);
   }
-  .descent-prose li {
+  .descent-prose :where(li):not(figure *) {
     margin-block: 0.35rem;
   }
 }

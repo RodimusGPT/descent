@@ -101,3 +101,19 @@ Choices not fully fixed by the GOAL spec. Format: decision — rationale.
   real prose.
 - **MoE preset uses top-4 (not the spec's top-8 example)** so the active/total params land near the
   stated "~5 B active of ~117 B total" illustration; documented in `moe.ts`.
+
+## Presentation (post-M4, user-directed)
+
+- **Step-through navigator replaces auto-play as the primary control.** Per user feedback, the
+  bottom control is now ◀ Prev / "n / N" / Next ▶ — the reader advances stop-by-stop at their own
+  pace. Auto-play is kept as a small optional toggle (▷) with a speed chip. Stops are the same set
+  (`[data-tour-stop]` beats/headers + `[data-scrollstep]` scene steps); the counter tracks the
+  nearest stop as you also scroll freely.
+- **Two-column "Beat" layout** (`Beat.astro`) pairs each explanation with its visual: prose left,
+  interactive right and **sticky** so it stays in view while you read; wide interactives (attention,
+  Q/K/V, sampling) use a stacked full-width variant; everything stacks on mobile. Replaced the
+  flat prose-then-`Figure` flow in Part 1.
+- **Prose isolation via `:not(figure *)`.** Because interactives now live in two-column figures
+  inside the prose container, the `.descent-prose` typography rules are scoped to skip anything
+  inside a `<figure>` — so a bare `<p>` in a viz no longer inherits prose color/margins. Removed the
+  rehype heading-tagging (Beats/section-headers are the explicit tour stops now).

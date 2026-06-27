@@ -1,0 +1,61 @@
+---
+/**
+ * Beat — one explanatory "beat": prose paired with its visual.
+ *
+ * Default (lg+): two columns — prose on the left, the interactive on the right,
+ * with the visual `sticky` so it stays in view while you read the related text.
+ * Below lg it stacks (prose, then visual). `wide` switches to a stacked full-width
+ * layout for interactives that need horizontal room (attention fan, sampling, …).
+ *
+ * The whole beat is a guided-tour stop (`data-tour-stop`). The prose in the `text`
+ * slot is styled by the ambient `.descent-prose` rules (it is a descendant of the
+ * page's prose container); the visual lives inside a <figure>, which those rules
+ * deliberately skip (`:not(figure *)`), so the interactive keeps its own styling.
+ *
+ * Usage in MDX:
+ *   <Beat caption="…">
+ *     <Fragment slot="text">
+ *       ### Heading
+ *       prose…
+ *     </Fragment>
+ *     <SomeViz slot="visual" client:visible />
+ *   </Beat>
+ */
+interface Props {
+  caption?: string;
+  /** Stack full-width (prose on top, large visual below) instead of two columns. */
+  wide?: boolean;
+}
+const { caption, wide = false } = Astro.props;
+---
+
+{
+  wide ? (
+    <div class="beat my-20" data-tour-stop>
+      <div class="mx-auto max-w-2xl">
+        <slot name="text" />
+      </div>
+      <figure class="mx-auto mt-8 max-w-4xl">
+        <div class="rounded-xl border border-border bg-surface/40 p-4 sm:p-6">
+          <slot name="visual" />
+        </div>
+        {caption && <figcaption class="mt-3 text-center text-xs text-faint">{caption}</figcaption>}
+      </figure>
+    </div>
+  ) : (
+    <div
+      class="beat my-20 grid items-start gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+      data-tour-stop
+    >
+      <div class="lg:py-6">
+        <slot name="text" />
+      </div>
+      <figure class="lg:sticky lg:top-20">
+        <div class="rounded-xl border border-border bg-surface/40 p-4 sm:p-6">
+          <slot name="visual" />
+        </div>
+        {caption && <figcaption class="mt-3 text-center text-xs text-faint">{caption}</figcaption>}
+      </figure>
+    </div>
+  )
+}
