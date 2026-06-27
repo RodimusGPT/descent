@@ -1,5 +1,9 @@
 ---
 import TokenDemo from '../../components/dev/TokenDemo.tsx';
+import AttentionFan from '../../components/viz/AttentionFan.tsx';
+import FloatExploder from '../../components/viz/FloatExploder.tsx';
+import PrefillDecode from '../../components/viz/PrefillDecode.tsx';
+import QuantizationSlider from '../../components/viz/QuantizationSlider.tsx';
 import { DEV_SANDBOXES } from '../../lib/dev-registry';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
@@ -22,6 +26,10 @@ const meta = DEV_SANDBOXES.find((s) => s.slug === component);
     <p class="text-sm text-muted">{meta?.description}</p>
     <div class="mt-8 rounded-xl border border-border bg-surface/40 p-6">
       {component === 'token' && <TokenDemo client:load />}
+      {component === 'attention' && <AttentionFan client:load />}
+      {component === 'float' && <FloatExploder client:load />}
+      {component === 'quant' && <QuantizationSlider client:load />}
+      {component === 'prefill' && <PrefillDecode client:load />}
     </div>
   </main>
 </BaseLayout>

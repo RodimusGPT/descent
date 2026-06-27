@@ -33,3 +33,26 @@ Choices not fully fixed by the GOAL spec. Format: decision — rationale.
   tab stops and non-interactive-tabindex a11y violations) while `scrollama` drives it on scroll.
 - **Dark theme is the base.** The design's resting state is dark; the spec defers dark-mode
   *polish* to M9, not the base palette.
+
+## M1–M3 — Signature interactives
+
+- **Built in parallel, then integrated.** The four signature interactives (AttentionFan,
+  FloatExploder, QuantizationSlider, PrefillDecode) are independent units (disjoint
+  lib/component/test files), so they were implemented by parallel agents against the frozen
+  M0 foundation, each followed by an adversarial math verifier (IEEE-754 layouts, the
+  KV-cache formula, quantization-error monotonicity, attention row-normalization). The whole
+  tree was then type-checked, linted, encoding-guarded, and tested together (100 tests green)
+  before committing. Per-milestone commits are bookkeeping over that one parallel build.
+- **Disabled Biome `a11y/useSemanticElements`.** The interactives use valid, labeled,
+  keyboard-operable ARIA grouping roles (`role="group"`/`radiogroup` with labels, toggle
+  buttons with `aria-pressed`). The rule wants these rewritten to `<fieldset>`/`<input radio>`,
+  which would restyle the chip-button controls and risk the polish of the signature pieces for
+  a stylistic preference. Functional a11y (I4: keyboard + reduced-motion + labels) is met, so
+  the rule is off; the canonical radiogroup keyboard pattern is a documented M9 follow-up.
+- **`AttentionFan` uses an isomorphic layout effect.** It measures token centers
+  (`getBoundingClientRect`) to draw the SVG fan, which needs `useLayoutEffect` on the client;
+  on the server it falls back to `useEffect` to avoid React's SSR warning (keeps the console clean).
+- **Deferred to the M9 a11y/polish pass (logged in QA.md):** roving-tabindex/arrow-key
+  navigation for the QuantizationSlider precision/param radiogroups; making the PrefillDecode
+  "no cache" recompute a per-step pulse rather than a static re-tint. Both are minor; functional
+  behavior is correct now.
