@@ -1,0 +1,23 @@
+---
+title: 'Inference: hardware'
+order: 4
+kind: hardware
+question: How does the silicon run it?
+signature: Roofline
+summary: Tensor cores, a memory hierarchy, and the bandwidth wall that shapes it all.
+---
+
+import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+
+## How does the silicon run it?
+
+At the bottom of the descent is the GPU. Thousands of **tensor cores** chew through matrix
+multiplications; a steep **memory hierarchy** feeds them, from vast-but-slow HBM to
+tiny-but-fast on-chip SRAM. The art of fast inference is keeping the cores fed.
+
+One idea explains most of the behavior: **arithmetic intensity** — how many calculations
+you do per byte you move. Prefill is compute-bound and saturates the cores. Single-stream
+decode is memory-bound and starves them. Batching raises intensity and reclaims the
+wasted compute. Below this lies only electrons.
+
+<PlaceholderScene client:visible kind="hardware" label="Inference: hardware" signature="Roofline" />

@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-active);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-active);
+    color: var(--color-bg);
+  }
+}
+
+@layer components {
+  /*
+   * Prose for MDX part content. Text elements stay at a readable measure and are
+   * centered, while wide block elements (the ScrollScene <section>) span the full
+   * container so the scrollytelling layout has room for two columns.
+   */
+  .descent-prose > :where(p, h2, h3, ul, ol, blockquote, details, hr) {
+    max-width: 42rem;
+    margin-inline: auto;
+  }
+  .descent-prose h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+  }
+  .descent-prose h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .descent-prose p {
+    color: var(--color-muted);
+    line-height: 1.75;
+    margin-block: 1rem;
+  }
+  .descent-prose strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .descent-prose a {
+    color: var(--color-active);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .descent-prose code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background-color: var(--color-surface-raised);
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+  }
+  .descent-prose ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    color: var(--color-muted);
+  }
+  .descent-prose li {
+    margin-block: 0.35rem;
+  }
+}
+
+/*
+ * Invariant I4 — every animation degrades to a static frame under
+ * prefers-reduced-motion. Components also branch on the media query in JS, but
+ * this is the global backstop for any CSS transition/animation we miss.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

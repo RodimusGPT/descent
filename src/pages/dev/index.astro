@@ -1,0 +1,32 @@
+---
+import { DEV_SANDBOXES } from '../../lib/dev-registry';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="dev · sandboxes">
+  <main class="mx-auto max-w-3xl px-6 py-12">
+    <a class="text-sm text-muted hover:text-ink" href="/">← back to Descent</a>
+    <h1 class="mt-2 text-2xl font-bold text-ink">Dev sandboxes</h1>
+    <p class="mt-1 text-sm text-muted">
+      Each interactive in isolation, for development and human visual QA.
+    </p>
+    <ul class="mt-8 space-y-2">
+      {
+        DEV_SANDBOXES.map((s) => (
+          <li>
+            <a
+              class="flex items-baseline justify-between gap-4 rounded-lg border border-border bg-surface/40 p-4 transition-colors hover:border-active hover:bg-surface"
+              href={`/dev/${s.slug}`}
+            >
+              <span>
+                <span class="font-medium text-ink">{s.title}</span>
+                <span class="ml-2 text-sm text-muted">{s.description}</span>
+              </span>
+              <span class="font-mono text-xs text-muted">{s.milestone}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</BaseLayout>

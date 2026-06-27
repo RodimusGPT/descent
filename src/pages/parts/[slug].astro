@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import PartLayout from '../../layouts/PartLayout.astro';
+
+export async function getStaticPaths() {
+  const parts = await getCollection('parts');
+  return parts.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<PartLayout slug={entry.slug} title={entry.data.title}>
+  <Content />
+</PartLayout>

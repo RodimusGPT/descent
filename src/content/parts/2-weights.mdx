@@ -1,0 +1,27 @@
+---
+title: Weights as numbers
+order: 2
+kind: model
+question: How are the weights represented?
+signature: Float exploder + quantization slider
+summary: A model is billions of numbers; how we encode each one decides its size.
+---
+
+import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+
+## How are the weights represented?
+
+Zoom into the model far enough and the abstraction dissolves into **numbers** — billions
+of them, arranged in matrices. "Running" the model is mostly multiplying those matrices.
+
+So the question becomes physical: how do you store one number? A 32-bit float is precise
+but heavy. Sixteen bits halves the cost. Quantization pushes further — eight, four, even
+two bits per weight — trading a little accuracy for a lot of memory. The representation
+you choose decides whether a model fits on your GPU at all.
+
+<PlaceholderScene
+  client:visible
+  kind="model"
+  label="Weights as numbers"
+  signature="Float exploder + quantization slider"
+/>

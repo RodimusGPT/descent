@@ -1,0 +1,25 @@
+---
+title: The prompt
+order: 0
+kind: neutral
+question: What just happened when I hit enter?
+signature: Prompt → token
+summary: A prompt is just text the model continues, one token at a time.
+---
+
+import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+
+## You typed something and hit enter
+
+A fraction of a second later, words appeared. It feels like the machine *understood*
+you. What actually happened is stranger and more mechanical: the model read your text,
+turned it into numbers, and predicted the single most plausible **next token** — then
+did it again, and again, until it decided to stop.
+
+That is the whole trick. Everything below this point — the transformer, the weights, the
+serving stack, the silicon — exists to answer one question fast: *given everything so
+far, what token comes next?*
+
+Follow the token down. This is a descent.
+
+<PlaceholderScene client:visible kind="neutral" label="The prompt" signature="Prompt → token" />

@@ -1,0 +1,30 @@
+---
+title: The transformer
+order: 1
+kind: model
+question: What is the model?
+signature: Attention fan
+summary: Tokens become vectors, then flow through a stack of attention + FFN layers.
+---
+
+import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+import DeeperBlock from '@/components/scroll/DeeperBlock';
+
+## What is the model?
+
+The model is a tall stack of identical layers. Your text enters as **tokens**, each
+token becomes a **vector**, and those vectors flow upward through the stack. At every
+layer two things happen: **attention** lets each token gather context from the others,
+and a **feed-forward network** does the per-token "thinking." Residual connections and
+normalization keep the signal stable across dozens of layers.
+
+The signature mechanism is attention: every token decides, with varying weight, how much
+to listen to every other token. That is how context flows.
+
+<DeeperBlock summary="The attention score">
+Attention compares each query against every key and normalizes the result:
+$\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$.
+The $\sqrt{d_k}$ keeps the scores from saturating the softmax as dimension grows.
+</DeeperBlock>
+
+<PlaceholderScene client:visible kind="model" label="The transformer" signature="Attention fan" />

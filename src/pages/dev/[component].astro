@@ -1,0 +1,27 @@
+---
+import TokenDemo from '../../components/dev/TokenDemo.tsx';
+import { DEV_SANDBOXES } from '../../lib/dev-registry';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// getStaticPaths runs in an isolated scope and may only reference imports, so it
+// derives the routes from DEV_SANDBOXES (imported). Each slug is wired to its island
+// by an explicit conditional below — Astro requires a static reference per island to
+// generate its hydration script, so a dynamic <Comp/> will not work.
+export function getStaticPaths() {
+  return DEV_SANDBOXES.map((s) => ({ params: { component: s.slug } }));
+}
+
+const { component } = Astro.params;
+const meta = DEV_SANDBOXES.find((s) => s.slug === component);
+---
+
+<BaseLayout title={`dev · ${meta?.title ?? component}`}>
+  <main class="mx-auto max-w-4xl px-6 py-12">
+    <a class="text-sm text-muted hover:text-ink" href="/dev">← all sandboxes</a>
+    <h1 class="mt-2 text-2xl font-bold text-ink">{meta?.title}</h1>
+    <p class="text-sm text-muted">{meta?.description}</p>
+    <div class="mt-8 rounded-xl border border-border bg-surface/40 p-6">
+      {component === 'token' && <TokenDemo client:load />}
+    </div>
+  </main>
+</BaseLayout>

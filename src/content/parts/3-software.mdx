@@ -1,0 +1,29 @@
+---
+title: 'Inference: software'
+order: 3
+kind: neutral
+question: How is it served?
+signature: Prefill / decode + KV cache
+summary: Prefill reads the prompt in parallel; decode emits one token at a time.
+---
+
+import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+
+## How is it served?
+
+Between the math and the metal sits the **inference engine** — the software that actually
+runs the model for you. Its central drama is an asymmetry. Reading your prompt
+(**prefill**) happens in one big parallel pass. Generating the answer (**decode**) happens
+one token at a time, each step depending on the last.
+
+To avoid recomputing the past at every step, the engine keeps a **KV cache** — the
+attention keys and values for every token it has already seen. That single optimization
+turns generation from quadratic work into linear work, and it is why serving a long
+conversation is mostly a memory problem.
+
+<PlaceholderScene
+  client:visible
+  kind="neutral"
+  label="Inference: software"
+  signature="Prefill / decode + KV cache"
+/>

@@ -1,0 +1,38 @@
+/*
+ * Design tokens — CSS custom properties.
+ *
+ * This file is the CSS mirror of src/lib/encoding.ts. The two MUST agree on every
+ * color value (test/encoding.test.ts asserts the mapping). These two files are the
+ * ONLY places in the project allowed to contain raw hex (Invariant I3); everything
+ * else references the semantic Tailwind names or var(--…) tokens declared here.
+ */
+:root {
+  color-scheme: dark;
+
+  /* ── Surfaces & neutrals (cool, recede) ───────────────────────────── */
+  --color-bg: #0a0e1a;
+  --color-surface: #111726;
+  --color-surface-raised: #1a2236;
+  --color-border: #26304a;
+  --color-ink: #e6ecf5;
+  --color-muted: #9aa7bd;
+  --color-faint: #5b6880;
+
+  /* ── Encoding: active / energy (warm amber → coral) ───────────────── */
+  --color-active: #f5a524;
+  --color-active-hot: #fb6f5a;
+
+  /* ── Encoding: inert / dormant (cool slate) ───────────────────────── */
+  --color-inert: #4a5874;
+
+  /* ── Section accents ──────────────────────────────────────────────── */
+  --color-model-accent: #a978f0; /* "model" sections */
+  --color-hw-accent: #2dd4bf; /* "hardware" sections */
+
+  /* ── Typography ───────────────────────────────────────────────────── */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+
+  /* ── Layout ───────────────────────────────────────────────────────── */
+  --rail-width: 3.5rem;
+}
