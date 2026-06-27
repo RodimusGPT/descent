@@ -7,23 +7,113 @@ signature: Prefill / decode + KV cache
 summary: Prefill reads the prompt in parallel; decode emits one token at a time.
 ---
 
-import PlaceholderScene from '@/components/scroll/PlaceholderScene';
-
-## How is it served?
+import Beat from '@/components/Beat.astro';
+import DeeperBlock from '@/components/scroll/DeeperBlock';
+import PrefillDecode from '@/components/viz/PrefillDecode';
+import BatchingTimeline from '@/components/viz/BatchingTimeline';
+import PagedAttention from '@/components/viz/PagedAttention';
+import EnginesOverview from '@/components/viz/EnginesOverview';
+import SpeculativeDecoding from '@/components/viz/SpeculativeDecoding';
 
 Between the math and the metal sits the **inference engine** — the software that actually
-runs the model for you. Its central drama is an asymmetry. Reading your prompt
-(**prefill**) happens in one big parallel pass. Generating the answer (**decode**) happens
-one token at a time, each step depending on the last.
+runs the model for you. It is, underneath, a memory manager and a scheduler: its whole job is
+to squeeze a memory-bound, one-token-at-a-time workload onto hardware that craves big parallel
+batches. Its central drama is an asymmetry.
 
-To avoid recomputing the past at every step, the engine keeps a **KV cache** — the
-attention keys and values for every token it has already seen. That single optimization
-turns generation from quadratic work into linear work, and it is why serving a long
-conversation is mostly a memory problem.
+<Beat wide caption="Prefill fills the KV cache in parallel; decode ticks one token at a time. Toggle the cache off to see the waste.">
+<div slot="text">
 
-<PlaceholderScene
-  client:visible
-  kind="neutral"
-  label="Inference: software"
-  signature="Prefill / decode + KV cache"
-/>
+### Prefill vs decode
+
+Reading your prompt — **prefill** — happens in one big parallel pass over all the prompt tokens
+at once. It is **compute-bound**, and it sets the *time to first token*. Generating the answer —
+**decode** — happens one token at a time, each step depending on the last. It is
+**memory-bound**, and it sets the speed *between* tokens.
+
+To avoid recomputing the past at every step, the engine keeps a **KV cache**: the attention keys
+and values for every token already seen. That single trick turns generation from O(n²) work into
+O(n) — which is why serving a long conversation is mostly a memory problem.
+
+</div>
+<PrefillDecode slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Static batching idles finished slots until the whole batch drains; continuous batching refills them at once.">
+<div slot="text">
+
+### Batching & scheduling
+
+A GPU is happiest with a **big batch** — many sequences in flight at once. But they finish at
+different times, and naive **static batching** makes the whole batch wait for its slowest member,
+leaving finished slots idle. **Continuous batching** schedules *per iteration*: the instant a
+sequence finishes, a waiting one takes its slot. Utilization climbs.
+
+Two tricks ride along. **Chunked prefill** breaks a long prompt into pieces and interleaves them
+with ongoing decodes, so one big prefill doesn't stall everyone. And **prefix caching** reuses
+the KV of a shared prompt across requests — a system prompt is computed once, not per user.
+
+</div>
+<BatchingTimeline slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Fixed-size blocks + a block table map logical positions to physical blocks — fragmentation collapses, prefixes share.">
+<div slot="text">
+
+### PagedAttention
+
+The KV cache has a memory-management problem: sequences grow unpredictably, so reserving a
+**contiguous** block of max length per sequence wastes enormous space. **PagedAttention** borrows
+the operating system's answer — *virtual memory*. The cache is cut into fixed-size **blocks**; a
+**block table** maps each sequence's logical positions to physical blocks, handed out on demand.
+
+Fragmentation nearly vanishes, and two sequences that share a prefix can point at the very same
+physical blocks. Switch between contiguous and paged to watch the wasted blocks collapse.
+
+</div>
+<PagedAttention slot="visual" client:visible />
+</Beat>
+
+<Beat caption="Four engines, four personalities. Pick one to see what it is for.">
+<div slot="text">
+
+### The engines
+
+All of this is packaged into **inference engines**, each with a personality. **llama.cpp** is the
+portable one — runs the GGUF format anywhere, ideal for a single user on local hardware. **vLLM**
+is the production workhorse — PagedAttention and continuous batching for many concurrent users.
+**SGLang** leans into prefix caching (RadixAttention) and structured, agentic workloads.
+**TensorRT-LLM** squeezes maximum throughput from NVIDIA hardware, at the cost of a compile step.
+
+</div>
+<EnginesOverview slot="visual" client:visible />
+</Beat>
+
+<Beat caption="A cheap draft guesses k tokens; the target verifies all k in one pass. Slide the acceptance rate.">
+<div slot="text">
+
+### Speculative decoding
+
+Decode is memory-bound, so the GPU's compute sits half-idle waiting on memory — spare capacity we
+can spend. **Speculative decoding** does exactly that: a small, cheap **draft** model guesses the
+next *k* tokens, and the big **target** verifies all *k* in a single forward pass. Where the draft
+guessed right, the tokens are kept for free; at the first miss, we resample from the target and
+continue.
+
+The win depends on the **acceptance rate** and on the draft being much cheaper than the target —
+push either the wrong way and the speedup can dip below 1.
+
+<DeeperBlock summary="Why it stays correct, and how much it gains">
+Rejection sampling makes the output *provably identical* to sampling from the target alone — same
+distribution, fewer passes. With per-token acceptance probability $\alpha$ and draft length $k$,
+the expected tokens produced per target pass is
+$\mathbb{E} = \dfrac{1 - \alpha^{\,k+1}}{1 - \alpha}$. Variants like Medusa, EAGLE, and MTP fold
+the draft into the target itself.
+</DeeperBlock>
+
+</div>
+<SpeculativeDecoding slot="visual" client:visible />
+</Beat>
+
+The engine, then, is a memory manager and a scheduler in a trench coat — bending a memory-bound,
+autoregressive workload onto hardware that wants big parallel batches. But what *is* that
+hardware, and why does it want what it wants? Down one more level: the silicon.

@@ -2,16 +2,20 @@
 import TokenDemo from '../../components/dev/TokenDemo.tsx';
 import AttentionFan from '../../components/viz/AttentionFan.tsx';
 import Autoregression from '../../components/viz/Autoregression.tsx';
+import BatchingTimeline from '../../components/viz/BatchingTimeline.tsx';
 import BlockScaling from '../../components/viz/BlockScaling.tsx';
 import Distillation from '../../components/viz/Distillation.tsx';
+import EnginesOverview from '../../components/viz/EnginesOverview.tsx';
 import EmbeddingSpace from '../../components/viz/EmbeddingSpace.tsx';
 import FloatExploder from '../../components/viz/FloatExploder.tsx';
 import MemoryBudget from '../../components/viz/MemoryBudget.tsx';
 import MoERouter from '../../components/viz/MoERouter.tsx';
+import PagedAttention from '../../components/viz/PagedAttention.tsx';
 import PrefillDecode from '../../components/viz/PrefillDecode.tsx';
 import QKVMultiHead from '../../components/viz/QKVMultiHead.tsx';
 import QuantizationSlider from '../../components/viz/QuantizationSlider.tsx';
 import SamplingPlayground from '../../components/viz/SamplingPlayground.tsx';
+import SpeculativeDecoding from '../../components/viz/SpeculativeDecoding.tsx';
 import Tokenizer from '../../components/viz/Tokenizer.tsx';
 import TransformerStack from '../../components/viz/TransformerStack.tsx';
 import ZoomToWeight from '../../components/viz/ZoomToWeight.tsx';
@@ -52,6 +56,10 @@ const meta = DEV_SANDBOXES.find((s) => s.slug === component);
       {component === 'budget' && <MemoryBudget client:load />}
       {component === 'blockscale' && <BlockScaling client:load />}
       {component === 'distill' && <Distillation client:load />}
+      {component === 'batching' && <BatchingTimeline client:load />}
+      {component === 'paged' && <PagedAttention client:load />}
+      {component === 'engines' && <EnginesOverview client:load />}
+      {component === 'speculative' && <SpeculativeDecoding client:load />}
     </div>
   </main>
 </BaseLayout>

@@ -2,6 +2,9 @@
 dist/
 .astro/
 
+# ui audit output (playwright screenshots)
+playwright-audit/
+
 # dependencies
 node_modules/
 

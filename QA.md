@@ -138,3 +138,21 @@ Read Part 1 top-to-bottom in the page; exercise each visual in isolation at the 
   distinct from quantization? Is the transfer score labeled illustrative?
 - ⚠ Known minors (M9): budget/blockscale radiogroups lack roving-tabindex arrow nav; zoom's big
   decimal and its FP16 bits differ by ~6e-5 (illustrative); extreme over-capacity bar can clip.
+
+## M6 — Part 3: Inference, software (`/`, the Part 3 section, + `/dev/*`)
+
+- ☐ **Reads as one descent:** prefill vs decode → batching → PagedAttention → engines →
+  speculative decoding. Does the "engine = memory manager + scheduler" framing land?
+- ☐ **PrefillDecode** (the M3 piece, now in prose): parallel prefill vs token-by-token decode,
+  KV grid, no-cache toggle, compute/memory-bound labels — reads well in context?
+- ☐ **BatchingTimeline** (`/dev/batching`): does continuous vs static visibly raise utilization?
+  Are idle slots obvious? (Known M9: under reduced motion the Step buttons are inert.)
+- ☐ **PagedAttention** (`/dev/paged`): does contiguous → paged collapse the wasted blocks? Does
+  the block table map logical → physical clearly? Does the shared-prefix case share blocks?
+- ☐ **EnginesOverview** (`/dev/engines`): are the four engines' personalities clear and correct
+  (llama.cpp portable / vLLM multi-user / SGLang prefix / TensorRT-LLM throughput)?
+- ☐ **SpeculativeDecoding** (`/dev/speculative`): does the acceptance-rate slider move the
+  speedup sensibly (and dip below 1× when the draft is too costly / α too low)? Does the
+  DeeperBlock formula render?
+- ⚠ Cross-cutting (Playwright audit follow-up): several viz buttons use `focus-visible:outline-none`
+  which can hide the keyboard focus ring — to be swept in the polish pass.

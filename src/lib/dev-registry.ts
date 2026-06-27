@@ -110,4 +110,28 @@ export const DEV_SANDBOXES: DevSandbox[] = [
     description: 'Small student learns from a big teacher’s outputs.',
     milestone: 'M5',
   },
+  {
+    slug: 'batching',
+    title: 'Batching timeline',
+    description: 'Static vs continuous batching; watch slot utilization rise.',
+    milestone: 'M6',
+  },
+  {
+    slug: 'paged',
+    title: 'PagedAttention',
+    description: 'KV cache as paged blocks + a block table; fragmentation vs sharing.',
+    milestone: 'M6',
+  },
+  {
+    slug: 'engines',
+    title: 'Inference engines',
+    description: 'llama.cpp / vLLM / SGLang / TensorRT-LLM — what each is for.',
+    milestone: 'M6',
+  },
+  {
+    slug: 'speculative',
+    title: 'Speculative decoding',
+    description: 'Draft proposes k, target verifies in one pass; acceptance-rate slider.',
+    milestone: 'M6',
+  },
 ];
