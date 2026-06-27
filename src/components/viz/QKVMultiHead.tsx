@@ -158,7 +158,7 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
               onClick={() => setHeadIdx(i)}
               aria-pressed={isActive}
               title={h.description}
-              className="rounded-md border px-2 py-1 font-mono text-xs transition-colors focus-visible:outline-none"
+              className="rounded-md border px-2 py-1 font-mono text-xs transition-colors "
               style={{
                 borderColor: isActive ? COLOR.modelAccent : COLOR.border,
                 backgroundColor: isActive ? withAlpha(COLOR.modelAccent, 0.16) : 'transparent',
@@ -314,7 +314,7 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
                   onClick={() => setMode(m.id)}
                   aria-pressed={on}
                   title={m.blurb}
-                  className="rounded-md border px-2 py-1 font-mono text-xs transition-colors focus-visible:outline-none"
+                  className="rounded-md border px-2 py-1 font-mono text-xs transition-colors "
                   style={{
                     borderColor: on ? COLOR.hwAccent : COLOR.border,
                     backgroundColor: on ? withAlpha(COLOR.hwAccent, 0.16) : 'transparent',

@@ -72,7 +72,7 @@ function SubBlock({ block, active, reduced, onSelect }: SubBlockProps) {
         onClick={onSelect}
         aria-pressed={active}
         title={block.note}
-        className="flex w-full items-center justify-center gap-2 rounded py-1 font-mono text-[0.7rem] focus-visible:outline-none"
+        className="flex w-full items-center justify-center gap-2 rounded py-1 font-mono text-[0.7rem] "
         style={{ color: active ? COLOR.ink : COLOR.faint, transition }}
       >
         <span aria-hidden="true">⊕</span>
@@ -87,7 +87,7 @@ function SubBlock({ block, active, reduced, onSelect }: SubBlockProps) {
       onClick={onSelect}
       aria-pressed={active}
       title={block.note}
-      className="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left font-mono text-xs focus-visible:outline-none"
+      className="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left font-mono text-xs "
       style={{
         borderColor: active ? color : withAlpha(color, 0.5),
         backgroundColor: withAlpha(color, active ? 0.22 : 0.08),
@@ -172,7 +172,7 @@ export function TransformerStack({
           id="ts-preset"
           value={presetIdx}
           onChange={(e) => setPresetIdx(Number(e.target.value))}
-          className="rounded-md border border-border bg-surface-raised px-2 py-1 font-mono text-xs text-ink focus-visible:outline-none"
+          className="rounded-md border border-border bg-surface-raised px-2 py-1 font-mono text-xs text-ink "
         >
           {presets.map((p, i) => (
             <option key={p.name} value={i}>

@@ -259,7 +259,7 @@ export function EmbeddingSpace({ words = EMBEDDINGS, k = 4, initialWord }: Embed
               aria-pressed={isSelected}
               aria-label={`${w.word}, cluster ${w.cluster}`}
               title={`${w.word} · ${w.cluster}`}
-              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:outline-none"
+              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full "
               style={{
                 left: `${leftPct}%`,
                 top: `${topPct}%`,

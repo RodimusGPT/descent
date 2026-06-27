@@ -233,7 +233,7 @@ export function Autoregression({ initialStep = 0 }: AutoregressionProps) {
           <button
             type="button"
             onClick={togglePlay}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none"
+            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised "
             style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
             aria-pressed={playing}
           >
@@ -244,7 +244,7 @@ export function Autoregression({ initialStep = 0 }: AutoregressionProps) {
           type="button"
           onClick={stepForward}
           disabled={atEnd}
-          className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none disabled:opacity-40"
+          className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
           style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
           aria-label="Generate the next token"
         >
@@ -253,7 +253,7 @@ export function Autoregression({ initialStep = 0 }: AutoregressionProps) {
         <button
           type="button"
           onClick={reset}
-          className="rounded-md border px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-surface-raised focus-visible:outline-none"
+          className="rounded-md border px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-surface-raised "
           style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
           aria-label="Reset to the start"
         >

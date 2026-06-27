@@ -104,7 +104,7 @@ export function BlockScaling({
                 role="radio"
                 aria-checked={on}
                 onClick={() => setMode(opt.key)}
-                className="rounded-md border px-3 py-1 font-mono text-xs transition-colors focus-visible:outline-none"
+                className="rounded-md border px-3 py-1 font-mono text-xs transition-colors "
                 style={{
                   borderColor: on ? COLOR.active : COLOR.border,
                   backgroundColor: on ? withAlpha(COLOR.active, 0.18) : 'transparent',

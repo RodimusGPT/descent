@@ -149,7 +149,7 @@ export function FloatExploder({
               type="button"
               onClick={() => switchFormat(key)}
               aria-pressed={active}
-              className="rounded-md border px-3 py-1 font-mono text-sm focus-visible:outline-none"
+              className="rounded-md border px-3 py-1 font-mono text-sm "
               style={{
                 borderColor: active ? COLOR.active : COLOR.border,
                 backgroundColor: active ? withAlpha(COLOR.active, 0.18) : 'transparent',
@@ -178,7 +178,7 @@ export function FloatExploder({
                 aria-label={`${FIELD_LABEL[kind]} bit ${index}, value ${bit}`}
                 aria-pressed={on}
                 title={`${FIELD_LABEL[kind]} bit ${index}`}
-                className="h-9 w-7 rounded font-mono text-sm tabular-nums focus-visible:outline-none"
+                className="h-9 w-7 rounded font-mono text-sm tabular-nums "
                 style={{
                   border: `1px solid ${hue}`,
                   backgroundColor: on ? withAlpha(hue, 0.32) : withAlpha(hue, 0.06),
@@ -246,7 +246,7 @@ export function FloatExploder({
             key={preset.label}
             type="button"
             onClick={() => loadPreset(preset.value)}
-            className="rounded-md border border-border px-3 py-1 font-mono text-sm text-muted focus-visible:outline-none hover:text-ink"
+            className="rounded-md border border-border px-3 py-1 font-mono text-sm text-muted hover:text-ink"
             style={transition}
           >
             {preset.label}

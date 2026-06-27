@@ -255,7 +255,7 @@ export function Distillation({ initialExamples = 1000 }: DistillationProps) {
                 key={preset}
                 type="button"
                 onClick={() => setLogExamples(Math.log10(preset))}
-                className="rounded-md border px-2.5 py-1 font-mono text-xs transition-colors focus-visible:outline-none"
+                className="rounded-md border px-2.5 py-1 font-mono text-xs transition-colors "
                 style={{
                   borderColor: active ? COLOR.active : COLOR.border,
                   backgroundColor: active ? withAlpha(COLOR.active, 0.18) : 'transparent',

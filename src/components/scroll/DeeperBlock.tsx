@@ -22,7 +22,7 @@ export function DeeperBlock({ summary = 'Go deeper', children }: DeeperBlockProp
       style={{ borderColor: withAlpha(COLOR.modelAccent, 0.4) }}
     >
       <summary
-        className="-mx-1 flex cursor-pointer list-none items-center gap-2 rounded px-1 py-3 font-mono text-sm font-medium focus-visible:outline-none"
+        className="-mx-1 flex cursor-pointer list-none items-center gap-2 rounded px-1 py-3 font-mono text-sm font-medium "
         style={{ color: COLOR.modelAccent }}
       >
         <span aria-hidden="true" className="inline-block transition-transform group-open:rotate-90">

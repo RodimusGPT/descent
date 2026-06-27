@@ -83,7 +83,7 @@ export function ZoomToWeight({ initialLevel = 0 }: ZoomToWeightProps) {
                   type="button"
                   onClick={() => setIndex(i)}
                   aria-current={current ? 'step' : undefined}
-                  className="rounded px-1.5 py-0.5 transition-colors focus-visible:outline-none"
+                  className="rounded px-1.5 py-0.5 transition-colors "
                   style={{
                     color: current ? COLOR.active : reached ? COLOR.ink : COLOR.faint,
                     backgroundColor: current ? withAlpha(COLOR.active, 0.16) : 'transparent',
@@ -128,7 +128,7 @@ export function ZoomToWeight({ initialLevel = 0 }: ZoomToWeightProps) {
           type="button"
           onClick={zoomOut}
           disabled={atStart}
-          className="rounded-md border border-border px-3 py-1.5 font-mono text-sm text-ink transition-colors focus-visible:outline-none disabled:opacity-40"
+          className="rounded-md border border-border px-3 py-1.5 font-mono text-sm text-ink transition-colors disabled:opacity-40"
         >
           ← Zoom out
         </button>
@@ -139,7 +139,7 @@ export function ZoomToWeight({ initialLevel = 0 }: ZoomToWeightProps) {
           type="button"
           onClick={zoomIn}
           disabled={atEnd}
-          className="rounded-md border px-3 py-1.5 font-mono text-sm transition-colors focus-visible:outline-none disabled:opacity-40"
+          className="rounded-md border px-3 py-1.5 font-mono text-sm transition-colors disabled:opacity-40"
           style={{
             borderColor: atEnd ? COLOR.border : COLOR.active,
             color: atEnd ? COLOR.muted : COLOR.active,

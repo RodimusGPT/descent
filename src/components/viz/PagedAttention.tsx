@@ -120,7 +120,7 @@ export function PagedAttention({ initialMode = 'contiguous' }: PagedAttentionPro
                 type="button"
                 onClick={() => setMode(m)}
                 aria-pressed={on}
-                className={`rounded px-3 py-1 font-mono text-xs ${tw} focus-visible:outline-none`}
+                className={`rounded px-3 py-1 font-mono text-xs ${tw} `}
                 style={{
                   backgroundColor: on ? withAlpha(COLOR.modelAccent, 0.18) : 'transparent',
                   color: on ? COLOR.ink : COLOR.muted,
@@ -212,7 +212,7 @@ export function PagedAttention({ initialMode = 'contiguous' }: PagedAttentionPro
           <button
             type="button"
             onClick={reset}
-            className={`ml-auto rounded-md border px-3 py-1 font-mono text-xs text-muted ${tw} hover:bg-surface-raised focus-visible:outline-none`}
+            className={`ml-auto rounded-md border px-3 py-1 font-mono text-xs text-muted ${tw} hover:bg-surface-raised `}
             style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
           >
             Reset
@@ -310,7 +310,7 @@ function NormalView({
                 <button
                   type="button"
                   onClick={() => onBump(s.id, -1)}
-                  className={`rounded border px-2 py-0.5 font-mono text-xs text-muted ${tw} hover:bg-surface-raised focus-visible:outline-none`}
+                  className={`rounded border px-2 py-0.5 font-mono text-xs text-muted ${tw} hover:bg-surface-raised `}
                   style={{ borderColor: COLOR.border }}
                   aria-label={`Remove a token from sequence ${s.id}`}
                 >
@@ -319,7 +319,7 @@ function NormalView({
                 <button
                   type="button"
                   onClick={() => onBump(s.id, +1)}
-                  className={`rounded border px-2 py-0.5 font-mono text-xs text-muted ${tw} hover:bg-surface-raised focus-visible:outline-none`}
+                  className={`rounded border px-2 py-0.5 font-mono text-xs text-muted ${tw} hover:bg-surface-raised `}
                   style={{ borderColor: COLOR.border }}
                   aria-label={`Add a token to sequence ${s.id}`}
                 >

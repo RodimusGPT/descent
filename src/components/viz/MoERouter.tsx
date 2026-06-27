@@ -241,7 +241,7 @@ export function MoERouter({ tokens = TOKENS, preset = MOE_PRESET }: MoERouterPro
                 role="radio"
                 aria-checked={active}
                 onClick={() => setK(c)}
-                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors focus-visible:outline-none"
+                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
                   borderColor: active ? COLOR.active : COLOR.border,
                   backgroundColor: active ? withAlpha(COLOR.active, 0.18) : 'transparent',

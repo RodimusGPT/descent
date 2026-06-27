@@ -147,7 +147,7 @@ export function BatchingTimeline({
                 type="button"
                 onClick={() => setMode(m)}
                 aria-pressed={on}
-                className="rounded px-3 py-1 font-mono text-xs capitalize transition-colors focus-visible:outline-none"
+                className="rounded px-3 py-1 font-mono text-xs capitalize transition-colors "
                 style={{
                   color: on ? COLOR.ink : COLOR.muted,
                   backgroundColor: on ? withAlpha(COLOR.modelAccent, 0.22) : 'transparent',
@@ -259,7 +259,7 @@ export function BatchingTimeline({
             type="button"
             onClick={togglePlay}
             aria-pressed={playing}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none"
+            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised "
             style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
           >
             {playing ? 'Pause' : atEnd ? 'Replay' : 'Play'}
@@ -269,7 +269,7 @@ export function BatchingTimeline({
           type="button"
           onClick={stepBack}
           disabled={shownCols === 0}
-          className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none disabled:opacity-40"
+          className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
           style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
           aria-label="Step back one iteration"
         >
@@ -279,7 +279,7 @@ export function BatchingTimeline({
           type="button"
           onClick={stepForward}
           disabled={atEnd}
-          className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none disabled:opacity-40"
+          className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
           style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
           aria-label="Step forward one iteration"
         >
@@ -288,7 +288,7 @@ export function BatchingTimeline({
         <button
           type="button"
           onClick={showAll}
-          className="rounded-md border px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-surface-raised focus-visible:outline-none"
+          className="rounded-md border px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-surface-raised "
           style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
           aria-label="Reveal the whole timeline"
         >

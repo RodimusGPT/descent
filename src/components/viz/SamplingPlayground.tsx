@@ -165,7 +165,7 @@ export function SamplingPlayground({
         <button
           type="button"
           onClick={onSample}
-          className="rounded-md border px-3 py-1.5 font-mono text-sm transition-colors focus-visible:outline-none"
+          className="rounded-md border px-3 py-1.5 font-mono text-sm transition-colors "
           style={{
             borderColor: COLOR.active,
             backgroundColor: withAlpha(COLOR.active, 0.16),

@@ -101,7 +101,7 @@ export function EnginesOverview({ initialKey = ENGINES[0]?.key }: EnginesOvervie
               tabIndex={isActive ? 0 : -1}
               onClick={() => setIndex(i)}
               onKeyDown={(e) => onCardKey(e, i)}
-              className="flex flex-col gap-1 rounded-md border p-2.5 text-left focus-visible:outline-none"
+              className="flex flex-col gap-1 rounded-md border p-2.5 text-left "
               style={{
                 borderColor: isActive ? accent : COLOR.border,
                 backgroundColor: isActive ? withAlpha(accent, 0.16) : 'transparent',

@@ -98,7 +98,7 @@ export function Token({
     return (
       <button
         type="button"
-        className={`${baseClass} cursor-pointer focus-visible:outline-none`}
+        className={`${baseClass} cursor-pointer `}
         style={style}
         title={title}
         onClick={onClick}

@@ -75,7 +75,7 @@ export function Tokenizer({ initialText = DEFAULT_TEXT }: TokenizerProps) {
         onChange={(e) => setText(e.target.value)}
         rows={3}
         spellCheck={false}
-        className="w-full resize-y rounded-md border border-border bg-surface-raised p-3 font-mono text-sm text-ink focus-visible:outline-none"
+        className="w-full resize-y rounded-md border border-border bg-surface-raised p-3 font-mono text-sm text-ink "
         style={{ borderColor: COLOR.border }}
         placeholder="Type something to tokenize…"
       />

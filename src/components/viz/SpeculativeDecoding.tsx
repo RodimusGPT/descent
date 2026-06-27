@@ -192,7 +192,7 @@ export function SpeculativeDecoding({
           <button
             type="button"
             onClick={() => setSeed((s) => s + 1)}
-            className="rounded border border-border px-1.5 py-0.5 font-mono text-[0.65rem] text-muted transition-colors hover:text-ink focus-visible:outline-none"
+            className="rounded border border-border px-1.5 py-0.5 font-mono text-[0.65rem] text-muted transition-colors hover:text-ink "
           >
             re-roll
           </button>

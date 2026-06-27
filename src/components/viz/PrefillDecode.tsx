@@ -241,7 +241,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
             <button
               type="button"
               onClick={togglePlay}
-              className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none"
+              className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised "
               style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
               aria-pressed={playing}
             >
@@ -252,7 +252,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
             type="button"
             onClick={stepBack}
             disabled={frame === 0}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none disabled:opacity-40"
+            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
             style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
             aria-label="Step back one frame"
           >
@@ -262,7 +262,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
             type="button"
             onClick={stepForward}
             disabled={atEnd}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none disabled:opacity-40"
+            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
             style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
             aria-label="Step forward one frame"
           >
@@ -271,7 +271,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
           <button
             type="button"
             onClick={reset}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-surface-raised focus-visible:outline-none"
+            className="rounded-md border px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-surface-raised "
             style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
             aria-label="Reset to start"
           >
@@ -303,7 +303,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
             <select
               value={presetIndex}
               onChange={(e) => setPresetIndex(Number(e.target.value))}
-              className="rounded-md border px-2 py-1 text-ink focus-visible:outline-none"
+              className="rounded-md border px-2 py-1 text-ink "
               style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
             >
               {MODEL_PRESETS.map((p, i) => (

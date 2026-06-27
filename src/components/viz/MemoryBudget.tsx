@@ -208,7 +208,7 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 role="radio"
                 aria-checked={active}
                 onClick={() => setModelIndex(i)}
-                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors focus-visible:outline-none"
+                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
                   borderColor: active ? COLOR.modelAccent : COLOR.border,
                   backgroundColor: active ? withAlpha(COLOR.modelAccent, 0.18) : 'transparent',
@@ -237,7 +237,7 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 role="radio"
                 aria-checked={active}
                 onClick={() => setPrecision(p.key)}
-                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors focus-visible:outline-none"
+                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
                   borderColor: active ? COLOR.active : COLOR.border,
                   backgroundColor: active ? withAlpha(COLOR.active, 0.18) : 'transparent',
@@ -290,7 +290,7 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 aria-checked={active}
                 onClick={() => setGpuIndex(i)}
                 title={g.note}
-                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors focus-visible:outline-none"
+                className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
                   borderColor: active ? COLOR.hwAccent : COLOR.border,
                   backgroundColor: active ? withAlpha(COLOR.hwAccent, 0.18) : 'transparent',

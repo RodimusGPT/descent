@@ -119,7 +119,7 @@ export function AttentionFan({ tokens = TOKENS, heads = HEADS }: AttentionFanPro
               onClick={() => setHeadIdx(i)}
               aria-pressed={isActive}
               title={h.description}
-              className="rounded-md border px-2 py-1 font-mono text-xs transition-colors focus-visible:outline-none"
+              className="rounded-md border px-2 py-1 font-mono text-xs transition-colors "
               style={{
                 borderColor: isActive ? COLOR.active : COLOR.border,
                 backgroundColor: isActive ? withAlpha(COLOR.active, 0.16) : 'transparent',
