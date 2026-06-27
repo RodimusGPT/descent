@@ -4,20 +4,134 @@ order: 4
 kind: hardware
 question: How does the silicon run it?
 signature: Roofline
-summary: Tensor cores, a memory hierarchy, and the bandwidth wall that shapes it all.
+summary: Tensor cores, a steep memory hierarchy, and the bandwidth wall that shapes it all.
 ---
 
-import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+import Beat from '@/components/Beat.astro';
+import DeeperBlock from '@/components/scroll/DeeperBlock';
+import GpuFloorplan from '@/components/viz/GpuFloorplan';
+import GemmTiling from '@/components/viz/GemmTiling';
+import FlashAttention from '@/components/viz/FlashAttention';
+import Roofline from '@/components/viz/Roofline';
+import Parallelism from '@/components/viz/Parallelism';
 
-## How does the silicon run it?
+We have reached the floor. Everything above — the transformer, the weights, the serving engine
+— ultimately runs as electrons moving through one chip. A GPU is a wall of **tensor cores**,
+thousands of tiny matrix-multiply units, fed by a steep hierarchy of memory. Almost every
+performance story down here reduces to one tension: the cores can compute far faster than memory
+can feed them. Keeping them fed is the whole game.
 
-At the bottom of the descent is the GPU. Thousands of **tensor cores** chew through matrix
-multiplications; a steep **memory hierarchy** feeds them, from vast-but-slow HBM to
-tiny-but-fast on-chip SRAM. The art of fast inference is keeping the cores fed.
+<Beat wide caption="A grid of SMs and tensor cores, fed by a memory pyramid: vast slow HBM at the base, tiny fast SRAM at the tip.">
+<div slot="text">
 
-One idea explains most of the behavior: **arithmetic intensity** — how many calculations
-you do per byte you move. Prefill is compute-bound and saturates the cores. Single-stream
-decode is memory-bound and starves them. Batching raises intensity and reclaims the
-wasted compute. Below this lies only electrons.
+### The GPU
 
-<PlaceholderScene client:visible kind="hardware" label="Inference: hardware" signature="Roofline" />
+Open one up and you find a grid of **streaming multiprocessors** (SMs), each packed with
+**tensor cores** built to multiply small matrices. Around them sits memory in tiers, and the
+tiers trade size against speed brutally. **HBM** — the headline "80 GB" — is large but
+comparatively slow (~3 TB/s). On-chip **SRAM** is roughly ten times faster, but measured in
+*kilobytes* per SM, not gigabytes.
+
+A value in HBM is far away; a value in SRAM is right next to the core. Every fast kernel is, at
+heart, a scheme for hauling the right data up this pyramid and reusing it before it falls back.
+
+</div>
+<GpuFloorplan slot="visual" client:visible />
+</Beat>
+
+<Beat caption="Matmul runs as tiles: each output tile reads a row-strip and a column-strip. Bigger tiles reuse more.">
+<div slot="text">
+
+### GEMM on tensor cores
+
+The workhorse is the **matrix multiply** (GEMM) — the Q/K/V projections, the FFN, and the final
+vocabulary projection are all matmuls. Tensor cores don't multiply whole matrices at once; they
+chew through **tiles**. Each output tile reads a strip of rows from one input and a strip of
+columns from the other, multiplies them in fast memory, and writes one block of the result.
+
+Bigger tiles **reuse** each loaded value across more multiplications — more arithmetic per byte
+fetched, which is exactly what the hardware wants. And tensor cores do this natively in low
+precision: FP16, FP8, even FP4 — the formats from Part 2.
+
+</div>
+<GemmTiling slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Naive attention writes the whole n×n score matrix to HBM; FlashAttention streams through SRAM and never stores it.">
+<div slot="text">
+
+### FlashAttention
+
+Attention has a memory problem the matmuls don't. Done naively, it builds the full **n×n** matrix
+of attention scores, writes it to HBM, reads it back to softmax, then reads it *again* to multiply
+by V — O(n²) trips to slow memory. For long sequences, that traffic, not the math, is the
+bottleneck.
+
+**FlashAttention** refuses to ever write that matrix. It tiles Q, K, and V into blocks that fit
+in SRAM and streams through them, keeping a running maximum and running sum so the softmax is
+computed **online**, one block at a time. The n×n matrix never exists; HBM traffic drops from
+O(n²) to O(n) — the same answer, a fraction of the memory movement.
+
+<DeeperBlock summary="Online softmax">
+Softmax can be accumulated incrementally. Carry a running max $m$ and running normalizer $\ell$;
+when a new block arrives with its own max, rescale the partial output by $e^{m_\text{old} -
+m_\text{new}}$ and fold in the block's contribution. The end result is bit-for-bit the ordinary
+softmax — just never materialized in full.
+</DeeperBlock>
+
+</div>
+<FlashAttention slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Arithmetic intensity vs the compute roof. Drag batch size — decode climbs from memory-bound toward the ridge.">
+<div slot="text">
+
+### The roofline
+
+Why is prefill fast per token and decode slow? The **roofline** answers it with one ratio. Plot a
+workload by its **arithmetic intensity** — FLOPs performed per byte moved from memory — against
+the FLOP/s it can attain. Low intensity and you are **memory-bound**: the math finishes long
+before the next bytes arrive, so bandwidth caps you. High intensity and you are **compute-bound**,
+pinned at the chip's peak. The crossover is the **ridge point**.
+
+Prefill, processing many tokens against the same weights, sits high and compute-bound. Decode at
+batch 1 reloads *all* the weights to produce a single token — dreadful intensity, deeply
+memory-bound. **Batching** is the lever: more sequences reuse each loaded weight, raising
+intensity and sliding the point toward the roof. Drag the batch size and watch decode climb.
+
+<DeeperBlock summary="The roofline, precisely">
+Attainable performance is
+$\min\!\big(\text{peak FLOP/s},\; \text{arithmetic intensity} \times \text{bandwidth}\big)$ — a
+flat compute roof and a sloped memory roof. They meet at the
+$\text{ridge} = \text{peak} / \text{bandwidth}$: below it you are memory-bound, above it
+compute-bound.
+</DeeperBlock>
+
+</div>
+<Roofline slot="visual" client:visible />
+</Beat>
+
+<Beat caption="TP shards matrices (all-reduce per layer); PP splits layers (pipeline bubbles); EP spreads experts (all-to-all).">
+<div slot="text">
+
+### Splitting across GPUs
+
+When a model is too big for one GPU, you split it — three ways. **Tensor parallel** shards every
+weight matrix across devices, so each holds a slice; an **all-reduce** stitches the partial
+results back together *every layer*, which is why TP wants the fat NVLink fabric. **Pipeline
+parallel** instead gives each device a *range of layers*; activations flow device to device like
+a pipeline — efficient, but with **bubbles** of idle time, shrunk by feeding more microbatches.
+**Expert parallel** spreads a MoE model's experts across devices and routes each token to its
+experts with an **all-to-all**. Real deployments stack all three at once.
+
+</div>
+<Parallelism slot="visual" client:visible />
+</Beat>
+
+Step back and one law rules this floor: for decode, **tokens per second ≈ memory bandwidth ÷
+bytes read per token**. The compute is almost incidental; what you wait on is weights streaming
+from memory. That single fact explains the landscape — why unified-memory machines, slow but
+vast, run *enormous* models that would never fit a fast GPU; why MoE feels like cheating, since
+only the few **active** experts' weights are read per token; and why every trick in Parts 2 and 3
+— quantization, GQA, paging — was, underneath, about *moving fewer bytes*. We have reached the
+bottom. Time to climb back up and watch the whole machine run at once.

@@ -7,12 +7,17 @@ import BlockScaling from '../../components/viz/BlockScaling.tsx';
 import Distillation from '../../components/viz/Distillation.tsx';
 import EnginesOverview from '../../components/viz/EnginesOverview.tsx';
 import EmbeddingSpace from '../../components/viz/EmbeddingSpace.tsx';
+import FlashAttention from '../../components/viz/FlashAttention.tsx';
 import FloatExploder from '../../components/viz/FloatExploder.tsx';
+import GemmTiling from '../../components/viz/GemmTiling.tsx';
+import GpuFloorplan from '../../components/viz/GpuFloorplan.tsx';
 import MemoryBudget from '../../components/viz/MemoryBudget.tsx';
 import MoERouter from '../../components/viz/MoERouter.tsx';
 import PagedAttention from '../../components/viz/PagedAttention.tsx';
+import Parallelism from '../../components/viz/Parallelism.tsx';
 import PrefillDecode from '../../components/viz/PrefillDecode.tsx';
 import QKVMultiHead from '../../components/viz/QKVMultiHead.tsx';
+import Roofline from '../../components/viz/Roofline.tsx';
 import QuantizationSlider from '../../components/viz/QuantizationSlider.tsx';
 import SamplingPlayground from '../../components/viz/SamplingPlayground.tsx';
 import SpeculativeDecoding from '../../components/viz/SpeculativeDecoding.tsx';
@@ -60,6 +65,11 @@ const meta = DEV_SANDBOXES.find((s) => s.slug === component);
       {component === 'paged' && <PagedAttention client:load />}
       {component === 'engines' && <EnginesOverview client:load />}
       {component === 'speculative' && <SpeculativeDecoding client:load />}
+      {component === 'gpu' && <GpuFloorplan client:load />}
+      {component === 'gemm' && <GemmTiling client:load />}
+      {component === 'flash' && <FlashAttention client:load />}
+      {component === 'roofline' && <Roofline client:load />}
+      {component === 'parallelism' && <Parallelism client:load />}
     </div>
   </main>
 </BaseLayout>

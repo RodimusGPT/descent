@@ -26,7 +26,8 @@
         "noNonNullAssertion": "off"
       },
       "a11y": {
-        "useSemanticElements": "off"
+        "useSemanticElements": "off",
+        "useKeyWithClickEvents": "off"
       }
     }
   },

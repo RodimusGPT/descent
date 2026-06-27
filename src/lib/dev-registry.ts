@@ -134,4 +134,34 @@ export const DEV_SANDBOXES: DevSandbox[] = [
     description: 'Draft proposes k, target verifies in one pass; acceptance-rate slider.',
     milestone: 'M6',
   },
+  {
+    slug: 'gpu',
+    title: 'GPU floorplan',
+    description: 'SMs + tensor cores and the memory pyramid (HBM → SRAM).',
+    milestone: 'M7',
+  },
+  {
+    slug: 'gemm',
+    title: 'GEMM tiling',
+    description: 'Tiled matmul on tensor cores; bigger tiles reuse more.',
+    milestone: 'M7',
+  },
+  {
+    slug: 'flash',
+    title: 'FlashAttention',
+    description: 'Naive O(n²) HBM vs fused O(n) with an online softmax.',
+    milestone: 'M7',
+  },
+  {
+    slug: 'roofline',
+    title: 'Roofline',
+    description: 'Arithmetic intensity vs the compute roof; drag batch size.',
+    milestone: 'M7',
+  },
+  {
+    slug: 'parallelism',
+    title: 'Parallelism',
+    description: 'TP / PP / EP — sharding and the communication each needs.',
+    milestone: 'M7',
+  },
 ];

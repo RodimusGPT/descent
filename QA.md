@@ -156,3 +156,20 @@ Read Part 1 top-to-bottom in the page; exercise each visual in isolation at the 
   DeeperBlock formula render?
 - ⚠ Cross-cutting (Playwright audit follow-up): several viz buttons use `focus-visible:outline-none`
   which can hide the keyboard focus ring — to be swept in the polish pass.
+
+## M7 — Part 4: Inference, hardware (`/`, the Part 4 section, + `/dev/*`)
+
+- ☐ **Reads as one descent:** the GPU → GEMM tiling → FlashAttention → roofline → parallelism,
+  closing on the "tokens/s ≈ bandwidth ÷ bytes-per-token" law that ties back to Parts 2–3. Do the
+  online-softmax and roofline `DeeperBlock`s render?
+- ☐ **GpuFloorplan** (`/dev/gpu`): is the SM/tensor-core die + memory pyramid (HBM 80 GB·1× →
+  SRAM 228 KB·20× → registers) legible? Does selecting a tier read out its size/speed?
+- ☐ **GemmTiling** (`/dev/gemm`): does selecting a tile highlight its A row-strip + B col-strip?
+  Does the reuse / arithmetic-intensity readout rise with tile size? FP16/FP8/FP4 selector?
+- ☐ **FlashAttention** (`/dev/flash`): does naive (n×n in HBM, O(n²)) vs fused (streamed, online
+  softmax, O(n)) read clearly? Does the seq-length slider widen the HBM-traffic gap (16.9× shown)?
+- ☐ **Roofline** (`/dev/roofline`, signature): does dragging batch size slide the decode point up
+  the memory roof toward the ridge? Are prefill (compute-bound) / decode (memory-bound) clear, and
+  the readouts (AI, attainable, bottleneck) correct? ⚠ (minor) y-axis tick labels are a touch clipped.
+- ☐ **Parallelism** (`/dev/parallelism`): do TP (all-reduce) / PP (bubble shrinks with microbatches)
+  / EP (all-to-all) each draw the split + comms clearly?
