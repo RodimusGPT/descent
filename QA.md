@@ -203,3 +203,46 @@ top (hero → Part 0) and bottom (Part 5) and confirm the descent now has a real
 - ☐ Does the closing ("just bandwidth and arithmetic… fast enough to feel like thought… now you
   can see the whole climb") pay off the opening hook?
 - ☐ Reduced motion: replay autoplay off (Step ↓ only); both sandboxes still teach statically.
+
+## M9 — Global polish & launch readiness
+
+The launch pass: accessibility (keyboard + contrast + ARIA), reduced-motion, dark-mode, and
+performance, verified with automated gates (`bun run a11y` + Lighthouse) plus the spot-checks below.
+
+**Automated gates (all green — re-run before release):**
+- ☑ **axe-core WCAG 2.1 A/AA** (`bun run a11y`, served build): **0 violations across 29 routes**.
+- ☑ **Keyboard roving-tabindex**: 14 sandbox pages / 28 radiogroups — each is one tab stop and
+  Arrow keys move BOTH selection and focus (wrap + Home/End), via the single shared
+  `moveRadioFocus` (`src/lib/roving.ts`, unit-tested).
+- ☑ **Reduced-motion audit** (`AUDIT_RM=1 bun run audit`): 63 pages, 0 console errors, 0 overflow.
+- ☑ **Lighthouse** (production-representative, gzipped): **perf 96–97 · a11y 100 · best-practices
+  100 · SEO 100**; CLS 0. (Uncompressed localhost shows perf 85 — the gap is entirely server
+  text-compression, ~2.25 s of LCP; any CDN/host with gzip/brotli restores ≥95.)
+
+**Human spot-checks (M9-specific):**
+- ☐ **Keyboard radio pattern** on every chip group (precision, model, GPU, head, strategy, mode,
+  prompt, top-k, token rows): Tab lands once, ←/↑ and →/↓ move the selection AND the focus ring
+  together (wrapping), Home/End jump to ends. The visible focus ring shows on the focused option.
+- ☐ **Contrast**: active chips now use **ink** labels (white) on the accent-tinted fill + accent
+  ring (the purple model chips no longer use purple-on-purple). Secondary suffixes (`16b`, `%`,
+  token ids) read clearly — no washed-out grey. Hot/high-weight tokens keep legible labels (the
+  weight fill is capped so near-white text stays ≥4.5:1).
+- ☐ **Dark mode**: no white flash on load; mobile browser chrome matches the dark theme
+  (`<meta name="theme-color">` = bg) and form controls/scrollbars are dark (`color-scheme: dark`).
+- ☐ **Token id removal**: the interactive token rows (attention fan, MoE router, Q/K/V query row)
+  no longer show the numeric id subscript (declutter + WCAG 2.5.3 label-in-name); ids remain where
+  they teach (tokenizer, zoom, the prompt hook, the score grid).
+- ☐ **Heading order**: each part section now opens with an `<h2>` "Part N · Title" eyebrow (h1 hero
+  → h2 part → h3 beats), so screen-reader heading navigation is sequential.
+
+**Deferred "Known (M9)" items from earlier milestones — now RESOLVED in this pass:**
+- ☑ Roving-tabindex + arrow-key nav on ALL radiogroups (was: M2 quant, M5 budget/blockscale, and
+  ~12 more chip groups) — single shared helper, verified on 28 groups.
+- ☑ `aria-live` on result readouts (sampling drawn token, prefill/autoregression emitted tokens,
+  config/budget verdicts, MoE routing, paged waste, prompt prediction, replay reveal, tour step).
+- ☑ Keyboard focus ring restored everywhere (the M6 `focus-visible:outline-none` sweep — 0 remain;
+  global `:focus-visible` ring backs every control).
+- ☑ Reduced-motion: CSS transitions covered by the global `!important` backstop; JS autoplay/rAF
+  clocks gated per-component; manual Step controls stay live under reduced motion.
+- ◑ Cosmetic leftovers logged earlier (roofline y-tick clipping, zoom decimal vs FP16 bits ~6e-5,
+  extreme over-capacity bar clamp) are illustrative/non-blocking and unchanged.

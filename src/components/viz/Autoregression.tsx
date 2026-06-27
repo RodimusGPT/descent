@@ -176,7 +176,7 @@ export function Autoregression({ initialStep = 0 }: AutoregressionProps) {
             →
           </span>
           <span className="text-xs text-muted">emits</span>
-          <div className="flex min-h-[2rem] items-center">
+          <div className="flex min-h-[2rem] items-center" aria-live="polite" aria-atomic="true">
             {emitToken !== null ? (
               <Token
                 key={`emit-${step}-${emitting ? 'hot' : 'rest'}`}

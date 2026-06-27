@@ -1,8 +1,9 @@
 import { Token } from '@/components/scroll/Token';
 import { COLOR, weightToColor, withAlpha } from '@/lib/encoding';
 import { MOE_PRESET, type MoePreset, activeParamsB, route } from '@/lib/moe';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { type KeyboardEvent, useId, useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
 /**
  * MoERouter (spec 10.1) — how a mixture-of-experts layer routes a token.
@@ -143,13 +144,7 @@ export function MoERouter({ tokens = TOKENS, preset = MOE_PRESET }: MoERouterPro
 
   const barTransition = reduced ? undefined : 'height 280ms ease, y 280ms ease, fill 280ms ease';
 
-  const onTokenKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-      e.preventDefault();
-      const delta = e.key === 'ArrowRight' ? 1 : -1;
-      setTokenIdx((i + delta + tokens.length) % tokens.length);
-    }
-  };
+  const kChoices = useMemo(() => K_CHOICES.filter((c) => c <= n), [n]);
 
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-border bg-surface p-4 text-ink">
@@ -173,13 +168,14 @@ export function MoERouter({ tokens = TOKENS, preset = MOE_PRESET }: MoERouterPro
               <Token
                 key={t.id}
                 text={t.text}
-                id={t.id}
                 state={active ? 'active' : 'default'}
                 selected={active}
                 ariaLabel={`Route token ${t.text}`}
-                ariaPressed={active}
+                role="radio"
+                ariaChecked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setTokenIdx(i)}
-                onKeyDown={(e) => onTokenKey(e, i)}
+                onKeyDown={(e) => moveRadioFocus(e, i, tokens.length, setTokenIdx)}
               />
             );
           })}
@@ -232,7 +228,7 @@ export function MoERouter({ tokens = TOKENS, preset = MOE_PRESET }: MoERouterPro
           Experts per token (top-k)
         </legend>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={kGroupId}>
-          {K_CHOICES.filter((c) => c <= n).map((c) => {
+          {kChoices.map((c, i) => {
             const active = c === k;
             return (
               <button
@@ -240,7 +236,11 @@ export function MoERouter({ tokens = TOKENS, preset = MOE_PRESET }: MoERouterPro
                 type="button"
                 role="radio"
                 aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setK(c)}
+                onKeyDown={(e) =>
+                  moveRadioFocus(e, i, kChoices.length, (idx) => setK(kChoices[idx]))
+                }
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
                   borderColor: active ? COLOR.active : COLOR.border,
@@ -256,7 +256,11 @@ export function MoERouter({ tokens = TOKENS, preset = MOE_PRESET }: MoERouterPro
       </fieldset>
 
       {/* Chosen experts + renormalized weights */}
-      <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+      <div
+        className="flex flex-wrap items-center gap-2 font-mono text-xs"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         <span className="text-faint">routed →</span>
         {chosen.map((e) => {
           const w = weightByExpert.get(e) ?? 0;
@@ -271,7 +275,7 @@ export function MoERouter({ tokens = TOKENS, preset = MOE_PRESET }: MoERouterPro
               }}
             >
               E{e}
-              <span className="ml-1 text-faint">{(w * 100).toFixed(0)}%</span>
+              <span className="ml-1 text-ink">{(w * 100).toFixed(0)}%</span>
             </span>
           );
         })}

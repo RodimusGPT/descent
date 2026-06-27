@@ -96,8 +96,6 @@ export function SpeculativeDecoding({
     return () => window.clearInterval(id);
   }, [round, reduced]);
 
-  const spColor = isSlowdown ? COLOR.inert : weightToColor(clamp01((sp - 1) / 3));
-
   return (
     <div className="mx-auto flex w-full max-w-[900px] flex-col gap-4 rounded-lg border border-border bg-surface p-4 text-ink">
       <div className="flex flex-col gap-1">
@@ -150,14 +148,7 @@ export function SpeculativeDecoding({
                 ? 'rejected — resampled by target'
                 : 'free bonus token';
             return (
-              <span
-                key={i}
-                className="inline-flex flex-col items-center gap-0.5"
-                style={{
-                  opacity: shown ? 1 : 0.15,
-                  transition: reduced ? undefined : 'opacity 220ms ease',
-                }}
-              >
+              <span key={i} className="inline-flex flex-col items-center gap-0.5">
                 <Token
                   text={label}
                   size="sm"
@@ -265,7 +256,7 @@ export function SpeculativeDecoding({
               </span>
             )}
           </div>
-          <div className="font-mono text-lg tabular-nums" style={{ color: spColor }}>
+          <div className="font-mono text-lg tabular-nums" style={{ color: COLOR.ink }}>
             {sp.toFixed(2)}×
           </div>
           <div className="mt-0.5 text-[0.7rem] text-faint">

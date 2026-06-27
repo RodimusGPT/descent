@@ -104,7 +104,7 @@ export function Tokenizer({ initialText = DEFAULT_TEXT }: TokenizerProps) {
                     legible with readable contrast even at narrow widths. */}
                 <span>{displayText(tok)}</span>
                 <span
-                  className="ml-1 align-baseline text-[10px] tabular-nums text-muted"
+                  className="ml-1 align-baseline text-[10px] tabular-nums text-ink opacity-80"
                   aria-hidden="true"
                 >
                   {tok.id}

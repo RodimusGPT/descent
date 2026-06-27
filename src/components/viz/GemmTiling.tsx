@@ -1,5 +1,6 @@
 import { COLOR, withAlpha } from '@/lib/encoding';
 import { flops, tileArithmeticIntensity, tileCount } from '@/lib/gemm';
+import { moveRadioFocus } from '@/lib/roving';
 import { useInView } from '@/lib/use-in-view';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import {
@@ -200,7 +201,7 @@ export function GemmTiling({ rows = M, cols = N, contraction = K }: GemmTilingPr
           Tensor-core precision
         </legend>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={precGroupId}>
-          {PRECISIONS.map((p) => {
+          {PRECISIONS.map((p, i) => {
             const on = p.key === precision;
             return (
               <button
@@ -208,7 +209,11 @@ export function GemmTiling({ rows = M, cols = N, contraction = K }: GemmTilingPr
                 type="button"
                 role="radio"
                 aria-checked={on}
+                tabIndex={on ? 0 : -1}
                 onClick={() => setPrecision(p.key)}
+                onKeyDown={(e) =>
+                  moveRadioFocus(e, i, PRECISIONS.length, (n) => setPrecision(PRECISIONS[n].key))
+                }
                 className="rounded-md border px-3 py-1 font-mono text-xs transition-colors"
                 style={{
                   borderColor: on ? teal : COLOR.border,
@@ -217,7 +222,7 @@ export function GemmTiling({ rows = M, cols = N, contraction = K }: GemmTilingPr
                 }}
               >
                 {p.label}
-                <span className="ml-1 text-faint">{p.bytes}B</span>
+                <span className="ml-1 text-muted">{p.bytes}B</span>
               </button>
             );
           })}
@@ -337,7 +342,7 @@ function GemmDiagram({
     <svg
       viewBox={`0 0 ${w} ${h}`}
       className="w-full"
-      role="img"
+      role="group"
       aria-label={`Tiled matrix multiply C equals A times B. A is ${rows} by ${contraction}, B is ${contraction} by ${cols}, C is ${rows} by ${cols}, split into ${nTiles} tiles of ${tile} by ${tile}. The highlighted output tile at row ${selRow + 1}, column ${selCol + 1} multiplies a row-strip of A by a column-strip of B.`}
     >
       <title>Tiled GEMM: highlighted output tile, A row-strip, and B column-strip</title>

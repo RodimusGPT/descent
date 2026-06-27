@@ -1,5 +1,6 @@
 import { EXAMPLE_PRESETS, STUDENT, TEACHER, transferProxy } from '@/lib/distill';
 import { COLOR, clamp01, weightToColor, withAlpha } from '@/lib/encoding';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { useId, useState } from 'react';
 
@@ -247,14 +248,26 @@ export function Distillation({ initialExamples = 1000 }: DistillationProps) {
           className="w-full accent-active"
           aria-valuetext={`${examples} examples`}
         />
-        <div className="flex flex-wrap gap-2">
-          {EXAMPLE_PRESETS.map((preset) => {
+        <div
+          className="flex flex-wrap gap-2"
+          role="radiogroup"
+          aria-label="Training-example presets"
+        >
+          {EXAMPLE_PRESETS.map((preset, i) => {
             const active = examples === preset;
             return (
               <button
                 key={preset}
                 type="button"
+                role="radio"
+                aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setLogExamples(Math.log10(preset))}
+                onKeyDown={(e) =>
+                  moveRadioFocus(e, i, EXAMPLE_PRESETS.length, (n) =>
+                    setLogExamples(Math.log10(EXAMPLE_PRESETS[n])),
+                  )
+                }
                 className="rounded-md border px-2.5 py-1 font-mono text-xs transition-colors "
                 style={{
                   borderColor: active ? COLOR.active : COLOR.border,

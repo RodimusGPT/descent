@@ -273,7 +273,13 @@ export function DescentTour() {
         <span aria-hidden="true">◀</span>
         <span className="hidden sm:inline">Prev</span>
       </button>
-      <span className="min-w-[3.5rem] text-center font-mono text-xs tabular-nums text-muted">
+      <span
+        className="min-w-[3.5rem] text-center font-mono text-xs tabular-nums text-muted"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label={total > 0 ? `Step ${active + 1} of ${total}` : undefined}
+      >
         {total > 0 ? `${active + 1} / ${total}` : '—'}
       </span>
       <button

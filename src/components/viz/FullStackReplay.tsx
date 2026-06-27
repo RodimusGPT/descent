@@ -128,9 +128,7 @@ export function FullStackReplay() {
           return (
             <li key={stage.id}>
               <div
-                className={`flex items-start gap-3 rounded-lg border p-3 transition-colors ${
-                  isUpcoming ? 'opacity-50' : 'opacity-100'
-                }`}
+                className="flex items-start gap-3 rounded-lg border p-3 transition-colors"
                 style={cardStyle}
                 aria-current={isActive ? 'step' : undefined}
               >
@@ -186,6 +184,8 @@ export function FullStackReplay() {
 
       {/* the emitted token, revealed when the descent completes */}
       <div
+        aria-live="polite"
+        aria-atomic="true"
         className="flex flex-wrap items-center gap-2 rounded-md border border-dashed px-3 py-2"
         style={{
           borderColor: withAlpha(COLOR.active, atEnd ? 0.6 : 0.25),

@@ -10,9 +10,10 @@ import {
 } from '@/lib/config';
 import { COLOR, clamp01, lerpColor, withAlpha } from '@/lib/encoding';
 import { PRECISIONS, type PrecisionKey } from '@/lib/quant';
+import { moveRadioFocus } from '@/lib/roving';
 import { useInView } from '@/lib/use-in-view';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 /**
  * ConfigSandbox (spec 10.5) — the Part 5 capstone.
@@ -178,11 +179,12 @@ export function ConfigSandbox({ initialModelIndex = 2, initialGpuIndex = 2 }: Co
                 style={{
                   borderColor: active ? COLOR.modelAccent : COLOR.border,
                   backgroundColor: active ? withAlpha(COLOR.modelAccent, 0.18) : 'transparent',
-                  color: active ? COLOR.modelAccent : COLOR.muted,
+                  // ink (not the purple accent) for the active label — purple-on-its-tint fails AA.
+                  color: active ? COLOR.ink : COLOR.muted,
                 }}
               >
                 {m.name}
-                <span className="ml-1 text-[0.7em] opacity-70">
+                <span className="ml-1 text-[0.7em]">
                   {m.activeParamsB < m.paramsB ? `${m.activeParamsB}B active` : `${m.paramsB}B`}
                 </span>
               </button>
@@ -220,7 +222,7 @@ export function ConfigSandbox({ initialModelIndex = 2, initialGpuIndex = 2 }: Co
                 }}
               >
                 {p.label}
-                <span className="ml-1 text-[0.7em] opacity-70">{p.bits}b</span>
+                <span className="ml-1 text-[0.7em]">{p.bits}b</span>
               </button>
             );
           })}
@@ -253,7 +255,7 @@ export function ConfigSandbox({ initialModelIndex = 2, initialGpuIndex = 2 }: Co
                 }}
               >
                 {g.name}
-                <span className="ml-1 text-[0.7em] opacity-70">
+                <span className="ml-1 text-[0.7em]">
                   {g.vramGB}GB · {g.bandwidthTBs}TB/s
                 </span>
               </button>
@@ -405,7 +407,7 @@ export function ConfigSandbox({ initialModelIndex = 2, initialGpuIndex = 2 }: Co
       </div>
 
       {/* Readouts */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" role="status" aria-live="polite">
         <Readout
           label="Weights"
           value={`${formatGB(vram.weightGB)} GB`}
@@ -442,23 +444,6 @@ export function ConfigSandbox({ initialModelIndex = 2, initialGpuIndex = 2 }: Co
       </div>
     </div>
   );
-}
-
-/** Standard ARIA radiogroup keyboard nav with wraparound; selection follows focus. */
-function moveRadioFocus(
-  e: KeyboardEvent<HTMLButtonElement>,
-  currentIndex: number,
-  count: number,
-  setIndex: (i: number) => void,
-): void {
-  let next: number;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (currentIndex + 1) % count;
-  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (currentIndex - 1 + count) % count;
-  else return;
-  e.preventDefault();
-  setIndex(next);
-  const radios = e.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="radio"]');
-  radios?.[next]?.focus();
 }
 
 function Swatch({ color, label }: { color: string; label: string }) {

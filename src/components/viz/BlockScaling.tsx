@@ -5,6 +5,7 @@ import {
   quantizePerTensor,
 } from '@/lib/blockscale';
 import { COLOR, weightToColor, withAlpha } from '@/lib/encoding';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { useId, useMemo, useState } from 'react';
 
@@ -37,6 +38,11 @@ export interface BlockScalingProps {
 }
 
 type Mode = 'tensor' | 'block';
+
+const MODES: { key: Mode; label: string }[] = [
+  { key: 'tensor', label: 'One scale for the whole tensor' },
+  { key: 'block', label: 'One scale per block' },
+];
 
 export function BlockScaling({
   blocks = SHOWN_BLOCKS,
@@ -92,10 +98,7 @@ export function BlockScaling({
           Scale granularity
         </legend>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={modeGroupId}>
-          {[
-            { key: 'tensor' as const, label: 'One scale for the whole tensor' },
-            { key: 'block' as const, label: 'One scale per block' },
-          ].map((opt) => {
+          {MODES.map((opt, i) => {
             const on = opt.key === mode;
             return (
               <button
@@ -103,7 +106,9 @@ export function BlockScaling({
                 type="button"
                 role="radio"
                 aria-checked={on}
+                tabIndex={on ? 0 : -1}
                 onClick={() => setMode(opt.key)}
+                onKeyDown={(e) => moveRadioFocus(e, i, MODES.length, (n) => setMode(MODES[n].key))}
                 className="rounded-md border px-3 py-1 font-mono text-xs transition-colors "
                 style={{
                   borderColor: on ? COLOR.active : COLOR.border,

@@ -36,6 +36,10 @@ export interface TokenProps {
   tabIndex?: number;
   ariaLabel?: string;
   ariaPressed?: boolean;
+  /** ARIA role for the rendered button (e.g. "radio" inside a radiogroup). */
+  role?: string;
+  /** Checked state when this token is a radio option (role="radio"). */
+  ariaChecked?: boolean;
 }
 
 function hueForState(state: TokenState): string {
@@ -66,10 +70,15 @@ export function Token({
   tabIndex,
   ariaLabel,
   ariaPressed,
+  role,
+  ariaChecked,
 }: TokenProps) {
   const hue = weight === undefined ? hueForState(state) : weightToColor(weight);
+  // Cap the weighted fill so even the hottest token keeps a dark-enough background
+  // for the near-white ink label to clear WCAG AA (4.5:1). The 0.14→0.40 ramp still
+  // reads as a clear warm gradient; a heavier fill washed the text out (I4/contrast).
   const fillAlpha =
-    weight === undefined ? (state === 'default' ? 0.06 : 0.16) : 0.18 + 0.5 * weight;
+    weight === undefined ? (state === 'default' ? 0.06 : 0.16) : 0.14 + 0.26 * weight;
 
   const style: CSSProperties = {
     borderColor: selected ? COLOR.active : hue,
@@ -85,7 +94,7 @@ export function Token({
     <span className="inline-flex items-baseline gap-1 whitespace-pre">
       <span>{label}</span>
       {id !== undefined && (
-        <span className="text-[0.6em] tabular-nums opacity-60" aria-hidden="true">
+        <span className="text-[0.6em] tabular-nums opacity-80" aria-hidden="true">
           {id}
         </span>
       )}
@@ -104,8 +113,10 @@ export function Token({
         onClick={onClick}
         onKeyDown={onKeyDown}
         tabIndex={tabIndex}
+        role={role}
         aria-label={ariaLabel ?? (typeof label === 'string' ? label : undefined)}
         aria-pressed={ariaPressed}
+        aria-checked={ariaChecked}
       >
         {inner}
       </button>

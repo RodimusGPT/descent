@@ -7,6 +7,7 @@ import {
   blocksFor,
   withSharedPrefix,
 } from '@/lib/paged';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { type CSSProperties, useCallback, useMemo, useState } from 'react';
 
@@ -38,7 +39,8 @@ const DEFAULT_SEQS: Seq[] = [
 const MAX_LEN_CAP = 28; // upper bound for the reserve-max slider
 const SEQ_LEN_CAP = 16; // a single sequence can't exceed this here
 
-type Mode = 'contiguous' | 'paged';
+const MODES = ['contiguous', 'paged'] as const;
+type Mode = (typeof MODES)[number];
 
 export interface PagedAttentionProps {
   /** Starting view. */
@@ -109,17 +111,20 @@ export function PagedAttention({ initialMode = 'contiguous' }: PagedAttentionPro
         <div
           className="flex items-center gap-1 rounded-md border p-1"
           style={{ borderColor: COLOR.border }}
-          role="group"
+          role="radiogroup"
           aria-label="Allocation strategy"
         >
-          {(['contiguous', 'paged'] as const).map((m) => {
+          {MODES.map((m, i) => {
             const on = mode === m;
             return (
               <button
                 key={m}
                 type="button"
+                role="radio"
+                aria-checked={on}
+                tabIndex={on ? 0 : -1}
                 onClick={() => setMode(m)}
-                aria-pressed={on}
+                onKeyDown={(e) => moveRadioFocus(e, i, MODES.length, (n) => setMode(MODES[n]))}
                 className={`rounded px-3 py-1 font-mono text-xs ${tw} `}
                 style={{
                   backgroundColor: on ? withAlpha(COLOR.modelAccent, 0.18) : 'transparent',
@@ -569,6 +574,8 @@ function WasteReadout({
     <div
       className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
       style={{ borderColor: COLOR.border, backgroundColor: withAlpha(COLOR.faint, 0.08) }}
+      aria-live="polite"
+      aria-atomic="true"
     >
       <span className="font-mono text-xs text-muted">
         {shared ? 'sharing' : mode === 'contiguous' ? 'internal fragmentation' : 'waste'}

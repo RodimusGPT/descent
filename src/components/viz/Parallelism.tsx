@@ -1,5 +1,6 @@
 import { COLOR, lerpColor, withAlpha } from '@/lib/encoding';
 import { STRATEGIES, type StrategyKey, pipelineBubbleFraction } from '@/lib/parallelism';
+import { moveRadioFocus } from '@/lib/roving';
 import { useInView } from '@/lib/use-in-view';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { type CSSProperties, useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -502,7 +503,7 @@ export function Parallelism({ initialStrategy = 'tp' }: ParallelismProps) {
           Strategy
         </legend>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={stratGroupId}>
-          {STRATEGIES.map((s) => {
+          {STRATEGIES.map((s, i) => {
             const active = s.key === strategy;
             return (
               <button
@@ -510,7 +511,11 @@ export function Parallelism({ initialStrategy = 'tp' }: ParallelismProps) {
                 type="button"
                 role="radio"
                 aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setStrategy(s.key)}
+                onKeyDown={(e) =>
+                  moveRadioFocus(e, i, STRATEGIES.length, (n) => setStrategy(STRATEGIES[n].key))
+                }
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors"
                 style={pill(active)}
               >

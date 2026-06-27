@@ -299,7 +299,7 @@ export function Roofline({
       <div className="flex flex-col gap-2">
         <label htmlFor={batchId} className="flex items-baseline justify-between text-xs text-muted">
           <span>Decode batch size</span>
-          <span className="font-mono tabular-nums" style={{ color: decodeColor }}>
+          <span className="font-mono tabular-nums" style={{ color: COLOR.ink }}>
             {batch} {batch === 1 ? 'sequence' : 'sequences'}
           </span>
         </label>
@@ -324,13 +324,13 @@ export function Roofline({
         <Readout
           label="Arithmetic intensity"
           value={`${formatAi(decodeAi)} F/B`}
-          color={decodeColor}
+          color={COLOR.ink}
         />
         <Readout label="Attainable" value={formatFlops(decodeFlops)} color={COLOR.ink} />
         <Readout
           label="Bottleneck"
           value={decodeMemBound ? 'memory-bound' : 'compute-bound'}
-          color={decodeMemBound ? COLOR.inert : COLOR.active}
+          color={decodeMemBound ? COLOR.muted : COLOR.active}
         />
       </div>
 

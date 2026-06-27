@@ -9,9 +9,10 @@ import {
   qualityProxy,
   quantize,
 } from '@/lib/quant';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import type { CSSProperties, KeyboardEvent } from 'react';
-import { useId, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useId, useMemo, useState } from 'react';
 
 /**
  * Selected-state styling for the radio pills — a filled tint, a colored border
@@ -22,46 +23,13 @@ function pillStyle(active: boolean, accent: string): CSSProperties {
   return {
     borderColor: active ? accent : COLOR.border,
     backgroundColor: active ? withAlpha(accent, 0.22) : 'transparent',
-    color: active ? accent : COLOR.muted,
+    // Active label uses ink, not the accent: accent-on-its-own-tint (esp. the
+    // purple model accent) fails AA; the accent border + fill + ring carry the
+    // selected state instead.
+    color: active ? COLOR.ink : COLOR.muted,
     boxShadow: active ? `inset 0 0 0 1px ${accent}` : undefined,
     fontWeight: active ? 600 : 400,
   };
-}
-
-/**
- * Roving-tabindex arrow-key navigation for a radio group: arrows (and Home/End)
- * move both selection and focus, wrapping at the ends. Only the selected option
- * is in the tab order.
- */
-function handleRovingKey(
-  e: KeyboardEvent<HTMLButtonElement>,
-  index: number,
-  length: number,
-  refs: { current: (HTMLButtonElement | null)[] },
-  select: (i: number) => void,
-): void {
-  let next = index;
-  switch (e.key) {
-    case 'ArrowRight':
-    case 'ArrowDown':
-      next = (index + 1) % length;
-      break;
-    case 'ArrowLeft':
-    case 'ArrowUp':
-      next = (index - 1 + length) % length;
-      break;
-    case 'Home':
-      next = 0;
-      break;
-    case 'End':
-      next = length - 1;
-      break;
-    default:
-      return;
-  }
-  e.preventDefault();
-  select(next);
-  refs.current[next]?.focus();
 }
 
 /**
@@ -100,9 +68,6 @@ export function QuantizationSlider({
   const baseId = useId();
   const precGroupId = `${baseId}-prec`;
   const paramGroupId = `${baseId}-param`;
-
-  const precRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const paramRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const values = useMemo(() => generateWeights(sampleCount, seed), [sampleCount, seed]);
 
@@ -183,26 +148,19 @@ export function QuantizationSlider({
             return (
               <button
                 key={p.key}
-                ref={(el) => {
-                  precRefs.current[i] = el;
-                }}
                 type="button"
                 role="radio"
                 aria-checked={active}
                 tabIndex={active ? 0 : -1}
                 onClick={() => setPrecision(p.key)}
                 onKeyDown={(e) =>
-                  handleRovingKey(e, i, PRECISIONS.length, precRefs, (n) =>
-                    setPrecision(PRECISIONS[n].key),
-                  )
+                  moveRadioFocus(e, i, PRECISIONS.length, (n) => setPrecision(PRECISIONS[n].key))
                 }
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={pillStyle(active, COLOR.active)}
               >
                 {p.label}
-                <span className="ml-1 text-[0.7em]" style={{ opacity: active ? 0.85 : 0.7 }}>
-                  {p.bits}b
-                </span>
+                <span className="ml-1 text-[0.7em]">{p.bits}b</span>
               </button>
             );
           })}
@@ -220,16 +178,13 @@ export function QuantizationSlider({
             return (
               <button
                 key={preset.key}
-                ref={(el) => {
-                  paramRefs.current[i] = el;
-                }}
                 type="button"
                 role="radio"
                 aria-checked={active}
                 tabIndex={active ? 0 : -1}
                 onClick={() => setParams(preset.params)}
                 onKeyDown={(e) =>
-                  handleRovingKey(e, i, PARAM_PRESETS.length, paramRefs, (n) =>
+                  moveRadioFocus(e, i, PARAM_PRESETS.length, (n) =>
                     setParams(PARAM_PRESETS[n].params),
                   )
                 }
@@ -244,7 +199,7 @@ export function QuantizationSlider({
       </fieldset>
 
       {/* Readouts */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3" aria-live="polite" aria-atomic="true">
         <div className="rounded-md border border-border bg-surface-raised p-3">
           <div className="text-xs text-muted">On-disk size</div>
           <div className="font-mono text-lg tabular-nums" style={{ color: COLOR.active }}>

@@ -156,3 +156,51 @@ also retired the ScrollScene's competing Prev/Next on placeholder parts). Verifi
   inside the prose container, the `.descent-prose` typography rules are scoped to skip anything
   inside a `<figure>` — so a bare `<p>` in a viz no longer inherits prose color/margins. Removed the
   rehype heading-tagging (Beats/section-headers are the explicit tour stops now).
+
+## M9 — Global polish & launch readiness
+
+Driven by a parallel audit (one agent per interactive + cross-cutting) → triage → parallel fix →
+adversarial re-audit, then an objective runtime gate (`scripts/a11y-runtime.mjs` = axe-core + a
+keyboard-roving harness) and Lighthouse. Choices made:
+
+- **One shared `moveRadioFocus` (`src/lib/roving.ts`), ref-free.** Every single-select chip group
+  (precision, model, GPU, head, strategy, mode, prompt, top-k, and the Token-based query/route rows)
+  is now a conformant WAI-ARIA radiogroup: `role="radiogroup"` container, each option
+  `role="radio"` + `aria-checked` + roving `tabIndex={active?0:-1}`, and one `onKeyDown` →
+  `moveRadioFocus`, which finds siblings via `closest('[role="radiogroup"]')` (no ref arrays) and
+  moves selection+focus on Arrow/Home/End with wrap. This **supersedes the M0 decision to defer the
+  radiogroup pattern** and the `a11y/useSemanticElements`-off rationale: the chip buttons keep their
+  styling AND are now keyboard-conformant. Two pre-existing local copies (Quant `handleRovingKey`,
+  Budget `moveRadioFocus`) + a third in ConfigSandbox were collapsed into this one. `Token` gained
+  `role`/`ariaChecked` props so token rows can be true radios. Verified on 28 groups.
+- **`aria-live="polite"` on every result readout** that changes as the result of a user action
+  (sampled/predicted/emitted tokens, fit/throughput verdicts, MoE routing, paged waste, the tour
+  step counter, the replay reveal). Screen-reader users now hear the outcome of each interaction.
+- **Reduced motion: CSS via global backstop, JS via the hook.** The global
+  `@media (prefers-reduced-motion: reduce)` rule already neutralizes every CSS `transition`/
+  `animation` with `!important`, so per-component `transition-colors` classes are intentionally NOT
+  individually gated — the audit's 21 "ungated transition" findings were verified non-issues. What
+  matters and is gated in JS: autoplay/`setInterval`/rAF clocks and that manual Step controls stay
+  live under reduced motion.
+- **Contrast (WCAG AA 4.5:1), palette-constrained.** Lifted `--color-faint` #7e8aa0 → #8c97ac
+  (still distinct from muted, clears 4.5:1 on surface-raised). Killed all opacity-based text dimming
+  (suffix `opacity-70`, the replay `opacity-50` upcoming cards). **Active chips use ink labels, not
+  the accent** — accent-on-its-own-tint failed for the purple model accent (4.50); the accent
+  border + fill + ring carry "selected" instead. **Capped the Token weight fill** at `0.14+0.26·w`
+  (was `0.18+0.5·w`) so the hottest token keeps a dark-enough background for near-white ink to clear
+  AA. Encoding-guard kept everything in `encoding.ts`/`tokens.css`.
+- **Dropped the id subscript from the *interactive* token rows** (attention fan, MoE router, Q/K/V
+  query row): it was decorative clutter there and tripped WCAG 2.5.3 (label-in-name, since the
+  visible id wasn't in the aria-label). The I5 "token carries its id" motif stays everywhere it
+  teaches (tokenizer, zoom, prompt hook, score grid).
+- **Heading order.** The per-part eyebrow "Part N · Title" is now an `<h2>` (was a styled `<span>`),
+  giving h1 (hero) → h2 (part) → h3 (beats) — sequential for screen-reader heading nav.
+- **Dark mode finalized.** Added `<meta name="color-scheme" content="dark">` + `<meta name="theme-color">`
+  (= `COLOR.bg`). Fixed a latent bug: the `COLOR` object never exposed `bg`/`surfaceRaised`
+  (so `COLOR.bg` was `undefined`) — added them (mirrored in the encoding test).
+- **`a11y` script + axe devDeps.** Added `bun run a11y` (`scripts/a11y-runtime.mjs`) and
+  `@axe-core/playwright` + `axe-core` as devDeps — a reusable, server-driven launch gate alongside
+  the existing `audit`. Kept out of `bun run check` (which must stay offline/fast).
+- **Lighthouse target met.** Production-representative (gzipped) home page: perf 96–97 / a11y 100 /
+  best-practices 100 / SEO 100, CLS 0. The uncompressed-localhost perf 85 is entirely missing server
+  text-compression (~2.25 s of LCP); not a site-architecture issue (total weight 685 KiB passes).

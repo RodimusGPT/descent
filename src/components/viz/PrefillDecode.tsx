@@ -188,7 +188,11 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
         <span className="text-xs text-muted">
           Generated — one token per step (autoregressive loop)
         </span>
-        <div className="flex min-h-[2rem] flex-wrap items-center gap-1.5">
+        <div
+          className="flex min-h-[2rem] flex-wrap items-center gap-1.5"
+          aria-live="polite"
+          aria-atomic="false"
+        >
           {decodedTokens.length === 0 && (
             <span className="font-mono text-xs text-faint">— not started —</span>
           )}

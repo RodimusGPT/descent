@@ -9,15 +9,9 @@ import {
   gqaGrouping,
   headAttention,
 } from '@/lib/qkv';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import {
-  type CSSProperties,
-  type KeyboardEvent,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type CSSProperties, useMemo, useState } from 'react';
 
 /**
  * QKVMultiHead — spec 10.1.
@@ -92,8 +86,6 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
   const [queryIdx, setQueryIdx] = useState(1 % tokens.length);
   const [mode, setMode] = useState<GqaMode>('gqa');
 
-  const tokenRefs = useRef<Array<HTMLElement | null>>([]);
-
   const head = heads[Math.min(headIdx, heads.length - 1)];
   const safeQuery = Math.min(queryIdx, tokens.length - 1);
 
@@ -115,20 +107,6 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
     [vecScale, output],
   );
 
-  const onTokenKey = useCallback(
-    (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
-      let next: number | null = null;
-      if (e.key === 'ArrowRight') next = Math.min(tokens.length - 1, i + 1);
-      else if (e.key === 'ArrowLeft') next = Math.max(0, i - 1);
-      if (next !== null) {
-        e.preventDefault();
-        setQueryIdx(next);
-        tokenRefs.current[next]?.querySelector('button')?.focus();
-      }
-    },
-    [tokens.length],
-  );
-
   const transition = reduced ? 'none' : 'width 220ms ease, background-color 220ms ease';
 
   const activeMode = GQA_MODES.find((m) => m.id === mode) ?? GQA_MODES[1];
@@ -147,7 +125,11 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
       aria-label="Query, key, value attention across multiple heads"
     >
       {/* Head selector */}
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Attention head">
+      <div
+        className="flex flex-wrap items-center gap-2"
+        role="radiogroup"
+        aria-label="Attention head"
+      >
         <span className="font-mono text-xs text-faint">Head:</span>
         {heads.map((h, i) => {
           const isActive = i === Math.min(headIdx, heads.length - 1);
@@ -155,8 +137,11 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
             <button
               key={h.name}
               type="button"
+              role="radio"
               onClick={() => setHeadIdx(i)}
-              aria-pressed={isActive}
+              onKeyDown={(e) => moveRadioFocus(e, i, heads.length, setHeadIdx)}
+              aria-checked={isActive}
+              tabIndex={isActive ? 0 : -1}
               title={h.description}
               className="rounded-md border px-2 py-1 font-mono text-xs transition-colors "
               style={{
@@ -181,26 +166,25 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
         <div
           className="grid items-start gap-2"
           style={{ gridTemplateColumns: `repeat(${tokens.length}, minmax(0, 1fr))` }}
+          role="radiogroup"
+          aria-label="Query token"
         >
           {tokens.map((t, i) => {
             const isQuery = i === safeQuery;
             return (
               <div key={t.id} className="flex flex-col items-center gap-1.5">
-                <span
-                  ref={(el: HTMLSpanElement | null) => {
-                    tokenRefs.current[i] = el;
-                  }}
-                  className="inline-flex"
-                >
+                <span className="inline-flex">
                   <Token
                     text={t.text}
-                    id={t.id}
                     state={isQuery ? 'active' : 'default'}
                     selected={isQuery}
                     size="md"
+                    role="radio"
+                    ariaChecked={isQuery}
+                    tabIndex={isQuery ? 0 : -1}
                     ariaLabel={isQuery ? `Query token ${t.text}` : `Set query to ${t.text}`}
                     onClick={() => setQueryIdx(i)}
-                    onKeyDown={(e) => onTokenKey(e, i)}
+                    onKeyDown={(e) => moveRadioFocus(e, i, tokens.length, setQueryIdx)}
                   />
                 </span>
                 <div className="flex flex-col items-center gap-1.5 rounded-md border border-border bg-bg px-2 py-1.5">
@@ -273,10 +257,7 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
                     }}
                   />
                 </span>
-                <span
-                  className="text-right font-mono text-xs tabular-nums"
-                  style={{ color: weightToColor(w) }}
-                >
+                <span className="text-right font-mono text-xs tabular-nums text-muted">
                   {(w * 100).toFixed(0)}%
                 </span>
               </div>
@@ -304,15 +285,20 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
       <div className="flex flex-col gap-2 border-t pt-3" style={{ borderColor: COLOR.border }}>
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xs text-faint">KV sharing:</span>
-          <div className="flex gap-1" role="group" aria-label="KV sharing scheme">
-            {GQA_MODES.map((m) => {
+          <div className="flex gap-1" role="radiogroup" aria-label="KV sharing scheme">
+            {GQA_MODES.map((m, i) => {
               const on = m.id === mode;
               return (
                 <button
                   key={m.id}
                   type="button"
+                  role="radio"
                   onClick={() => setMode(m.id)}
-                  aria-pressed={on}
+                  onKeyDown={(e) =>
+                    moveRadioFocus(e, i, GQA_MODES.length, (n) => setMode(GQA_MODES[n].id))
+                  }
+                  aria-checked={on}
+                  tabIndex={on ? 0 : -1}
                   title={m.blurb}
                   className="rounded-md border px-2 py-1 font-mono text-xs transition-colors "
                   style={{
@@ -356,7 +342,7 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
                       key={h}
                       className="rounded px-1 py-0.5 font-mono text-[0.65rem] tabular-nums"
                       style={{
-                        color: COLOR.modelAccent,
+                        color: COLOR.ink,
                         backgroundColor: withAlpha(COLOR.modelAccent, 0.16),
                         border: `1px solid ${withAlpha(COLOR.modelAccent, 0.5)}`,
                       }}

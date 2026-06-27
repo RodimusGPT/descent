@@ -21,7 +21,7 @@ export const PALETTE = {
   border: '#26304a',
   ink: '#e6ecf5',
   muted: '#9aa7bd',
-  faint: '#7e8aa0',
+  faint: '#8c97ac',
   /** warm — most energetic state */
   active: '#f5a524',
   activeHot: '#fb6f5a',
@@ -43,7 +43,9 @@ export const COLOR = {
   muted: PALETTE.muted,
   faint: PALETTE.faint,
   border: PALETTE.border,
+  bg: PALETTE.bg,
   surface: PALETTE.surface,
+  surfaceRaised: PALETTE.surfaceRaised,
 } as const;
 
 /**

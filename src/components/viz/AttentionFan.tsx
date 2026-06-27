@@ -1,15 +1,9 @@
 import { Token } from '@/components/scroll/Token';
 import { HEADS, type Head, TOKENS, type TokenDatum, weightToGeometry } from '@/lib/attention-data';
 import { COLOR, weightToColor, withAlpha } from '@/lib/encoding';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import {
-  type KeyboardEvent,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // useLayoutEffect warns under SSR; this island only ever measures layout on the
 // client, so fall back to useEffect on the server to keep the console clean.
@@ -82,23 +76,6 @@ export function AttentionFan({ tokens = TOKENS, heads = HEADS }: AttentionFanPro
     return () => window.removeEventListener('resize', onResize);
   }, [measure]);
 
-  const onTokenKey = useCallback(
-    (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        const next = Math.min(tokens.length - 1, i + 1);
-        setQueryIdx(next);
-        tokenRefs.current[next]?.querySelector('button')?.focus();
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const next = Math.max(0, i - 1);
-        setQueryIdx(next);
-        tokenRefs.current[next]?.querySelector('button')?.focus();
-      }
-    },
-    [tokens.length],
-  );
-
   const queryCenter = centers[safeQuery];
   const transition = reduced ? 'none' : 'opacity 200ms ease, stroke-width 200ms ease';
 
@@ -108,7 +85,11 @@ export function AttentionFan({ tokens = TOKENS, heads = HEADS }: AttentionFanPro
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-border bg-surface p-4">
       {/* Head selector */}
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Attention head">
+      <div
+        className="flex flex-wrap items-center gap-2"
+        role="radiogroup"
+        aria-label="Attention head"
+      >
         <span className="text-xs text-faint">Head:</span>
         {heads.map((h, i) => {
           const isActive = i === Math.min(headIdx, heads.length - 1);
@@ -116,8 +97,11 @@ export function AttentionFan({ tokens = TOKENS, heads = HEADS }: AttentionFanPro
             <button
               key={h.name}
               type="button"
+              role="radio"
               onClick={() => setHeadIdx(i)}
-              aria-pressed={isActive}
+              onKeyDown={(e) => moveRadioFocus(e, i, heads.length, setHeadIdx)}
+              aria-checked={isActive}
+              tabIndex={isActive ? 0 : -1}
               title={h.description}
               className="rounded-md border px-2 py-1 font-mono text-xs transition-colors "
               style={{
@@ -164,7 +148,11 @@ export function AttentionFan({ tokens = TOKENS, heads = HEADS }: AttentionFanPro
             })}
         </svg>
 
-        <div className="relative flex flex-wrap items-center justify-center gap-2">
+        <div
+          className="relative flex flex-wrap items-center justify-center gap-2"
+          role="radiogroup"
+          aria-label="Query token"
+        >
           {tokens.map((t, i) => {
             const isQuery = i === safeQuery;
             const w = weights[i] ?? 0;
@@ -185,7 +173,6 @@ export function AttentionFan({ tokens = TOKENS, heads = HEADS }: AttentionFanPro
               >
                 <Token
                   text={t.text}
-                  id={t.id}
                   weight={isQuery ? undefined : w}
                   state={isQuery ? 'active' : 'default'}
                   selected={isQuery}
@@ -195,8 +182,11 @@ export function AttentionFan({ tokens = TOKENS, heads = HEADS }: AttentionFanPro
                       ? `Query token ${t.text}`
                       : `Key token ${t.text}, attention weight ${w.toFixed(2)}`
                   }
+                  role="radio"
+                  ariaChecked={isQuery}
+                  tabIndex={isQuery ? 0 : -1}
                   onClick={() => setQueryIdx(i)}
-                  onKeyDown={(e) => onTokenKey(e, i)}
+                  onKeyDown={(e) => moveRadioFocus(e, i, tokens.length, setQueryIdx)}
                 />
               </span>
             );

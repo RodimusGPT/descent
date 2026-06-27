@@ -7,6 +7,7 @@ import {
   utilization,
 } from '@/lib/batching';
 import { CATEGORICAL, COLOR, withAlpha } from '@/lib/encoding';
+import { moveRadioFocus } from '@/lib/roving';
 import { useInView } from '@/lib/use-in-view';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -32,6 +33,8 @@ function seqColor(id: number): string {
 }
 
 type Mode = 'static' | 'continuous';
+
+const MODES: readonly Mode[] = ['static', 'continuous'];
 
 const STEP_MS = 420;
 
@@ -136,21 +139,24 @@ export function BatchingTimeline({
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div
           className="inline-flex rounded-md border p-0.5"
-          role="group"
+          role="radiogroup"
           aria-label="Batching strategy"
           style={{ borderColor: COLOR.border }}
         >
-          {(['static', 'continuous'] as const).map((m) => {
+          {MODES.map((m, i) => {
             const on = mode === m;
             return (
               <button
                 key={m}
                 type="button"
+                role="radio"
                 onClick={() => setMode(m)}
-                aria-pressed={on}
+                onKeyDown={(e) => moveRadioFocus(e, i, MODES.length, (n) => setMode(MODES[n]))}
+                aria-checked={on}
+                tabIndex={on ? 0 : -1}
                 className="rounded border px-3 py-1 font-mono text-xs capitalize transition-colors "
                 style={{
-                  color: on ? COLOR.modelAccent : COLOR.muted,
+                  color: on ? COLOR.ink : COLOR.muted,
                   fontWeight: on ? 600 : 400,
                   borderColor: on ? COLOR.modelAccent : 'transparent',
                   backgroundColor: on ? withAlpha(COLOR.modelAccent, 0.3) : 'transparent',
@@ -162,7 +168,7 @@ export function BatchingTimeline({
           })}
         </div>
 
-        <div className="flex items-baseline gap-2 font-mono">
+        <div className="flex items-baseline gap-2 font-mono" aria-live="polite" aria-atomic="true">
           <span className="text-xs text-muted">utilization</span>
           <span
             className="text-2xl font-semibold tabular-nums"

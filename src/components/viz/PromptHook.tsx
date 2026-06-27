@@ -1,6 +1,7 @@
 import { Token } from '@/components/scroll/Token';
 import { COLOR, weightToColor, withAlpha } from '@/lib/encoding';
 import { PROMPTS, predict, promptById, topToken } from '@/lib/hook';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { useMemo, useState } from 'react';
 
@@ -58,15 +59,20 @@ export function PromptHook({ initialPromptId }: PromptHookProps) {
       {/* Prompt picker */}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 font-mono text-xs text-faint">Pick a prompt</legend>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Example prompts">
-          {PROMPTS.map((p) => {
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Example prompts">
+          {PROMPTS.map((p, i) => {
             const active = p.id === promptId;
             return (
               <button
                 key={p.id}
                 type="button"
+                role="radio"
                 onClick={() => selectPrompt(p.id)}
-                aria-pressed={active}
+                onKeyDown={(e) =>
+                  moveRadioFocus(e, i, PROMPTS.length, (n) => selectPrompt(PROMPTS[n].id))
+                }
+                aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 className="rounded-md border px-2.5 py-1 text-left font-mono text-xs transition-colors "
                 style={{
                   borderColor: active ? COLOR.active : COLOR.border,
@@ -139,7 +145,7 @@ export function PromptHook({ initialPromptId }: PromptHookProps) {
 
       {/* Reveal: top token + runner-up bars */}
       {revealed && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3" aria-live="polite">
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-mono text-xs text-faint">Most likely next token</span>
             <span

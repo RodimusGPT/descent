@@ -12,6 +12,7 @@ import {
   smallestSubnormal,
   valueToBits,
 } from '@/lib/float';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import type { CSSProperties } from 'react';
 import { useCallback, useMemo, useState } from 'react';
@@ -139,16 +140,25 @@ export function FloatExploder({
       aria-label="IEEE-754 float bit explorer"
     >
       {/* Format switcher */}
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Number format">
+      <div
+        className="flex flex-wrap items-center gap-2"
+        role="radiogroup"
+        aria-label="Number format"
+      >
         <span className="text-xs uppercase tracking-wide text-faint">Format</span>
-        {FORMAT_ORDER.map((key) => {
+        {FORMAT_ORDER.map((key, i) => {
           const active = key === formatKey;
           return (
             <button
               key={key}
               type="button"
+              role="radio"
               onClick={() => switchFormat(key)}
-              aria-pressed={active}
+              onKeyDown={(e) =>
+                moveRadioFocus(e, i, FORMAT_ORDER.length, (n) => switchFormat(FORMAT_ORDER[n]))
+              }
+              aria-checked={active}
+              tabIndex={active ? 0 : -1}
               className="rounded-md border px-3 py-1 font-mono text-sm "
               style={{
                 borderColor: active ? COLOR.active : COLOR.border,

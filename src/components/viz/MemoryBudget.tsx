@@ -9,8 +9,9 @@ import {
 } from '@/lib/budget';
 import { COLOR, lerpColor, withAlpha } from '@/lib/encoding';
 import { PRECISIONS, type PrecisionKey } from '@/lib/quant';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { type KeyboardEvent, useId, useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
 /**
  * MemoryBudget (spec 10.2) — does the model fit in VRAM?
@@ -247,7 +248,8 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 style={{
                   borderColor: active ? COLOR.modelAccent : COLOR.border,
                   backgroundColor: active ? withAlpha(COLOR.modelAccent, 0.18) : 'transparent',
-                  color: active ? COLOR.modelAccent : COLOR.muted,
+                  // ink (not the purple accent) for the active label — purple-on-its-tint fails AA.
+                  color: active ? COLOR.ink : COLOR.muted,
                 }}
               >
                 {s.label}
@@ -286,7 +288,7 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 }}
               >
                 {p.label}
-                <span className="ml-1 text-[0.7em] opacity-70">{p.bits}b</span>
+                <span className="ml-1 text-[0.7em]">{p.bits}b</span>
               </button>
             );
           })}
@@ -341,7 +343,7 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 }}
               >
                 {g.name}
-                <span className="ml-1 text-[0.7em] opacity-70">{g.vramGB}GB</span>
+                <span className="ml-1 text-[0.7em]">{g.vramGB}GB</span>
               </button>
             );
           })}
@@ -349,7 +351,7 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
       </fieldset>
 
       {/* Readouts */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-live="polite" aria-atomic="true">
         <Readout label="Weights" value={`${formatGB(wGB)} GB`} color={COLOR.modelAccent} />
         <Readout label="KV cache" value={`${formatGB(kvGB)} GB`} color={COLOR.hwAccent} />
         <Readout label="Total" value={`${formatGB(total)} GB`} color={COLOR.ink} />
@@ -372,28 +374,6 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
       </div>
     </div>
   );
-}
-
-/**
- * Standard ARIA radiogroup keyboard nav: ArrowLeft/Up select the previous radio,
- * ArrowRight/Down the next, both wrapping around. Selection follows focus, and
- * focus is moved to the newly selected radio (roving tabindex is driven by the
- * `aria-checked`/`tabIndex` props on each button).
- */
-function moveRadioFocus(
-  e: KeyboardEvent<HTMLButtonElement>,
-  currentIndex: number,
-  count: number,
-  setIndex: (i: number) => void,
-): void {
-  let next: number;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (currentIndex + 1) % count;
-  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (currentIndex - 1 + count) % count;
-  else return;
-  e.preventDefault();
-  setIndex(next);
-  const radios = e.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="radio"]');
-  radios?.[next]?.focus();
 }
 
 function Swatch({ color, label }: { color: string; label: string }) {
