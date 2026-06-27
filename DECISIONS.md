@@ -102,6 +102,17 @@ Choices not fully fixed by the GOAL spec. Format: decision — rationale.
 - **MoE preset uses top-4 (not the spec's top-8 example)** so the active/total params land near the
   stated "~5 B active of ~117 B total" illustration; documented in `moe.ts`.
 
+## M5 — Part 2 (weights as numbers)
+
+- **Reused M2's FloatExploder + QuantizationSlider in prose**; built four new visuals in parallel
+  (build + adversarial verify): ZoomToWeight, MemoryBudget, BlockScaling, Distillation.
+- **`budget.ts` composes the existing libs** (`modelSizeBytes` from quant, `kvCacheBytes` from
+  memory) rather than re-deriving memory math — single source.
+- **MXFP4 illustration is a Beat (visual) + an inline DeeperBlock (mechanics)**, not a DeeperBlock
+  wrapping the island. The spec calls for a DeeperBlock, but a `client:visible` island inside a
+  collapsed `<details>` hydrates awkwardly; showing `BlockScaling` in the beat's visual slot and
+  keeping the E2M1/E8M0 detail in a text DeeperBlock honors the intent more reliably.
+
 ## Presentation (post-M4, user-directed)
 
 - **Step-through navigator replaces auto-play as the primary control.** Per user feedback, the

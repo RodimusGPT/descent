@@ -7,21 +7,128 @@ signature: Float exploder + quantization slider
 summary: A model is billions of numbers; how we encode each one decides its size.
 ---
 
-import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+import Beat from '@/components/Beat.astro';
+import DeeperBlock from '@/components/scroll/DeeperBlock';
+import ZoomToWeight from '@/components/viz/ZoomToWeight';
+import FloatExploder from '@/components/viz/FloatExploder';
+import QuantizationSlider from '@/components/viz/QuantizationSlider';
+import BlockScaling from '@/components/viz/BlockScaling';
+import MemoryBudget from '@/components/viz/MemoryBudget';
+import Distillation from '@/components/viz/Distillation';
 
-## How are the weights represented?
+We keep calling the model "numbers." This part takes that literally. Underneath the
+abstractions of Part 1, a model is just billions of stored values — and the single most
+consequential engineering choice is how to write *one* of them down, billions of times over.
 
-Zoom into the model far enough and the abstraction dissolves into **numbers** — billions
-of them, arranged in matrices. "Running" the model is mostly multiplying those matrices.
+<Beat caption="Zoom in: model → layer → matrix → one weight. It is numbers all the way down.">
+<div slot="text">
 
-So the question becomes physical: how do you store one number? A 32-bit float is precise
-but heavy. Sixteen bits halves the cost. Quantization pushes further — eight, four, even
-two bits per weight — trading a little accuracy for a lot of memory. The representation
-you choose decides whether a model fits on your GPU at all.
+### Zoom into a weight
 
-<PlaceholderScene
-  client:visible
-  kind="model"
-  label="Weights as numbers"
-  signature="Float exploder + quantization slider"
-/>
+Zoom out and a large model is a few hundred matrices stacked into layers. Zoom into one layer
+and you find the attention and feed-forward weight matrices. Zoom into one matrix and it is a
+grid of numbers. Zoom into one cell and it is a single value — a weight, like `0.0123`.
+
+There are billions of them, and "running" the model is mostly multiplying these matrices by the
+vectors flowing through. So the question for this whole part is concrete: how do you store one
+of these numbers, cheaply, without breaking the model?
+
+</div>
+<ZoomToWeight slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Sign · exponent · mantissa. Flip bits; switch FP16 ↔ BF16 on the same value.">
+<div slot="text">
+
+### Floating point
+
+The default answer is a **floating-point** number: a sign bit, an **exponent** (the scale), and
+a **mantissa** (the significant digits). Full precision is 32 bits — wasteful for inference.
+Sixteen bits halves it, in two flavors. **FP16** spends 5 bits on exponent and 10 on mantissa;
+**BF16** keeps FP32's full 8-bit exponent — its huge dynamic range — and trades mantissa bits
+for it.
+
+That trade is why BF16 is the modern default: for deep nets, *range* matters more than the last
+digits of precision. Flip the bits below and watch the value change.
+
+</div>
+<FloatExploder slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Drop the precision: the smooth distribution stair-steps into discrete levels, and the size falls.">
+<div slot="text">
+
+### Quantization
+
+We can go further by leaving floating point behind. **Quantization** stores each weight in fewer
+bits — 8, 4, even 2 — mapping the range of values onto a small set of levels. You lose precision,
+but a surprising rule holds: a **bigger model at lower precision usually beats a smaller model at
+higher precision**, and the quality loss from quantizing is *smaller* on bigger models.
+
+Formats like GGUF's **k-quants** even mix precision per layer, spending bits where they matter.
+Drag the precision down and watch the distribution stair-step — and the model size fall with it.
+
+</div>
+<QuantizationSlider slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="One scale for the whole tensor wastes range; a scale per block recovers it.">
+<div slot="text">
+
+### Block scaling: how 4-bit survives
+
+Four-bit numbers have a problem: a single scale for an entire tensor wastes most of its range
+wherever values are small. The fix behind **MXFP4 / NVFP4** is **block scaling** — chop the
+tensor into small blocks of 32 values and give each block its *own* scale factor. Each block now
+spends its few bits on its own local range, so error drops sharply where magnitudes differ.
+
+Toggle below between one shared scale and per-block scales to watch the error collapse.
+
+<DeeperBlock summary="What MXFP4 actually stores">
+MXFP4 stores each value as a 4-bit float (E2M1) and, per block of 32, a shared 8-bit power-of-two
+scale (E8M0); NVFP4 uses 16-value blocks with an FP8 scale. The shared scale costs a fraction of
+a bit per value but recovers most of the accuracy of formats several bits wider.
+</DeeperBlock>
+
+</div>
+<BlockScaling slot="visual" client:visible />
+</Beat>
+
+<Beat caption="Weights + KV cache, stacked against a GPU's VRAM. Pick a model, precision, context, card.">
+<div slot="text">
+
+### The memory budget
+
+Now the budget. Weight memory is just **params × bytes per weight**: 7 billion params at FP16
+(2 bytes) is 14 GB; at Q4 (half a byte) it is 3.5 GB — hence the rule of thumb that a model's
+size in billions, times ~0.6, is roughly its **Q4 footprint in gigabytes**.
+
+But weights are not the whole story: the **KV cache** sits on top and grows with context length
+and batch. The bar stacks weights and KV cache against a card's VRAM — pick the knobs and see
+whether it fits.
+
+</div>
+<MemoryBudget slot="visual" client:visible />
+</Beat>
+
+<Beat caption="A different route: a small student learns from a big teacher's outputs, not its weights.">
+<div slot="text">
+
+### A different route: distillation
+
+Quantization shrinks a model by storing it more cheaply. **Distillation** is a different route
+entirely: train a small **student** to imitate a big **teacher's** outputs — often its
+step-by-step reasoning traces. The student never sees the teacher's weights, only its behavior —
+and yet a surprisingly small number of examples, sometimes ~1,000, can transfer a lot of
+capability.
+
+Quantization *compresses*; distillation *transfers*. They are often combined: distill, then
+quantize.
+
+</div>
+<Distillation slot="visual" client:visible />
+</Beat>
+
+Between them, lower precision and distillation are how a frontier-scale model gets onto a single
+GPU — or your laptop. We now know what the weights are and how much room they take. Next: the
+software that actually runs them, fast.

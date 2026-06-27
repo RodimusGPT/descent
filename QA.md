@@ -120,3 +120,21 @@ Read Part 1 top-to-bottom in the page; exercise each visual in isolation at the 
 - ⚠ Known minors (M9 polish, non-blocking): embeddings selection follows focus while tabbing;
   sampling's drawn-token readout lacks `aria-live`; autoregression's emitted token is shown
   persistently rather than as a brief flash. None affect correctness.
+
+## M5 — Part 2: Weights as numbers (`/`, the Part 2 section, + `/dev/*`)
+
+- ☐ **Reads as one descent:** zoom into a weight → floating point → quantization → block scaling
+  → memory budget → distillation. Does the "it's all just numbers" framing land and flow into
+  how they're stored, then how much room they take?
+- ☐ **ZoomToWeight** (`/dev/zoom`): does zooming model → layer → matrix → one float feel like a
+  real zoom? Are the matrix cells colored by value, the single weight legible (with its bits)?
+- ☐ **FloatExploder** / **QuantizationSlider** (the M2 signature pieces) read well *in prose* now?
+- ☐ **BlockScaling** (`/dev/blockscale`): does toggling per-tensor → per-block visibly **collapse
+  the error**? Is "real blocks are 32" labeled? Does the MXFP4 `DeeperBlock` (E2M1 / E8M0) render?
+- ☐ **MemoryBudget** (`/dev/budget`): does the stacked weights+KV bar vs the VRAM marker make
+  "fits / doesn't fit" obvious? Are the numbers believable (7B FP16 = 14 GB, Q4 = 3.5 GB)? Is the
+  `size_B × 0.6 ≈ Q4 GB` rule shown?
+- ☐ **Distillation** (`/dev/distill`): is the teacher → traces → student transfer clear, and
+  distinct from quantization? Is the transfer score labeled illustrative?
+- ⚠ Known minors (M9): budget/blockscale radiogroups lack roving-tabindex arrow nav; zoom's big
+  decimal and its FP16 bits differ by ~6e-5 (illustrative); extreme over-capacity bar can clip.

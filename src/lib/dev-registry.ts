@@ -86,4 +86,28 @@ export const DEV_SANDBOXES: DevSandbox[] = [
     description: 'Append the sampled token, feed back, repeat — the generation loop.',
     milestone: 'M4',
   },
+  {
+    slug: 'zoom',
+    title: 'Zoom into a weight',
+    description: 'Stepped zoom: model → layer → matrix → one float.',
+    milestone: 'M5',
+  },
+  {
+    slug: 'budget',
+    title: 'Memory budget',
+    description: 'Weights + KV cache stacked against a GPU’s VRAM.',
+    milestone: 'M5',
+  },
+  {
+    slug: 'blockscale',
+    title: 'Block scaling (MXFP4)',
+    description: 'Per-tensor vs per-block-of-32 scale; watch the error collapse.',
+    milestone: 'M5',
+  },
+  {
+    slug: 'distill',
+    title: 'Distillation',
+    description: 'Small student learns from a big teacher’s outputs.',
+    milestone: 'M5',
+  },
 ];
