@@ -173,3 +173,33 @@ Read Part 1 top-to-bottom in the page; exercise each visual in isolation at the 
   the readouts (AI, attainable, bottleneck) correct? ⚠ (minor) y-axis tick labels are a touch clipped.
 - ☐ **Parallelism** (`/dev/parallelism`): do TP (all-reduce) / PP (bubble shrinks with microbatches)
   / EP (all-to-all) each draw the split + comms clearly?
+
+## M8 — Part 0 hook + Part 5 synthesis (`/`, the bookend sections, + `/dev/*`)
+
+The bookends: Part 0 opens with the question, Part 5 replays the whole answer. Read the page
+top (hero → Part 0) and bottom (Part 5) and confirm the descent now has a real opening and close.
+
+**Part 0 — the hook (`/`, top of page)**
+- ☐ Does the opening land emotionally — "it felt like the machine understood you… what actually
+  happened is stranger, and more mechanical"? Does it set up the single question the whole site
+  answers (*given everything so far, what comes next?*)?
+- ☐ **PromptHook** (`/dev/hook`): pick each prompt (capital of France / 2+2= / Once upon a /
+  fibonacci / sky) → does "Predict the next token →" reveal a *sensible* top token (Paris / 4 / …)
+  and a candidate distribution? Does the temperature slider visibly reshape the candidate bars?
+- ☐ Does the planted question ("how did it pick that token? Everything below is the answer.") make
+  you want to scroll down? Does "Follow it down. This is a descent." hand off into Part 1?
+
+**Part 5 — the synthesis (`/`, bottom of page)**
+- ☐ **FullStackReplay** (`/dev/replay`, signature): does Play (or Step ↓) walk one token DOWN the
+  full column — tokenize → embed → attention → FFN/MoE → logits → sample → quantized weights →
+  prefill/decode → tensor cores & bandwidth → next token? Is the active stage tinted with its
+  **part accent** (purple model / amber neutral / teal hardware) and showing its recap, done stages
+  lit, upcoming dimmed? Does the emitted-token reveal land at the bottom?
+- ☐ **ConfigSandbox** (`/dev/config`, capstone): pick model × precision × GPU + context/batch
+  sliders → does the VRAM bar show fits/doesn't-fit against the card's capacity, and the readouts
+  (weights GB, KV GB, tok/s) update believably? Does **MoE "fly"** (120B at ~5B active reads far
+  fewer bytes/token → high tok/s despite not fitting)? Does lower precision raise tok/s? Does the
+  "decode tape" reflect *bytes read per token*?
+- ☐ Does the closing ("just bandwidth and arithmetic… fast enough to feel like thought… now you
+  can see the whole climb") pay off the opening hook?
+- ☐ Reduced motion: replay autoplay off (Step ↓ only); both sandboxes still teach statically.

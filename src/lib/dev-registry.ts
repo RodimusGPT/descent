@@ -164,4 +164,22 @@ export const DEV_SANDBOXES: DevSandbox[] = [
     description: 'TP / PP / EP — sharding and the communication each needs.',
     milestone: 'M7',
   },
+  {
+    slug: 'hook',
+    title: 'Prompt hook',
+    description: 'A prompt → its predicted next token + the candidate distribution.',
+    milestone: 'M8',
+  },
+  {
+    slug: 'replay',
+    title: 'Full-stack replay',
+    description: 'Walk one token down the entire descent, stage by stage.',
+    milestone: 'M8',
+  },
+  {
+    slug: 'config',
+    title: 'Config sandbox',
+    description: 'Model + quant + GPU → estimated VRAM and tokens/sec.',
+    milestone: 'M8',
+  },
 ];

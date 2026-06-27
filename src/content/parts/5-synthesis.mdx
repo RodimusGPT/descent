@@ -7,21 +7,50 @@ signature: Full-stack replay
 summary: Replay one token through every layer you just learned, top to bottom.
 ---
 
-import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+import Beat from '@/components/Beat.astro';
+import FullStackReplay from '@/components/viz/FullStackReplay';
+import ConfigSandbox from '@/components/viz/ConfigSandbox';
 
-## Now show me the whole thing
+You have followed a single token from the prompt box, through the transformer, down into the
+numbers its weights are made of, across the serving stack, and onto the silicon. None of those
+layers is an island — they are one continuous machine. Here is the whole thing, in one pass.
 
-You have followed a single token from the prompt box, through the transformer, down into
-the numbers that make up its weights, across the serving stack, and onto the silicon. None
-of those layers is an island — they are one continuous machine.
+<Beat wide caption="Replay one token down the entire stack — every stage now legible.">
+<div slot="text">
 
-Here we replay the opening prompt one more time, but now every stage is legible. The same
-token that felt like magic at the top is, by the bottom, just bandwidth and arithmetic —
-and somehow no less impressive for it.
+### Replay the descent
 
-<PlaceholderScene
-  client:visible
-  kind="neutral"
-  label="The whole descent"
-  signature="Full-stack replay"
-/>
+We started with text and ended with a token, and in between the same value moved through every
+layer of this descent: split into tokens, looked up as a vector, mixed with its neighbors by
+attention across dozens of layers, transformed by the feed-forward experts, and projected back
+into a distribution to sample from. Those weights were billions of numbers in low precision; the
+engine fed your prompt in one parallel pass and then emitted answers one token at a time, reusing
+its KV cache; and all of it ran as tiled matmuls on tensor cores, paced by memory bandwidth.
+
+Step through it. The whole machine, from the word you typed to the next word it chose.
+
+</div>
+<FullStackReplay slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Pick a model, a precision, a GPU. Watch the memory math and the bandwidth law from Parts 2 and 4 collide.">
+<div slot="text">
+
+### Size it yourself
+
+Everything you have learned about memory and bandwidth now fits in one back-of-the-envelope tool.
+A model's **weights** take params × bytes-per-weight; its **KV cache** grows with context and
+batch; together they must fit in a GPU's VRAM. And for decode, **tokens per second ≈ memory
+bandwidth ÷ bytes read per token** — so lower precision runs faster, a bigger context costs
+memory, and a Mixture-of-Experts model flies because only its *active* experts are read each step.
+
+Pick a model, a precision, and a card. See whether it fits, and roughly how fast it runs.
+
+</div>
+<ConfigSandbox slot="visual" client:visible />
+</Beat>
+
+The same token that felt like magic at the top is, by the bottom, just bandwidth and arithmetic —
+a list of numbers multiplied by other numbers, fast enough to feel like thought. Somehow that
+makes it more impressive, not less. You have reached the bottom of the descent; now you can see
+the whole climb.

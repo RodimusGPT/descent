@@ -4,7 +4,9 @@ import AttentionFan from '../../components/viz/AttentionFan.tsx';
 import Autoregression from '../../components/viz/Autoregression.tsx';
 import BatchingTimeline from '../../components/viz/BatchingTimeline.tsx';
 import BlockScaling from '../../components/viz/BlockScaling.tsx';
+import ConfigSandbox from '../../components/viz/ConfigSandbox.tsx';
 import Distillation from '../../components/viz/Distillation.tsx';
+import FullStackReplay from '../../components/viz/FullStackReplay.tsx';
 import EnginesOverview from '../../components/viz/EnginesOverview.tsx';
 import EmbeddingSpace from '../../components/viz/EmbeddingSpace.tsx';
 import FlashAttention from '../../components/viz/FlashAttention.tsx';
@@ -15,6 +17,7 @@ import MemoryBudget from '../../components/viz/MemoryBudget.tsx';
 import MoERouter from '../../components/viz/MoERouter.tsx';
 import PagedAttention from '../../components/viz/PagedAttention.tsx';
 import Parallelism from '../../components/viz/Parallelism.tsx';
+import PromptHook from '../../components/viz/PromptHook.tsx';
 import PrefillDecode from '../../components/viz/PrefillDecode.tsx';
 import QKVMultiHead from '../../components/viz/QKVMultiHead.tsx';
 import Roofline from '../../components/viz/Roofline.tsx';
@@ -70,6 +73,9 @@ const meta = DEV_SANDBOXES.find((s) => s.slug === component);
       {component === 'flash' && <FlashAttention client:load />}
       {component === 'roofline' && <Roofline client:load />}
       {component === 'parallelism' && <Parallelism client:load />}
+      {component === 'hook' && <PromptHook client:load />}
+      {component === 'replay' && <FullStackReplay client:load />}
+      {component === 'config' && <ConfigSandbox client:load />}
     </div>
   </main>
 </BaseLayout>

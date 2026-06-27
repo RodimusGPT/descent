@@ -7,19 +7,27 @@ signature: Prompt → token
 summary: A prompt is just text the model continues, one token at a time.
 ---
 
-import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+import Beat from '@/components/Beat.astro';
+import PromptHook from '@/components/viz/PromptHook';
 
-## You typed something and hit enter
+You typed something and hit enter. A fraction of a second later, words appeared — and it felt
+like the machine *understood* you. What actually happened is stranger, and more mechanical.
 
-A fraction of a second later, words appeared. It feels like the machine *understood*
-you. What actually happened is stranger and more mechanical: the model read your text,
-turned it into numbers, and predicted the single most plausible **next token** — then
-did it again, and again, until it decided to stop.
+<Beat caption="Pick a prompt, predict its next token. That reveal is the whole trick.">
+<div slot="text">
 
-That is the whole trick. Everything below this point — the transformer, the weights, the
-serving stack, the silicon — exists to answer one question fast: *given everything so
-far, what token comes next?*
+### One token at a time
 
-Follow the token down. This is a descent.
+The model did exactly one thing, very fast, over and over: it read everything so far and
+predicted the single most plausible **next token** — a whole word, or a fragment of one. Then it
+appended that token to the text and did it again, and again, until it decided to stop.
 
-<PlaceholderScene client:visible kind="neutral" label="The prompt" signature="Prompt → token" />
+Pick a prompt and predict its next token. Everything below this point — the transformer, the
+weights, the serving stack, the silicon — exists to answer that one question, fast: *given
+everything so far, what comes next?*
+
+</div>
+<PromptHook slot="visual" client:visible />
+</Beat>
+
+So how does it pick that token? Follow it down. This is a descent.
