@@ -44,4 +44,46 @@ export const DEV_SANDBOXES: DevSandbox[] = [
     description: 'Parallel prefill, token-by-token decode, KV grid, no-cache toggle.',
     milestone: 'M3',
   },
+  {
+    slug: 'tokenizer',
+    title: 'Tokenizer',
+    description: 'Live subword split of editable text into tokens + ids.',
+    milestone: 'M4',
+  },
+  {
+    slug: 'embeddings',
+    title: 'Embedding space',
+    description: '2D scatter; clusters + analogy (king − man + woman ≈ queen).',
+    milestone: 'M4',
+  },
+  {
+    slug: 'stack',
+    title: 'Transformer stack',
+    description: 'Pre-norm layer structure (norm → attn → FFN, residuals) + params.',
+    milestone: 'M4',
+  },
+  {
+    slug: 'qkv',
+    title: 'Q/K/V + multi-head',
+    description: 'Scaled dot-product → softmax → weighted V; heads; GQA/MQA toggle.',
+    milestone: 'M4',
+  },
+  {
+    slug: 'moe',
+    title: 'MoE router',
+    description: 'Router picks top-k experts; active vs total params.',
+    milestone: 'M4',
+  },
+  {
+    slug: 'sampling',
+    title: 'Sampling playground',
+    description: 'Temperature / top-k / top-p reshape the next-token distribution.',
+    milestone: 'M4',
+  },
+  {
+    slug: 'autoregression',
+    title: 'Autoregression',
+    description: 'Append the sampled token, feed back, repeat — the generation loop.',
+    milestone: 'M4',
+  },
 ];

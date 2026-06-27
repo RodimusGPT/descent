@@ -7,24 +7,164 @@ signature: Attention fan
 summary: Tokens become vectors, then flow through a stack of attention + FFN layers.
 ---
 
-import PlaceholderScene from '@/components/scroll/PlaceholderScene';
+import Figure from '@/components/Figure.astro';
 import DeeperBlock from '@/components/scroll/DeeperBlock';
+import Tokenizer from '@/components/viz/Tokenizer';
+import EmbeddingSpace from '@/components/viz/EmbeddingSpace';
+import TransformerStack from '@/components/viz/TransformerStack';
+import AttentionFan from '@/components/viz/AttentionFan';
+import QKVMultiHead from '@/components/viz/QKVMultiHead';
+import MoERouter from '@/components/viz/MoERouter';
+import SamplingPlayground from '@/components/viz/SamplingPlayground';
+import Autoregression from '@/components/viz/Autoregression';
 
-## What is the model?
+The model that answered you is a **transformer**. Strip away the branding and it is a
+tall stack of the same simple operations, applied over and over to a list of numbers. Let
+us walk down through it, from the words you typed to the single token it chose to say next.
 
-The model is a tall stack of identical layers. Your text enters as **tokens**, each
-token becomes a **vector**, and those vectors flow upward through the stack. At every
-layer two things happen: **attention** lets each token gather context from the others,
-and a **feed-forward network** does the per-token "thinking." Residual connections and
-normalization keep the signal stable across dozens of layers.
+## Tokenization
 
-The signature mechanism is attention: every token decides, with varying weight, how much
-to listen to every other token. That is how context flows.
+Before the model can do anything, it chops your text into pieces it recognizes. Those
+pieces are **tokens** — not quite words, not quite letters, but **subword** chunks learned
+from data. A common word like *the* is usually one token; a rarer or compound word like
+*tokenization* splits into several (*token* + *ization*). Spaces and punctuation count too.
 
-<DeeperBlock summary="The attention score">
-Attention compares each query against every key and normalizes the result:
-$\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$.
-The $\sqrt{d_k}$ keeps the scores from saturating the softmax as dimension grows.
+Each distinct chunk maps to an integer **id** drawn from a fixed vocabulary of tens of
+thousands of entries. From here on, the model never sees your letters — only this sequence
+of ids. Type into the box and watch the split change.
+
+<Figure caption="Text → subword tokens → integer ids. Edit the text to see it re-tokenize.">
+  <Tokenizer client:visible />
+</Figure>
+
+## Embeddings
+
+An id is just an arbitrary index; on its own it means nothing. So the model's first move is
+to look each id up in a big table and replace it with a **vector** — a list of a few thousand
+numbers. This is the **embedding**, and it is where meaning begins.
+
+Tokens with similar meanings get similar vectors, so they sit near each other in this space.
+More strikingly, *directions* carry relationships: the step from *king* to *queen* is about
+the same step as *man* to *woman*. The scatter below is a flattened 2-D cartoon of that idea —
+click a word to see its nearest neighbors.
+
+<Figure caption="A 2-D shadow of embedding space: similar words cluster; directions encode analogies.">
+  <EmbeddingSpace client:visible />
+</Figure>
+
+<DeeperBlock summary="2-D is a cartoon">
+Real embeddings live in hundreds or thousands of dimensions (e.g. $d_{\text{model}} = 4096$).
+We can't see that, so the picture above projects down to two dimensions — which inevitably
+distorts distances. The *intuition* (neighbors and directions carry meaning) survives the
+projection even though the exact geometry does not.
 </DeeperBlock>
 
-<PlaceholderScene client:visible kind="model" label="The transformer" signature="Attention fan" />
+## The stack
+
+With every token now a vector, the real work begins. The model is a stack of **N identical
+layers** — dozens of them in a large model. Each layer does two things in turn: an
+**attention** sublayer, where tokens exchange information, and a **feed-forward** sublayer,
+which transforms each token on its own.
+
+Two details keep a stack this deep trainable. A **residual connection** wraps each sublayer,
+adding its input back to its output so signal (and gradient) has a clear path all the way
+down. And **RMSNorm** is applied *before* each sublayer — the "pre-norm" arrangement — to keep
+magnitudes stable. The vectors flow up through the stack, getting richer at every layer.
+
+<Figure caption="One pre-norm layer: norm → attention → add, then norm → FFN → add, repeated N times.">
+  <TransformerStack client:visible />
+</Figure>
+
+<DeeperBlock summary="Pre-norm and RMSNorm">
+Pre-norm means the block computes $x + \text{Sublayer}(\text{Norm}(x))$ rather than
+$\text{Norm}(x + \text{Sublayer}(x))$ — keeping a clean residual highway that makes very deep
+stacks stable to train. RMSNorm rescales a vector by its root-mean-square,
+$\text{RMSNorm}(x) = \dfrac{x}{\sqrt{\frac{1}{d}\sum_i x_i^2 + \epsilon}}\odot g$, a cheaper
+cousin of LayerNorm that drops the mean-centering.
+</DeeperBlock>
+
+## Attention
+
+Attention is the mechanism that makes transformers work. At each layer, **every token looks
+at every other token** and decides how much to borrow from each. A pronoun reaches back to
+the noun it refers to; a verb pulls in its subject. The weights are *soft* — a token spreads
+its attention across many others, more on some, less on others.
+
+Click a token in the fan to make it the one doing the looking. Warmer, thicker lines show
+where its attention flows; switch heads to see a completely different pattern of who-attends-
+to-whom.
+
+<Figure wide caption="The attention fan: for the selected token, line warmth and width encode how much it attends to each other token.">
+  <AttentionFan client:visible />
+</Figure>
+
+## Queries, keys, values — and many heads
+
+How does a token decide *where* to look? It projects its vector into three smaller ones: a
+**query** (what am I looking for?), a **key** (what do I offer?), and a **value** (what will I
+hand over?). A token compares its query against every key with a dot product, scales the
+result, softmaxes it into weights, and takes the weighted sum of the values.
+
+One such computation is a **head**. A layer runs many heads in parallel, each with its own
+projections, so different heads specialize — one tracks syntax, another the previous token. A
+modern twist, **GQA/MQA**, lets several query heads *share* one set of keys and values. That
+shrinks the **KV cache** we'll meet in Part 3 — remember this; it pays off later.
+
+<Figure wide caption="Q·Kᵀ → scale → softmax → weighted sum of V, per head. Toggle GQA to share K/V across heads.">
+  <QKVMultiHead client:visible />
+</Figure>
+
+<DeeperBlock summary="The attention equation">
+For a head with key dimension $d_k$:
+$$\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V.$$
+The $\sqrt{d_k}$ divisor stops the dot products from growing with dimension and saturating the
+softmax into a near-one-hot spike, which would kill the gradient.
+</DeeperBlock>
+
+## The feed-forward network (and Mixture-of-Experts)
+
+Between attention sublayers sits the **feed-forward network**: two big matrix multiplies with
+a nonlinearity between them, run on each token independently. This is where **most of a
+model's parameters live**, and much of its stored knowledge with them.
+
+**Mixture-of-Experts** replaces that single FFN with many **expert** FFNs plus a small
+**router** that, for each token, picks only the top few. So a model can carry an enormous
+*total* parameter count while running a small **active** fraction per token — say a few
+billion active out of a hundred-plus billion total. More capacity, similar cost per token.
+
+<Figure caption="The router scores experts for a token and activates only the top-k; the rest stay dormant.">
+  <MoERouter client:visible />
+</Figure>
+
+## From logits to a token
+
+At the top of the stack, the final vector is projected back out to the whole vocabulary,
+giving one score — a **logit** — for every possible next token. Softmax turns those into
+probabilities. But we rarely just take the most likely token; that gets repetitive.
+
+**Temperature** flattens or sharpens the distribution. **Top-k** keeps only the k most likely
+candidates. **Top-p** (nucleus) keeps the smallest set that covers probability p. Then we
+**sample** one token from what survives. Drag the sliders and watch the distribution reshape.
+
+<Figure wide caption="The next-token distribution, reshaped by temperature / top-k / top-p before sampling.">
+  <SamplingPlayground client:visible />
+</Figure>
+
+## Autoregression
+
+Now the loop. Append the chosen token to the sequence and feed the whole thing back in to
+predict the next one — then again, and again, **one token at a time**, until the model emits a
+stop token or hits a limit. "Generating" is just this same forward pass run over a sequence
+that grows by one each step.
+
+Notice the waste: every step re-reads the *entire* context from scratch. The fix — caching
+what has already been computed instead of recomputing it — is the whole drama of Part 3.
+
+<Figure caption="Append the sampled token, feed it back, repeat. The context grows by one each step.">
+  <Autoregression client:visible />
+</Figure>
+
+So that is the model: tokens become vectors, vectors flow through a stack of attention and
+feed-forward layers, the top of the stack produces a distribution, and we sample from it on a
+loop. But we have been waving our hands at those "vectors" and "parameters." What *are* they,
+underneath? Just numbers — billions of them. Time to descend into how they are stored.

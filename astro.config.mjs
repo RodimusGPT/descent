@@ -5,6 +5,24 @@ import { defineConfig } from 'astro/config';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 
+/**
+ * Tag content headings (h2/h3) as guided-tour stops so DescentTour pauses on each
+ * prose beat. Dependency-free walk over the HAST tree; `dataTourStop` serializes to
+ * the `data-tour-stop` attribute.
+ */
+function rehypeTourStops() {
+  const visit = (node) => {
+    if (node.type === 'element' && (node.tagName === 'h2' || node.tagName === 'h3')) {
+      node.properties = node.properties || {};
+      node.properties.dataTourStop = true;
+    }
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) visit(child);
+    }
+  };
+  return (tree) => visit(tree);
+}
+
 // https://astro.build/config
 export default defineConfig({
   // Static-first: prose is .astro/.mdx, interactivity ships as React islands only.
@@ -18,6 +36,6 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    rehypePlugins: [rehypeKatex, rehypeTourStops],
   },
 });

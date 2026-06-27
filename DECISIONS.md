@@ -81,3 +81,23 @@ Choices not fully fixed by the GOAL spec. Format: decision — rationale.
   navigation for the QuantizationSlider precision/param radiogroups; making the PrefillDecode
   "no cache" recompute a per-step pulse rather than a static re-tint. Both are minor; functional
   behavior is correct now.
+
+## M4 — Part 1 (the transformer)
+
+- **Shared `lib/nn.ts` before fan-out.** softmax / softmaxWithTemperature / argmax / dot /
+  cosineSimilarity / scaledScores are single-sourced and tested, then the seven Part-1 visuals
+  (QKV, MoE, sampling, embeddings, …) build on them — so the core numerics are correct once, not
+  reimplemented seven times. Same parallel build + adversarial-verify pattern as M1–M3.
+- **MDX integration pattern.** Prose stays flat markdown (so the `.descent-prose` direct-child
+  typography keeps working); interactives are embedded via a `Figure.astro` wrapper that frames +
+  captions them and is a guided-tour stop. Because `.descent-prose` only styles *direct* children,
+  the interactive inside a `<figure>` is untouched by prose rules — no `not-prose` gymnastics.
+- **Tour stops in real content.** A dependency-free `rehypeTourStops` plugin tags content `h2`/`h3`
+  as `data-tour-stop`, and `Figure` adds one per visual — so the guided descent pauses at each prose
+  beat and each interactive. The section eyebrow lost its explicit stop to avoid doubling with the
+  first heading.
+- **Distance-based tour dwell.** DescentTour now sets each stop's dwell from the gap to the next
+  stop (content-agnostic), replacing the placeholder-era word-count heuristic — paces sensibly over
+  real prose.
+- **MoE preset uses top-4 (not the spec's top-8 example)** so the active/total params land near the
+  stated "~5 B active of ~117 B total" illustration; documented in `moe.ts`.

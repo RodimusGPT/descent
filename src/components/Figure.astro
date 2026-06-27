@@ -1,0 +1,23 @@
+---
+/**
+ * Figure — frames an interactive (or any visual) embedded in MDX prose.
+ *
+ * Renders a bounded, captioned <figure> that is also a guided-tour stop
+ * (`data-tour-stop`), so DescentTour pauses on each visual. Lives outside the
+ * `.descent-prose` typographic rules (which only target direct-child text
+ * elements), so the interactive inside keeps its own styling.
+ */
+interface Props {
+  caption?: string;
+  /** Wider frame for big interactives (attention fan, sampling, etc.). */
+  wide?: boolean;
+}
+const { caption, wide = false } = Astro.props;
+---
+
+<figure data-tour-stop class:list={['mx-auto my-10', wide ? 'max-w-4xl' : 'max-w-3xl']}>
+  <div class="rounded-xl border border-border bg-surface/40 p-4 sm:p-6">
+    <slot />
+  </div>
+  {caption && <figcaption class="mt-3 text-center text-xs text-faint">{caption}</figcaption>}
+</figure>

@@ -90,3 +90,29 @@ Legend: ☐ to check · each item names where to look.
   shrink the KV vs MHA?
 - ☐ Play/Pause works; reduced motion gives a stepped static fallback that still teaches.
 - ⚠ Known (M9): in "no cache" mode the recompute is a static re-tint rather than a per-step pulse.
+
+## M4 — Part 1: The transformer (`/`, the Part 1 section, + `/dev/*`)
+
+Read Part 1 top-to-bottom in the page; exercise each visual in isolation at the `/dev` slug noted.
+
+- ☐ **Reads as one descent:** tokenization → embeddings → the stack → attention → Q/K/V →
+  FFN/MoE → logits→token → autoregression. Does each beat flow into the next? Do the
+  `DeeperBlock` math asides (attention eq., RMSNorm, 2-D caveat) render as real KaTeX?
+- ☐ **Tokenizer** (`/dev/tokenizer`): edit the text — do tokens/ids update live? Do compound
+  words visibly split into subwords? Do the four kinds (word/subword/punct/space) read clearly?
+- ☐ **EmbeddingSpace** (`/dev/embeddings`): are the 5 clusters visually separated? Click a word —
+  do its nearest neighbors highlight? Does the analogy overlay (king − man + woman → queen) land?
+- ☐ **TransformerStack** (`/dev/stack`): is the pre-norm layer legible (norm → attn → FFN with
+  residual arrows)? Does the FFN read as "holds most params"? Do presets change the numbers?
+- ☐ **AttentionFan** (`/dev/attention`): still the centerpiece — heads distinct, warm=strong.
+- ☐ **QKVMultiHead** (`/dev/qkv`): does Q·Kᵀ → softmax → weighted-V read step-by-step? Do heads
+  differ? Does the GQA/MQA toggle visibly share K/V (and the copy now reads sensibly at 1×)?
+- ☐ **MoERouter** (`/dev/moe`): do only the top-k experts light up (rest dormant)? Is the
+  active-vs-total readout believable (~5 B of ~117 B)?
+- ☐ **SamplingPlayground** (`/dev/sampling`): do temperature / top-k / top-p visibly reshape the
+  bars? Are filtered-out tokens greyed? Does "Sample" pick sensibly?
+- ☐ **Autoregression** (`/dev/autoregression`): does the context grow one token at a time with a
+  feedback loop? Does the KV-cache motivation note land? Play/pause + reduced-motion stepped work?
+- ⚠ Known minors (M9 polish, non-blocking): embeddings selection follows focus while tabbing;
+  sampling's drawn-token readout lacks `aria-live`; autoregression's emitted token is shown
+  persistently rather than as a brief flash. None affect correctness.

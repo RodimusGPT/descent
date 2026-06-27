@@ -1,9 +1,16 @@
 ---
 import TokenDemo from '../../components/dev/TokenDemo.tsx';
 import AttentionFan from '../../components/viz/AttentionFan.tsx';
+import Autoregression from '../../components/viz/Autoregression.tsx';
+import EmbeddingSpace from '../../components/viz/EmbeddingSpace.tsx';
 import FloatExploder from '../../components/viz/FloatExploder.tsx';
+import MoERouter from '../../components/viz/MoERouter.tsx';
 import PrefillDecode from '../../components/viz/PrefillDecode.tsx';
+import QKVMultiHead from '../../components/viz/QKVMultiHead.tsx';
 import QuantizationSlider from '../../components/viz/QuantizationSlider.tsx';
+import SamplingPlayground from '../../components/viz/SamplingPlayground.tsx';
+import Tokenizer from '../../components/viz/Tokenizer.tsx';
+import TransformerStack from '../../components/viz/TransformerStack.tsx';
 import { DEV_SANDBOXES } from '../../lib/dev-registry';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
@@ -30,6 +37,13 @@ const meta = DEV_SANDBOXES.find((s) => s.slug === component);
       {component === 'float' && <FloatExploder client:load />}
       {component === 'quant' && <QuantizationSlider client:load />}
       {component === 'prefill' && <PrefillDecode client:load />}
+      {component === 'tokenizer' && <Tokenizer client:load />}
+      {component === 'embeddings' && <EmbeddingSpace client:load />}
+      {component === 'stack' && <TransformerStack client:load />}
+      {component === 'qkv' && <QKVMultiHead client:load />}
+      {component === 'moe' && <MoERouter client:load />}
+      {component === 'sampling' && <SamplingPlayground client:load />}
+      {component === 'autoregression' && <Autoregression client:load />}
     </div>
   </main>
 </BaseLayout>

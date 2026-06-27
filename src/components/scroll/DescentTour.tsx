@@ -46,10 +46,15 @@ function createEngine(hooks: EngineHooks): TourEngine {
     return Array.from(new Set(found));
   };
 
-  const dwellMs = (el: HTMLElement): number => {
-    const words = (el.textContent ?? '').trim().split(/\s+/).filter(Boolean).length;
-    const ms = 600 + (words / 3.3) * 1000;
-    return Math.min(9000, Math.max(2000, ms)) / hooks.getSpeed();
+  const absTop = (el: HTMLElement) => el.getBoundingClientRect().top + window.scrollY;
+
+  // Dwell ∝ how much content separates this stop from the next — a robust,
+  // content-agnostic proxy for "how long to linger here" (a guided skim pace).
+  const dwellMs = (list: HTMLElement[], i: number): number => {
+    const here = absTop(list[i]);
+    const next = i + 1 < list.length ? absTop(list[i + 1]) : document.documentElement.scrollHeight;
+    const gap = Math.max(0, next - here);
+    return Math.min(9000, Math.max(2500, 2200 + gap * 0.9)) / hooks.getSpeed();
   };
 
   const targetFor = (el: HTMLElement): number => {
@@ -106,10 +111,13 @@ function createEngine(hooks: EngineHooks): TourEngine {
     const el = list[i];
     animateTo(targetFor(el), () => {
       if (!playing) return;
-      dwell = window.setTimeout(() => {
-        if (!playing) return;
-        runStop(list, i + 1);
-      }, dwellMs(el));
+      dwell = window.setTimeout(
+        () => {
+          if (!playing) return;
+          runStop(list, i + 1);
+        },
+        dwellMs(list, i),
+      );
     });
   };
 
