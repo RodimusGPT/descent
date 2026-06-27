@@ -14,6 +14,7 @@
     "encoding-guard": "bun scripts/encoding-guard.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "audit": "node scripts/ui-audit.mjs",
     "check": "bun run typecheck && bun run lint && bun run encoding-guard && bun run test"
   },
   "dependencies": {
