@@ -34,6 +34,23 @@ Choices not fully fixed by the GOAL spec. Format: decision — rationale.
 - **Dark theme is the base.** The design's resting state is dark; the spec defers dark-mode
   *polish* to M9, not the base palette.
 
+## Navigation — single continuous descent (post-M3, user-directed)
+
+- **The descent is one scrollable page, not six.** Per direct user feedback that page-to-page
+  navigation felt unintuitive, `index.astro` now renders the hero followed by all six parts as
+  in-page `<section id={slug}>` blocks. You scroll the whole stack top-to-bottom — which is what
+  the "descent" metaphor always promised. This **supersedes the spec's `pages/parts/[slug].astro`
+  + `PartLayout.astro`** (both removed): per-part URLs were redundant once `/#slug` deep-links to a
+  section, and keeping them would have meant duplicate content at orphaned routes. The content
+  collection (MDX) is unchanged — it is the single source rendered into the page.
+- **`ProgressRail` reworked into the persistent spine.** Desktop: a left sidebar with an
+  always-visible label per part (the missing wayfinding), a warm fill that descends with scroll,
+  and live highlighting of the section in view (scroll-position tracking). Mobile: a slim sticky
+  top bar with a progress line + a `<select>` jump menu (the side rail can't show on narrow
+  screens). All entries are in-page anchors; reduced-motion uses instant (not smooth) scroll.
+- **`ProgressRail` keeps an optional `currentSlug` "focused part" mode** even though no route uses
+  it now — cheap to keep, and ready if per-part deep-pages return later.
+
 ## M1–M3 — Signature interactives
 
 - **Built in parallel, then integrated.** The four signature interactives (AttentionFan,

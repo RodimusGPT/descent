@@ -1,13 +1,23 @@
 ---
+import { getCollection } from 'astro:content';
+import ProgressRail from '../components/scroll/ProgressRail.tsx';
 import { partAccent } from '../lib/encoding';
-import { PARTS } from '../lib/parts';
+import { PARTS, partBySlug } from '../lib/parts';
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+// The whole descent is one page: a hero, then every part as an in-page section.
+const entries = (await getCollection('parts')).sort((a, b) => a.data.order - b.data.order);
+const sections = await Promise.all(
+  entries.map(async (entry) => ({ entry, Content: (await entry.render()).Content })),
+);
 ---
 
 <BaseLayout title="Descent · How LLM inference works">
-  <main class="mx-auto max-w-3xl px-6 pb-32">
+  <ProgressRail client:idle parts={[...PARTS]} />
+
+  <main class="pt-12 md:pl-52 md:pt-0">
     <!-- Hero / hook -->
-    <section class="flex min-h-[80vh] flex-col justify-center">
+    <section class="mx-auto flex min-h-[88vh] max-w-3xl flex-col justify-center px-6">
       <p class="font-mono text-sm uppercase tracking-[0.3em] text-muted">A visual descent</p>
       <h1 class="mt-4 text-5xl font-bold tracking-tight text-ink sm:text-6xl">
         How an LLM<br />
@@ -16,58 +26,57 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="mt-6 max-w-prose text-lg leading-relaxed text-muted">
         You type a prompt and hit enter. What follows is a fall — from an abstract idea of a
         model, down through the numbers it is made of, down through the software that serves it,
-        all the way to electrons moving through silicon. This is that descent, one token at a
-        time.
+        all the way to electrons moving through silicon. Scroll to follow one token the whole way
+        down.
       </p>
-      <div class="mt-10 flex items-center gap-2 text-sm text-muted">
-        <span aria-hidden="true" class="animate-pulse">↓</span>
-        <span>scroll, or jump to any depth</span>
-      </div>
+      <a
+        href="#0-hook"
+        class="mt-10 inline-flex items-center gap-2 self-start rounded-full border border-border px-4 py-2 text-sm text-ink transition-colors hover:border-active"
+      >
+        Begin the descent <span aria-hidden="true" class="animate-pulse">↓</span>
+      </a>
     </section>
 
-    <!-- The descent: table of contents that IS the journey -->
-    <section aria-label="The six parts of the descent" class="relative pb-16">
-      <ol class="relative space-y-3 border-l border-border pl-8">
-        {
-          PARTS.map((part) => {
-            const accent = partAccent(part.kind);
-            return (
-              <li class="relative">
-                <span
-                  class="absolute -left-[2.35rem] top-3 block h-3 w-3 rounded-full border"
-                  style={`background-color:${accent};border-color:${accent}`}
-                  aria-hidden="true"
-                />
-                <a
-                  href={`/parts/${part.slug}`}
-                  class="group block rounded-lg border border-border bg-surface/40 p-5 transition-colors hover:border-active hover:bg-surface"
-                >
-                  <div class="flex items-baseline justify-between gap-4">
-                    <h2 class="text-lg font-semibold text-ink">
-                      <span class="font-mono text-sm text-muted">{part.index} · </span>
-                      {part.title}
-                    </h2>
-                    <span
-                      class="font-mono text-xs uppercase tracking-widest opacity-70"
-                      style={`color:${accent}`}
-                    >
-                      {part.depth}
-                    </span>
-                  </div>
-                  <p class="mt-1 text-sm italic text-muted">{part.question}</p>
-                </a>
-              </li>
-            );
-          })
-        }
-      </ol>
-    </section>
+    <!-- The six parts, in sequence -->
+    {
+      sections.map(({ entry, Content }) => {
+        const meta = partBySlug(entry.slug);
+        const index = meta?.index ?? entry.data.order;
+        const accent = partAccent(meta?.kind ?? entry.data.kind);
+        return (
+          <section id={entry.slug} class="scroll-mt-20 border-t border-border py-16 md:py-24">
+            <div class="mx-auto max-w-5xl px-6">
+              <header class="mx-auto max-w-prose">
+                <div class="flex items-center gap-3 font-mono text-sm">
+                  <span
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full border"
+                    style={`border-color:${accent};color:${accent}`}
+                  >
+                    {index}
+                  </span>
+                  <span class="uppercase tracking-widest" style={`color:${accent}`}>
+                    Part {index} · {meta?.title}
+                  </span>
+                </div>
+              </header>
+              <div class="descent-prose mt-8">
+                <Content />
+              </div>
+            </div>
+          </section>
+        );
+      })
+    }
 
-    <footer class="mt-12 border-t border-border pt-8 text-sm text-muted">
-      <p>
-        Built as a single continuous explainer. Each part is anchored by an interactive you can
-        poke at. Reduced-motion and keyboard navigation are supported throughout.
-      </p>
+    <footer class="border-t border-border px-6 py-20 text-center">
+      <p class="text-sm text-muted">You reached the bottom of the stack.</p>
+      <a
+        href="#top"
+        class="mt-4 inline-block font-mono text-xs uppercase tracking-widest text-faint hover:text-ink"
+        onclick="window.scrollTo({top:0}); return false;"
+      >
+        ↑ back to the top
+      </a>
     </footer>
   </main>
 </BaseLayout>

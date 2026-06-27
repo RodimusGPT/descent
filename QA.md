@@ -9,13 +9,17 @@ Legend: ☐ to check · each item names where to look.
 
 ## M0 — Scaffold & spine
 
-**The spine (`/` then any `/parts/*`)**
-- ☐ Does scrolling a part *feel* like a descent — narration moving past a fixed visual?
-- ☐ `ProgressRail` (left edge, desktop): is the current part highlighted, and does the warm
-  fill descend as you scroll? Do the node dots link to the right parts? Is it legible?
-- ☐ Landing page: does the hero read well, and does the six-part "table of contents that is
-  the journey" make the descent obvious? Do all six cards link correctly?
-- ☐ Part accents: model parts (1, 2) tinted purple, hardware part (4) teal, neutral amber.
+**The spine — single continuous descent (`/`)**
+- ☐ Is the whole thing ONE scrollable page (hero → six parts), and does scrolling it end-to-end
+  *feel* like a descent rather than a set of separate pages?
+- ☐ `ProgressRail` (desktop, left sidebar): are all six labels always visible, is the section
+  in view highlighted, and does the warm fill descend as you scroll? Clicking a label jumps to
+  that section (smooth, or instant under reduced motion).
+- ☐ Mobile / narrow window: does the slim top bar show a progress line + a working "jump to part"
+  dropdown? (The side rail is desktop-only by design.)
+- ☐ Hero: does it read well, and does "Begin the descent ↓" jump to Part 0?
+- ☐ Part accents: model parts (1, 2) tinted purple, hardware part (4) teal, neutral amber —
+  visible in each section's "Part N · Title" eyebrow and the rail dots.
 
 **`ScrollScene` primitive (visible in every part's placeholder scene)**
 - ☐ Sticky visual pane stays put while narration scrolls; the active step's narration is
