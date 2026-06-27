@@ -169,10 +169,15 @@ export function ProgressRail({ parts, currentSlug }: ProgressRailProps) {
                   }}
                 />
                 <span
-                  className="whitespace-nowrap text-xs leading-tight transition-colors"
+                  className="flex items-baseline gap-2 whitespace-nowrap text-xs leading-tight transition-colors"
                   style={{ color: isCurrent ? COLOR.ink : COLOR.muted }}
                 >
-                  <span className="font-mono opacity-50">{part.index}</span>{' '}
+                  <span
+                    className="inline-block w-3 shrink-0 text-right font-mono tabular-nums"
+                    style={{ color: isCurrent ? COLOR.active : withAlpha(accent, 0.85) }}
+                  >
+                    {part.index}
+                  </span>
                   <span className={isCurrent ? 'font-semibold' : ''}>{part.title}</span>
                 </span>
               </a>

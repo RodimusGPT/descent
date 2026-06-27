@@ -170,7 +170,7 @@ export function PagedAttention({ initialMode = 'contiguous' }: PagedAttentionPro
           </label>
 
           {!shared && mode === 'contiguous' && (
-            <label className="flex flex-1 flex-col gap-1 font-mono text-xs text-muted">
+            <label className="flex basis-full flex-col gap-1 font-mono text-xs text-muted sm:flex-1 sm:basis-0">
               <span>
                 Reserve max length: <span className="tabular-nums text-ink">{maxLen}</span> tokens (
                 {blocksFor(maxLen, BLOCK_SIZE)} blocks / seq)
@@ -190,7 +190,7 @@ export function PagedAttention({ initialMode = 'contiguous' }: PagedAttentionPro
           )}
 
           {shared && (
-            <label className="flex flex-1 flex-col gap-1 font-mono text-xs text-muted">
+            <label className="flex basis-full flex-col gap-1 font-mono text-xs text-muted sm:flex-1 sm:basis-0">
               <span>
                 Shared prefix: <span className="tabular-nums text-ink">{sharedTokens}</span> tokens
                 ({blocksFor(sharedTokens, BLOCK_SIZE)} blocks)
@@ -286,7 +286,7 @@ function NormalView({
               <span className="w-16 shrink-0 font-mono text-xs" style={{ color }}>
                 Seq {s.id}
               </span>
-              <span className="w-20 shrink-0 font-mono text-[0.7rem] text-faint tabular-nums">
+              <span className="w-20 shrink-0 font-mono text-xs text-muted tabular-nums">
                 {s.len} tok
               </span>
               <div className="flex flex-wrap items-center gap-1">

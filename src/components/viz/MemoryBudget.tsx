@@ -10,7 +10,7 @@ import {
 import { COLOR, lerpColor, withAlpha } from '@/lib/encoding';
 import { PRECISIONS, type PrecisionKey } from '@/lib/quant';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { useId, useMemo, useState } from 'react';
+import { type KeyboardEvent, useId, useMemo, useState } from 'react';
 
 /**
  * MemoryBudget (spec 10.2) — does the model fit in VRAM?
@@ -89,6 +89,17 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
   const kvWithin = Math.max(0, Math.min(track.kvPx, track.capX - track.wPx));
   const kvOver = track.kvPx - kvWithin;
 
+  // Clamp the hot overflow segment to the track so an extreme over-run (e.g. 70B
+  // FP16 on an 8 GB card) doesn't shoot past the rounded track and clip oddly.
+  // The excess is conveyed by the "over by N GB" label/marker instead.
+  const overRawPx = wOver + kvOver;
+  const overMaxPx = Math.max(0, track.plotW - overStartPx);
+  const overPx = Math.min(overRawPx, overMaxPx);
+  const overClipped = overRawPx > overMaxPx + 0.5;
+  const overByGB = total - gpu.vramGB;
+
+  const precIndex = PRECISIONS.findIndex((p) => p.key === precision);
+
   const barTransition = reduced ? undefined : 'width 300ms ease, x 300ms ease, fill 300ms ease';
 
   const overColor = lerpColor(COLOR.active, COLOR.activeHot, 0.85);
@@ -142,15 +153,24 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
           fill={withAlpha(COLOR.hwAccent, 0.8)}
           style={barTransition ? { transition: barTransition } : undefined}
         />
-        {/* overflow portion — hot */}
-        {wOver + kvOver > 0 && (
+        {/* overflow portion — hot, clamped to the track width */}
+        {overPx > 0 && (
           <rect
             x={fillStart + overStartPx}
             y={TRACK_Y}
-            width={wOver + kvOver}
+            width={overPx}
             height={BAR_H}
             fill={withAlpha(overColor, 0.9)}
             style={barTransition ? { transition: barTransition } : undefined}
+          />
+        )}
+        {/* clip marker — a right-pointing notch signalling the bar runs far past the edge */}
+        {overClipped && (
+          <polygon
+            points={`${fillStart + track.plotW - 11},${TRACK_Y + BAR_H / 2 - 8} ${
+              fillStart + track.plotW - 2
+            },${TRACK_Y + BAR_H / 2} ${fillStart + track.plotW - 11},${TRACK_Y + BAR_H / 2 + 8}`}
+            fill={withAlpha(COLOR.surface, 0.85)}
           />
         )}
 
@@ -184,6 +204,19 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
         >
           {gpu.name}
         </text>
+        {/* far-over-capacity callout — keeps the magnitude legible once the bar is clamped */}
+        {!ok && (
+          <text
+            x={fillStart + track.plotW}
+            y={TRACK_Y + BAR_H + 18}
+            textAnchor="end"
+            fontSize={11}
+            fill={COLOR.activeHot}
+            className="font-mono"
+          >
+            over by {formatGB(overByGB)} GB
+          </text>
+        )}
       </svg>
 
       {/* Legend */}
@@ -207,7 +240,9 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 type="button"
                 role="radio"
                 aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setModelIndex(i)}
+                onKeyDown={(e) => moveRadioFocus(e, modelIndex, MODEL_SHAPES.length, setModelIndex)}
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
                   borderColor: active ? COLOR.modelAccent : COLOR.border,
@@ -236,7 +271,13 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 type="button"
                 role="radio"
                 aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setPrecision(p.key)}
+                onKeyDown={(e) =>
+                  moveRadioFocus(e, precIndex, PRECISIONS.length, (i) =>
+                    setPrecision(PRECISIONS[i].key),
+                  )
+                }
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
                   borderColor: active ? COLOR.active : COLOR.border,
@@ -288,7 +329,9 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
                 type="button"
                 role="radio"
                 aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setGpuIndex(i)}
+                onKeyDown={(e) => moveRadioFocus(e, gpuIndex, GPU_PRESETS.length, setGpuIndex)}
                 title={g.note}
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
                 style={{
@@ -329,6 +372,28 @@ export function MemoryBudget({ initialModelIndex = 1, initialGpuIndex = 2 }: Mem
       </div>
     </div>
   );
+}
+
+/**
+ * Standard ARIA radiogroup keyboard nav: ArrowLeft/Up select the previous radio,
+ * ArrowRight/Down the next, both wrapping around. Selection follows focus, and
+ * focus is moved to the newly selected radio (roving tabindex is driven by the
+ * `aria-checked`/`tabIndex` props on each button).
+ */
+function moveRadioFocus(
+  e: KeyboardEvent<HTMLButtonElement>,
+  currentIndex: number,
+  count: number,
+  setIndex: (i: number) => void,
+): void {
+  let next: number;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (currentIndex + 1) % count;
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (currentIndex - 1 + count) % count;
+  else return;
+  e.preventDefault();
+  setIndex(next);
+  const radios = e.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="radio"]');
+  radios?.[next]?.focus();
 }
 
 function Swatch({ color, label }: { color: string; label: string }) {

@@ -10,7 +10,59 @@ import {
   quantize,
 } from '@/lib/quant';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { useId, useMemo, useState } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
+
+/**
+ * Selected-state styling for the radio pills — a filled tint, a colored border
+ * doubled by an inset ring, and a brightened/bolder label make the active option
+ * unmistakable. Mirrors FloatExploder's format toggle.
+ */
+function pillStyle(active: boolean, accent: string): CSSProperties {
+  return {
+    borderColor: active ? accent : COLOR.border,
+    backgroundColor: active ? withAlpha(accent, 0.22) : 'transparent',
+    color: active ? accent : COLOR.muted,
+    boxShadow: active ? `inset 0 0 0 1px ${accent}` : undefined,
+    fontWeight: active ? 600 : 400,
+  };
+}
+
+/**
+ * Roving-tabindex arrow-key navigation for a radio group: arrows (and Home/End)
+ * move both selection and focus, wrapping at the ends. Only the selected option
+ * is in the tab order.
+ */
+function handleRovingKey(
+  e: KeyboardEvent<HTMLButtonElement>,
+  index: number,
+  length: number,
+  refs: { current: (HTMLButtonElement | null)[] },
+  select: (i: number) => void,
+): void {
+  let next = index;
+  switch (e.key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      next = (index + 1) % length;
+      break;
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      next = (index - 1 + length) % length;
+      break;
+    case 'Home':
+      next = 0;
+      break;
+    case 'End':
+      next = length - 1;
+      break;
+    default:
+      return;
+  }
+  e.preventDefault();
+  select(next);
+  refs.current[next]?.focus();
+}
 
 /**
  * QuantizationSlider (spec 9.3) — an interactive showing how dropping numeric
@@ -48,6 +100,9 @@ export function QuantizationSlider({
   const baseId = useId();
   const precGroupId = `${baseId}-prec`;
   const paramGroupId = `${baseId}-param`;
+
+  const precRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const paramRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const values = useMemo(() => generateWeights(sampleCount, seed), [sampleCount, seed]);
 
@@ -123,24 +178,31 @@ export function QuantizationSlider({
           Precision
         </legend>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={precGroupId}>
-          {PRECISIONS.map((p) => {
+          {PRECISIONS.map((p, i) => {
             const active = p.key === precision;
             return (
               <button
                 key={p.key}
+                ref={(el) => {
+                  precRefs.current[i] = el;
+                }}
                 type="button"
                 role="radio"
                 aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setPrecision(p.key)}
+                onKeyDown={(e) =>
+                  handleRovingKey(e, i, PRECISIONS.length, precRefs, (n) =>
+                    setPrecision(PRECISIONS[n].key),
+                  )
+                }
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
-                style={{
-                  borderColor: active ? COLOR.active : COLOR.border,
-                  backgroundColor: active ? withAlpha(COLOR.active, 0.18) : 'transparent',
-                  color: active ? COLOR.active : COLOR.muted,
-                }}
+                style={pillStyle(active, COLOR.active)}
               >
                 {p.label}
-                <span className="ml-1 text-[0.7em] opacity-70">{p.bits}b</span>
+                <span className="ml-1 text-[0.7em]" style={{ opacity: active ? 0.85 : 0.7 }}>
+                  {p.bits}b
+                </span>
               </button>
             );
           })}
@@ -153,21 +215,26 @@ export function QuantizationSlider({
           Model size
         </legend>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={paramGroupId}>
-          {PARAM_PRESETS.map((preset) => {
+          {PARAM_PRESETS.map((preset, i) => {
             const active = preset.params === params;
             return (
               <button
                 key={preset.key}
+                ref={(el) => {
+                  paramRefs.current[i] = el;
+                }}
                 type="button"
                 role="radio"
                 aria-checked={active}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setParams(preset.params)}
+                onKeyDown={(e) =>
+                  handleRovingKey(e, i, PARAM_PRESETS.length, paramRefs, (n) =>
+                    setParams(PARAM_PRESETS[n].params),
+                  )
+                }
                 className="rounded-md border px-3 py-1 font-mono text-sm transition-colors "
-                style={{
-                  borderColor: active ? COLOR.modelAccent : COLOR.border,
-                  backgroundColor: active ? withAlpha(COLOR.modelAccent, 0.18) : 'transparent',
-                  color: active ? COLOR.modelAccent : COLOR.muted,
-                }}
+                style={pillStyle(active, COLOR.modelAccent)}
               >
                 {preset.label}
               </button>

@@ -197,13 +197,13 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
                     id={t.id}
                     state={isQuery ? 'active' : 'default'}
                     selected={isQuery}
-                    size="sm"
+                    size="md"
                     ariaLabel={isQuery ? `Query token ${t.text}` : `Set query to ${t.text}`}
                     onClick={() => setQueryIdx(i)}
                     onKeyDown={(e) => onTokenKey(e, i)}
                   />
                 </span>
-                <div className="flex flex-col items-center gap-1 rounded-md border border-border bg-bg px-1.5 py-1">
+                <div className="flex flex-col items-center gap-1.5 rounded-md border border-border bg-bg px-2 py-1.5">
                   <GlyphRow
                     tag="Q"
                     vec={head.Q[i]}
@@ -254,7 +254,7 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
                   <Token text={t.text} id={t.id} weight={w} size="sm" />
                 </span>
                 <span
-                  className="text-right font-mono text-[0.7rem] tabular-nums text-faint"
+                  className="text-right font-mono text-xs tabular-nums text-faint"
                   title="scaled score"
                 >
                   {s >= 0 ? '+' : ''}
@@ -274,7 +274,7 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
                   />
                 </span>
                 <span
-                  className="text-right font-mono text-[0.7rem] tabular-nums"
+                  className="text-right font-mono text-xs tabular-nums"
                   style={{ color: weightToColor(w) }}
                 >
                   {(w * 100).toFixed(0)}%
@@ -291,7 +291,7 @@ export function QKVMultiHead({ tokens = TOKENS, heads = HEADS }: QKVMultiHeadPro
         >
           <span className="font-mono text-xs text-muted">output =</span>
           <VecGlyph vec={output} scale={outScale} hue={COLOR.active} label="attention output" />
-          <span className="font-mono text-[0.7rem] tabular-nums text-faint">
+          <span className="font-mono text-xs tabular-nums text-faint">
             [{output.map((v) => v.toFixed(2)).join(', ')}]
           </span>
           <span className="ml-auto font-mono text-[0.7rem] text-faint">
@@ -408,7 +408,7 @@ function GlyphRow({
 }) {
   return (
     <span className="flex items-center gap-1" style={{ opacity: dim ? 0.85 : 1 }}>
-      <span className="w-2.5 font-mono text-[0.6rem]" style={{ color: hue }}>
+      <span className="w-3 font-mono text-[0.72rem]" style={{ color: hue }}>
         {tag}
       </span>
       <VecGlyph vec={vec} scale={scale} hue={hue} label={`${token} ${tag}`} />

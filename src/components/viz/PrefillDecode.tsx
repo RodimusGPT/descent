@@ -237,45 +237,53 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
       <div className="flex flex-col gap-3 border-t pt-3" style={{ borderColor: COLOR.border }}>
         {/* transport */}
         <div className="flex flex-wrap items-center gap-2">
-          {!reduced && (
+          {/* Primary cluster: play + step back/forward, kept tight together. */}
+          <div className="flex items-center gap-1.5">
+            {!reduced && (
+              <button
+                type="button"
+                onClick={togglePlay}
+                className="rounded-md border px-3 py-1 font-mono text-xs font-semibold transition-colors hover:brightness-110 "
+                style={{
+                  borderColor: COLOR.active,
+                  backgroundColor: withAlpha(COLOR.active, 0.16),
+                  color: COLOR.active,
+                }}
+                aria-pressed={playing}
+              >
+                {playing ? '❚❚ Pause' : atEnd ? '↻ Replay' : '▶ Play'}
+              </button>
+            )}
             <button
               type="button"
-              onClick={togglePlay}
-              className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised "
+              onClick={stepBack}
+              disabled={frame === 0}
+              className="rounded-md border px-3 py-1 font-mono text-xs font-medium text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
               style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
-              aria-pressed={playing}
+              aria-label="Step back one frame"
             >
-              {playing ? 'Pause' : atEnd ? 'Replay' : 'Play'}
+              ◀ Back
             </button>
-          )}
-          <button
-            type="button"
-            onClick={stepBack}
-            disabled={frame === 0}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
-            style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
-            aria-label="Step back one frame"
-          >
-            ◀ Step
-          </button>
-          <button
-            type="button"
-            onClick={stepForward}
-            disabled={atEnd}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
-            style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
-            aria-label="Step forward one frame"
-          >
-            Step ▶
-          </button>
+            <button
+              type="button"
+              onClick={stepForward}
+              disabled={atEnd}
+              className="rounded-md border px-3 py-1 font-mono text-xs font-medium text-ink transition-colors hover:bg-surface-raised disabled:opacity-40"
+              style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
+              aria-label="Step forward one frame"
+            >
+              Next ▶
+            </button>
+          </div>
+
+          {/* Reset is recessive — secondary to play/step. */}
           <button
             type="button"
             onClick={reset}
-            className="rounded-md border px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-surface-raised "
-            style={{ borderColor: COLOR.border, backgroundColor: COLOR.surface }}
+            className="rounded-md px-2 py-1 font-mono text-xs text-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
             aria-label="Reset to start"
           >
-            Reset
+            ↺ Reset
           </button>
 
           <label className="ml-auto flex cursor-pointer items-center gap-2 font-mono text-xs text-muted">
@@ -292,7 +300,7 @@ export function PrefillDecode({ initialPresetIndex = 0 }: PrefillDecodeProps) {
 
         {reduced && (
           <p className="font-mono text-xs text-faint">
-            Reduced motion: auto-play is off. Use Step ▶ / ◀ to advance frames manually.
+            Reduced motion: auto-play is off. Use Next ▶ / ◀ Back to advance frames manually.
           </p>
         )}
 

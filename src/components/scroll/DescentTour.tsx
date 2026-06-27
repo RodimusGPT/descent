@@ -253,7 +253,7 @@ export function DescentTour() {
   return (
     <nav
       aria-label="Step through the descent"
-      className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-0.5 rounded-full border border-border bg-surface p-1 shadow-lg"
+      className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-0.5 rounded-full border border-border bg-surface-raised p-1 shadow-xl"
     >
       <button
         type="button"

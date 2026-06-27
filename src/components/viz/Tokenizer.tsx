@@ -94,14 +94,22 @@ export function Tokenizer({ initialText = DEFAULT_TEXT }: TokenizerProps) {
               <Token
                 // Index is part of the key because identical pieces recur.
                 key={`${i}-${tok.text}-${tok.id}`}
-                text={displayText(tok)}
-                id={tok.id}
                 size="sm"
                 weight={style.weight}
                 state={style.state}
                 title={`${style.label} · id ${tok.id}`}
                 ariaLabel={`${style.label} ${tok.kind === 'space' ? 'whitespace' : tok.text}, id ${tok.id}`}
-              />
+              >
+                {/* Render the id inline (not the ~7px subscript) so it stays
+                    legible with readable contrast even at narrow widths. */}
+                <span>{displayText(tok)}</span>
+                <span
+                  className="ml-1 align-baseline text-[10px] tabular-nums text-muted"
+                  aria-hidden="true"
+                >
+                  {tok.id}
+                </span>
+              </Token>
             );
           })
         )}

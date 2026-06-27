@@ -1,5 +1,5 @@
 import { COLOR, weightToColor, withAlpha } from '@/lib/encoding';
-import { FORMATS } from '@/lib/float';
+import { FORMATS, bitsToValue } from '@/lib/float';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import {
   HIGHLIGHT,
@@ -83,10 +83,15 @@ export function ZoomToWeight({ initialLevel = 0 }: ZoomToWeightProps) {
                   type="button"
                   onClick={() => setIndex(i)}
                   aria-current={current ? 'step' : undefined}
-                  className="rounded px-1.5 py-0.5 transition-colors "
+                  aria-label={`Jump to ${l.label} view`}
+                  className={`rounded px-1.5 py-0.5 transition-colors ${
+                    current
+                      ? 'font-semibold'
+                      : 'underline decoration-dotted underline-offset-2 hover:bg-surface-raised hover:no-underline'
+                  }`}
                   style={{
-                    color: current ? COLOR.active : reached ? COLOR.ink : COLOR.faint,
-                    backgroundColor: current ? withAlpha(COLOR.active, 0.16) : 'transparent',
+                    color: current ? COLOR.active : reached ? COLOR.ink : COLOR.muted,
+                    backgroundColor: current ? withAlpha(COLOR.active, 0.16) : undefined,
                   }}
                 >
                   {l.label}
@@ -290,7 +295,11 @@ function MatrixStage({ min, max }: { min: number; max: number }) {
 /** Level 4 — the single highlighted float, big, with its FP16 bit pattern. */
 function WeightStage({ idPrefix }: { idPrefix: string }) {
   const fmt = FORMATS.fp16;
-  const { sign, exponent, mantissa } = highlightBits(HIGHLIGHT_VALUE, fmt);
+  const { bits, sign, exponent, mantissa } = highlightBits(HIGHLIGHT_VALUE, fmt);
+  // Decode the rounded bits back to a number so the big decimal exactly matches
+  // the FP16 bit cells below it (the source value is a full double; FP16 stores
+  // a slightly different, rounded value).
+  const stored = bitsToValue(bits, fmt);
   const groups: { label: string; bits: number[]; color: string }[] = [
     { label: 'sign', bits: sign, color: COLOR.activeHot },
     { label: 'exponent', bits: exponent, color: COLOR.modelAccent },
@@ -319,7 +328,7 @@ function WeightStage({ idPrefix }: { idPrefix: string }) {
         fontFamily="monospace"
         fill={COLOR.active}
       >
-        {HIGHLIGHT_VALUE.toFixed(5)}
+        {stored.toFixed(5)}
       </text>
 
       {/* bit cells */}

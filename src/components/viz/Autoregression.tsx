@@ -90,11 +90,17 @@ export function Autoregression({ initialStep = 0 }: AutoregressionProps) {
   const context = contextAt(contextStep);
   const contextLen = contextLengthAt(contextStep);
 
-  // The token currently being emitted (next one to append), if any.
-  // emittedAt returns null past the end, so this is null exactly when complete.
-  const nextToken = emittedAt(step + 1);
   const justAppended = !emitting && step > 0 ? emittedAt(step) : null;
   const promptLen = PROMPT.length;
+
+  // The token surfaced in the "transformer emits …" pill. ONLY during the brief
+  // `emitting` instant do we reveal the freshly-sampled FUTURE token (hot,
+  // selected). At rest we never preview the future: we echo the token just
+  // emitted to reach this step (calmer emphasis), or nothing before the first
+  // step / once the sentence is complete. Under reduced motion `emitting` is
+  // always false, so the static frame emphasizes the just-appended token.
+  const emitToken = emitting ? emittedAt(step + 1) : !atEnd && step > 0 ? emittedAt(step) : null;
+  const emitTokenId = emitting ? contextLen : contextLen - 1;
 
   const panel: CSSProperties = { backgroundColor: COLOR.surface, borderColor: COLOR.border };
 
@@ -171,14 +177,14 @@ export function Autoregression({ initialStep = 0 }: AutoregressionProps) {
           </span>
           <span className="text-xs text-muted">emits</span>
           <div className="flex min-h-[2rem] items-center">
-            {nextToken !== null ? (
+            {emitToken !== null ? (
               <Token
-                key={`next-${step}`}
-                text={nextToken}
-                id={contextLen}
+                key={`emit-${step}-${emitting ? 'hot' : 'rest'}`}
+                text={emitToken}
+                id={emitTokenId}
                 state="active"
-                weight={1}
-                selected
+                weight={emitting ? 1 : 0.85}
+                selected={emitting}
                 size="md"
               />
             ) : (

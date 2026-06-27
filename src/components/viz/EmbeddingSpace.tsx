@@ -50,6 +50,12 @@ export function EmbeddingSpace({ words = EMBEDDINGS, k = 4, initialWord }: Embed
   const reduced = usePrefersReducedMotion();
   const [selected, setSelected] = useState<string | null>(initialWord ?? null);
   const [showAnalogy, setShowAnalogy] = useState(false);
+  // Roving tabindex: which point is the single tab stop. Tab/arrows MOVE focus
+  // here without selecting; Enter/Space/click are what SELECT.
+  const [focusIdx, setFocusIdx] = useState(() => {
+    const i = words.findIndex((w) => w.word === initialWord);
+    return i < 0 ? 0 : i;
+  });
 
   // Pixel scales: data lives in [0,100]², padded to a clean inset rectangle.
   const { sx, sy, centroid } = useMemo(() => {
@@ -98,20 +104,23 @@ export function EmbeddingSpace({ words = EMBEDDINGS, k = 4, initialWord }: Embed
 
   const lineTransition = reduced ? undefined : 'opacity 200ms ease';
 
+  function moveFocus(next: number) {
+    // Roving: move focus only — selection is unchanged until Enter/Space/click.
+    setFocusIdx(next);
+    document.getElementById(`emb-pt-${next}`)?.focus();
+  }
+
   function onPointKey(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
-      const next = (idx + 1) % words.length;
-      setSelected(words[next].word);
-      document.getElementById(`emb-pt-${next}`)?.focus();
+      moveFocus((idx + 1) % words.length);
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();
-      const next = (idx - 1 + words.length) % words.length;
-      setSelected(words[next].word);
-      document.getElementById(`emb-pt-${next}`)?.focus();
+      moveFocus((idx - 1 + words.length) % words.length);
     } else if (e.key === 'Escape') {
       setSelected(null);
     }
+    // Enter/Space fall through to the native button click → setSelected.
   }
 
   return (
@@ -247,8 +256,12 @@ export function EmbeddingSpace({ words = EMBEDDINGS, k = 4, initialWord }: Embed
               key={w.word}
               id={`emb-pt-${i}`}
               type="button"
-              onClick={() => setSelected(isSelected ? null : w.word)}
-              onFocus={() => setSelected(w.word)}
+              tabIndex={i === focusIdx ? 0 : -1}
+              onClick={() => {
+                setFocusIdx(i);
+                setSelected(isSelected ? null : w.word);
+              }}
+              onFocus={() => setFocusIdx(i)}
               onKeyDown={(e) => onPointKey(e, i)}
               aria-pressed={isSelected}
               aria-label={`${w.word}, cluster ${w.cluster}`}

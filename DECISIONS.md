@@ -130,8 +130,16 @@ A 5-lens design review over the audit screenshots drove a batch of high-impact /
 - **Affordance.** Restored `cursor: pointer` on buttons globally (Tailwind preflight drops it) and
   added a "Click any bit to flip it" hint to FloatExploder; bumped the mobile stepper tap targets.
 
-Deferred (medium-effort or self-resolving): QKV mini-panel density, block-scaling error-ramp
-midrange + legend, rail index-number alignment, and the placeholder Parts 4/5 (resolve at M7/M8).
+All of the above, plus every other deferred / known-minor item, were then knocked out in a
+**fix-everything pass** (10 parallel component-fix agents + shared-chrome edits): QKV panel
+density, block-scaling ramp + gradient legend, batching reduced-motion stepping + selected toggle
++ labels, paged mobile restack + labels, sampling aria-live, autoregression emit-flash (no longer
+previews the next token at rest), zoom breadcrumb affordance + FP16 value/bits consistency, budget
++ quant ARIA radiogroup roving-tabindex/arrow-keys + budget overflow clamp, tokenizer mobile ids,
+prefill transport grouping, embeddings focus/selection decoupling, rail index numbers (accent-
+colored + tabular), a stronger stepper backing, and compact "coming soon" placeholder cards (which
+also retired the ScrollScene's competing Prev/Next on placeholder parts). Verified via re-audit:
+0 console errors, 0 layout overflow.
 
 ## Presentation (post-M4, user-directed)
 

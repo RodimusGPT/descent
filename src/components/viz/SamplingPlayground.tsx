@@ -174,7 +174,7 @@ export function SamplingPlayground({
         >
           Sample a token
         </button>
-        <span className="font-mono text-xs text-faint">
+        <span className="font-mono text-xs text-faint" aria-live="polite">
           {chosen !== null ? (
             <span style={{ color: COLOR.ink }}>
               drew <span style={{ color: COLOR.active }}>{vocab[chosen]?.token}</span>

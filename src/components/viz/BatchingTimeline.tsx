@@ -104,7 +104,9 @@ export function BatchingTimeline({
     setRevealed((c) => Math.max(0, c - 1));
   }, []);
 
-  const shownCols = reduced ? nCols : revealed;
+  // `revealed` already initializes to the full grid under reduced motion (see the
+  // reveal effect), so the Step ◀/▶ buttons stay live and can walk iterations.
+  const shownCols = revealed;
 
   // Live utilization over the revealed portion (rises as the grid fills in).
   const liveUtil = useMemo(() => utilization(schedule.slice(0, shownCols)), [schedule, shownCols]);
@@ -141,10 +143,12 @@ export function BatchingTimeline({
                 type="button"
                 onClick={() => setMode(m)}
                 aria-pressed={on}
-                className="rounded px-3 py-1 font-mono text-xs capitalize transition-colors "
+                className="rounded border px-3 py-1 font-mono text-xs capitalize transition-colors "
                 style={{
-                  color: on ? COLOR.ink : COLOR.muted,
-                  backgroundColor: on ? withAlpha(COLOR.modelAccent, 0.22) : 'transparent',
+                  color: on ? COLOR.modelAccent : COLOR.muted,
+                  fontWeight: on ? 600 : 400,
+                  borderColor: on ? COLOR.modelAccent : 'transparent',
+                  backgroundColor: on ? withAlpha(COLOR.modelAccent, 0.3) : 'transparent',
                 }}
               >
                 {m}
@@ -230,7 +234,7 @@ export function BatchingTimeline({
                 style={{ backgroundColor: seqColor(s.id) }}
               />
               seq {s.id}
-              <span className="text-faint">·{s.length} it</span>
+              <span className="text-muted">·{s.length} it</span>
             </span>
           ))}
           <span className="inline-flex items-center gap-1">

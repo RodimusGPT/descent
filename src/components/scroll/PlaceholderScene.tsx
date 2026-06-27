@@ -1,13 +1,14 @@
 import { partAccent, withAlpha } from '@/lib/encoding';
 import type { PartKind } from '@/lib/encoding';
-import { ScrollScene } from './ScrollScene';
 import { Token } from './Token';
 
 /**
- * PlaceholderScene — a generic ScrollScene used to make the spine walkable in M0
- * before the real per-part interactives exist (M4–M8 replace these). It still
- * demonstrates the primitives wired together: stepped narration, a sticky visual
- * that reacts to the active step, the Token motif, and per-part accent color.
+ * PlaceholderScene — a compact, intentional "coming soon" card for parts whose
+ * real interactive hasn't been built yet (replaced as M7/M8 land). Deliberately
+ * small and self-contained: it reads as a planned placeholder rather than an empty
+ * frame, carries the descending-token motif, and is a single guided-tour stop (so
+ * the stepper pauses here) — without the competing Prev/Next controls a full
+ * ScrollScene would add.
  */
 
 export interface PlaceholderSceneProps {
@@ -19,73 +20,34 @@ export interface PlaceholderSceneProps {
 
 export function PlaceholderScene({ kind, label, signature }: PlaceholderSceneProps) {
   const accent = partAccent(kind);
-
-  const steps = [
-    {
-      id: 'intro',
-      narration: (
-        <p className="text-lg leading-relaxed text-muted">
-          We are descending into <span className="text-ink">{label}</span>. Scroll to follow the
-          token down another layer of the stack.
-        </p>
-      ),
-    },
-    {
-      id: 'detail',
-      narration: (
-        <p className="text-lg leading-relaxed text-muted">
-          Each step here reveals one more mechanism. The sticky panel to the side updates as you
-          move — that is the <span className="text-ink">ScrollScene</span> primitive at work.
-        </p>
-      ),
-    },
-    {
-      id: 'signature',
-      narration: (
-        <p className="text-lg leading-relaxed text-muted">
-          This section's signature interactive
-          {signature ? (
-            <>
-              {' — '}
-              <span className="text-ink">{signature}</span>
-            </>
-          ) : null}{' '}
-          lands in a later milestone. For now, the descent itself is the point.
-        </p>
-      ),
-    },
-  ];
-
   return (
-    <ScrollScene
-      ariaLabel={`${label} (placeholder scene)`}
-      steps={steps}
-      render={(active) => (
-        <div
-          className="mx-auto flex aspect-square w-full max-w-md flex-col items-center justify-center gap-6 rounded-xl border p-8"
-          style={{ borderColor: withAlpha(accent, 0.5), backgroundColor: withAlpha(accent, 0.05) }}
-        >
-          <div className="flex flex-col items-center gap-3">
-            {[0, 1, 2].map((i) => (
-              <Token
-                key={i}
-                text="token"
-                state={i === active ? 'active' : 'inert'}
-                size={i === active ? 'md' : 'sm'}
-              />
-            ))}
-          </div>
-          <div className="text-center">
-            <div className="font-mono text-xs uppercase tracking-widest" style={{ color: accent }}>
-              {label}
-            </div>
-            <div className="mt-1 text-sm text-muted">
-              placeholder visual · step {active + 1} of {steps.length}
-            </div>
-          </div>
+    <figure data-tour-stop className="mx-auto my-10 max-w-xl">
+      <div
+        className="flex flex-col items-center gap-5 rounded-xl border border-dashed px-6 py-12 text-center"
+        style={{ borderColor: withAlpha(accent, 0.45), backgroundColor: withAlpha(accent, 0.05) }}
+      >
+        <div className="flex flex-col items-center gap-1.5" aria-hidden="true">
+          <Token text="token" state="active" size="sm" />
+          <span style={{ color: accent }}>↓</span>
+          <Token text="token" state="inert" size="sm" />
         </div>
-      )}
-    />
+        <div>
+          <div className="font-mono text-xs uppercase tracking-widest" style={{ color: accent }}>
+            {label}
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            {signature ? (
+              <>
+                The <span className="text-ink">{signature}</span> interactive lands in a later
+                milestone.
+              </>
+            ) : (
+              'Coming in a later milestone.'
+            )}
+          </p>
+        </div>
+      </div>
+    </figure>
   );
 }
 

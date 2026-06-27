@@ -140,14 +140,17 @@ export function BlockScaling({
               >
                 {Array.from({ length: blockSize }, (_, i) => {
                   const idx = start + i;
-                  const t = perValueError[idx] / maxError;
+                  // Quantization error scaled to [0,1] across the shown values, so
+                  // low error reads cool (inert) and high error reads hot (amber→coral)
+                  // along the project's clean ramp — no muddy midband.
+                  const normalizedError = perValueError[idx] / maxError;
                   return (
                     <div
                       key={i}
                       className="aspect-square flex-1 rounded-sm"
                       title={`value ${values[idx].toFixed(3)} · error ${perValueError[idx].toFixed(4)}`}
                       style={{
-                        backgroundColor: withAlpha(weightToColor(t), 0.9),
+                        backgroundColor: weightToColor(normalizedError),
                         transition: cellTransition,
                       }}
                     />
@@ -160,6 +163,23 @@ export function BlockScaling({
             </div>
           );
         })}
+      </div>
+
+      {/* Error color legend — reads the cool→warm ramp used for the cells */}
+      <div className="flex flex-col gap-1">
+        <div
+          className="h-2 w-full rounded-full"
+          role="img"
+          aria-label="Color scale: cool (low) to warm (high) quantization error"
+          style={{
+            background: `linear-gradient(to right, ${COLOR.inert}, ${COLOR.active}, ${COLOR.activeHot})`,
+          }}
+        />
+        <div className="flex justify-between font-mono text-[0.65rem] text-muted">
+          <span>low</span>
+          <span aria-hidden="true">← error →</span>
+          <span>high</span>
+        </div>
       </div>
 
       <p className="text-[0.7rem] text-faint">
