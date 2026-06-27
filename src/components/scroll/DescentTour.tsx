@@ -248,7 +248,7 @@ export function DescentTour() {
   }, []);
 
   const btn =
-    'flex items-center gap-1 rounded-full px-3 py-1.5 text-sm transition-colors hover:bg-surface-raised disabled:opacity-30 disabled:hover:bg-transparent';
+    'flex min-h-[2.5rem] items-center justify-center gap-1 rounded-full px-3.5 py-1.5 text-sm transition-colors hover:bg-surface-raised disabled:opacity-30 disabled:hover:bg-transparent';
 
   return (
     <nav

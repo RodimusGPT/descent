@@ -19,24 +19,28 @@ const sections = await Promise.all(
 
   <main class="pt-12 md:pl-52 md:pt-0">
     <!-- Hero / hook -->
-    <section class="mx-auto flex min-h-[88vh] max-w-3xl flex-col justify-center px-6">
-      <p class="font-mono text-sm uppercase tracking-[0.3em] text-muted">A visual descent</p>
-      <h1 class="mt-4 text-5xl font-bold tracking-tight text-ink sm:text-6xl">
-        How an LLM<br />
-        <span class="text-active">answers you</span>
-      </h1>
-      <p class="mt-6 max-w-prose text-lg leading-relaxed text-muted">
-        You type a prompt and hit enter. What follows is a fall — from an abstract idea of a
-        model, down through the numbers it is made of, down through the software that serves it,
-        all the way to electrons moving through silicon. Scroll to follow one token the whole way
-        down.
-      </p>
-      <a
-        href="#0-hook"
-        class="mt-10 inline-flex items-center gap-2 self-start rounded-full border border-border px-4 py-2 text-sm text-ink transition-colors hover:border-active"
-      >
-        Begin the descent <span aria-hidden="true" class="animate-pulse">↓</span>
-      </a>
+    <section class="flex min-h-[88vh] flex-col justify-center">
+      <div class="mx-auto w-full max-w-6xl px-6">
+        <div class="max-w-3xl">
+          <p class="font-mono text-sm uppercase tracking-[0.3em] text-muted">A visual descent</p>
+          <h1 class="mt-4 text-6xl font-bold tracking-tight text-ink sm:text-7xl">
+            How an LLM<br />
+            <span class="text-active">answers you</span>
+          </h1>
+          <p class="mt-6 max-w-[34rem] text-lg leading-relaxed text-muted">
+            You type a prompt and hit enter. What follows is a fall — from an abstract idea of a
+            model, down through the numbers it is made of, down through the software that serves
+            it, all the way to electrons moving through silicon. Scroll to follow one token the
+            whole way down.
+          </p>
+          <a
+            href="#0-hook"
+            class="mt-10 inline-flex items-center gap-2 self-start rounded-full border border-border px-4 py-2 text-sm text-ink transition-colors hover:border-active"
+          >
+            Begin the descent <span aria-hidden="true" class="animate-pulse">↓</span>
+          </a>
+        </div>
+      </div>
     </section>
 
     <!-- The six parts, in sequence -->
@@ -48,7 +52,7 @@ const sections = await Promise.all(
         return (
           <section id={entry.slug} class="scroll-mt-20 border-t border-border py-16 md:py-24">
             <div class="mx-auto max-w-6xl px-6">
-              <header class="mx-auto max-w-prose" data-tour-stop>
+              <header class="max-w-prose" data-tour-stop>
                 <div class="flex items-center gap-3 font-mono text-sm">
                   <span
                     class="inline-flex h-7 w-7 items-center justify-center rounded-full border"

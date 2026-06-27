@@ -1,4 +1,4 @@
-import { COLOR, withAlpha } from '@/lib/encoding';
+import { CATEGORICAL, COLOR, withAlpha } from '@/lib/encoding';
 import {
   BLOCK_SIZE,
   type Seq,
@@ -26,8 +26,8 @@ import { type CSSProperties, useCallback, useMemo, useState } from 'react';
  * fully-rendered static frame (color transitions disabled).
  */
 
-/** Per-sequence categorical colors, all derived from the encoding palette (<=5). */
-const SEQ_COLORS = [COLOR.active, COLOR.modelAccent, COLOR.hwAccent] as const;
+/** Per-sequence non-semantic categorical colors (avoids the purple/teal part accents). */
+const SEQ_COLORS = CATEGORICAL;
 
 const DEFAULT_SEQS: Seq[] = [
   { id: 0, len: 5 },

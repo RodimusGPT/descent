@@ -32,10 +32,10 @@ const { caption, wide = false } = Astro.props;
 {
   wide ? (
     <div class="beat my-20" data-tour-stop>
-      <div class="mx-auto max-w-2xl">
+      <div class="max-w-2xl">
         <slot name="text" />
       </div>
-      <figure class="mx-auto mt-8 max-w-4xl">
+      <figure class="mt-8 max-w-4xl">
         <div class="rounded-xl border border-border bg-surface/40 p-4 sm:p-6">
           <slot name="visual" />
         </div>

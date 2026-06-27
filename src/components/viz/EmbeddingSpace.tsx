@@ -8,7 +8,7 @@ import {
   nearest,
   vec,
 } from '@/lib/embeddings';
-import { COLOR, withAlpha } from '@/lib/encoding';
+import { CATEGORICAL, COLOR, withAlpha } from '@/lib/encoding';
 import { cosineSimilarity } from '@/lib/nn';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { scaleLinear } from 'd3-scale';
@@ -38,14 +38,8 @@ const WIDTH = 820;
 const HEIGHT = 460;
 const PAD = 44;
 
-/** Categorical palette — one entry per cluster (kept to <= 5). */
-const CLUSTER_PALETTE = [
-  COLOR.active,
-  COLOR.modelAccent,
-  COLOR.hwAccent,
-  COLOR.activeHot,
-  COLOR.inert,
-];
+/** Non-semantic categorical palette — one identity hue per cluster (kept to <= 5). */
+const CLUSTER_PALETTE = CATEGORICAL;
 
 function clusterColor(cluster: string): string {
   const i = CLUSTERS.indexOf(cluster);

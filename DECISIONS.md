@@ -113,6 +113,26 @@ Choices not fully fixed by the GOAL spec. Format: decision — rationale.
   collapsed `<details>` hydrates awkwardly; showing `BlockScaling` in the beat's visual slot and
   keeping the E2M1/E8M0 detail in a text DeeperBlock honors the intent more reliably.
 
+## UI/UX polish pass (post-M6, from a Playwright design review)
+
+A 5-lens design review over the audit screenshots drove a batch of high-impact / low-effort fixes:
+- **One content left edge.** The hero, flat intros, part eyebrows, and the *wide* beats were
+  centered at differing widths while two-column beats were left-aligned — "three competing left
+  edges." Now everything left-aligns to one column edge: flat prose uses `margin-inline: 0`, the
+  hero/eyebrow/wide-beat drop their `mx-auto`, and the hero sits in the same `max-w-6xl` container.
+- **Hero scale.** Bumped to text-6xl/7xl with a tighter (~34rem) measure so the opening lands.
+- **Heading hierarchy.** Beat `h3` → 1.4rem/700 so section titles clearly out-rank inline-bold terms.
+- **Contrast.** Lifted `--color-faint` #5b6880 → #7e8aa0 so captions/helper text clear ~4.5:1
+  (encoding.ts + tokens.css kept in sync; mirror test still passes).
+- **Categorical palette.** Added a non-semantic `CATEGORICAL` identity palette (amber/blue/pink/
+  green/coral) for embedding clusters and batch/paged sequences — so "verbs" stops using inert
+  slate (= "off") and sequences stop borrowing the purple/teal part accents.
+- **Affordance.** Restored `cursor: pointer` on buttons globally (Tailwind preflight drops it) and
+  added a "Click any bit to flip it" hint to FloatExploder; bumped the mobile stepper tap targets.
+
+Deferred (medium-effort or self-resolving): QKV mini-panel density, block-scaling error-ramp
+midrange + legend, rail index-number alignment, and the placeholder Parts 4/5 (resolve at M7/M8).
+
 ## Presentation (post-M4, user-directed)
 
 - **Step-through navigator replaces auto-play as the primary control.** Per user feedback, the

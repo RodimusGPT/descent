@@ -6,7 +6,7 @@ import {
   scheduleStatic,
   utilization,
 } from '@/lib/batching';
-import { COLOR, lerpColor, withAlpha } from '@/lib/encoding';
+import { CATEGORICAL, COLOR, withAlpha } from '@/lib/encoding';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -23,14 +23,8 @@ import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState }
  * and a utilization readout make the packing difference visible.
  */
 
-/** Categorical sequence palette (<= 5), all derived from the encoding. */
-const SEQ_COLORS: readonly string[] = [
-  COLOR.active,
-  COLOR.modelAccent,
-  COLOR.hwAccent,
-  COLOR.activeHot,
-  lerpColor(COLOR.modelAccent, COLOR.hwAccent, 0.5),
-];
+/** Non-semantic categorical sequence palette (<= 5). */
+const SEQ_COLORS: readonly string[] = CATEGORICAL;
 
 function seqColor(id: number): string {
   return SEQ_COLORS[((id % SEQ_COLORS.length) + SEQ_COLORS.length) % SEQ_COLORS.length];

@@ -165,6 +165,7 @@ export function FloatExploder({
 
       {/* Bit grid */}
       <div className="flex flex-col gap-2">
+        <p className="font-mono text-xs text-faint">Click any bit to flip it</p>
         <div className="flex flex-wrap gap-1" role="group" aria-label={`${format.label} bits`}>
           {bits.map((bit, index) => {
             const kind = fieldOfBit(index, format);
@@ -178,7 +179,7 @@ export function FloatExploder({
                 aria-label={`${FIELD_LABEL[kind]} bit ${index}, value ${bit}`}
                 aria-pressed={on}
                 title={`${FIELD_LABEL[kind]} bit ${index}`}
-                className="h-9 w-7 rounded font-mono text-sm tabular-nums "
+                className="h-9 w-7 rounded font-mono text-sm tabular-nums transition hover:brightness-125"
                 style={{
                   border: `1px solid ${hue}`,
                   backgroundColor: on ? withAlpha(hue, 0.32) : withAlpha(hue, 0.06),

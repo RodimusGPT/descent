@@ -21,7 +21,7 @@ export const PALETTE = {
   border: '#26304a',
   ink: '#e6ecf5',
   muted: '#9aa7bd',
-  faint: '#5b6880',
+  faint: '#7e8aa0',
   /** warm — most energetic state */
   active: '#f5a524',
   activeHot: '#fb6f5a',
@@ -45,6 +45,20 @@ export const COLOR = {
   border: PALETTE.border,
   surface: PALETTE.surface,
 } as const;
+
+/**
+ * Non-semantic CATEGORICAL identity colors — for distinguishing arbitrary items
+ * (embedding clusters, batch sequences) WITHOUT borrowing the meaningful hues.
+ * Deliberately avoids inert slate (= "off/idle") and the part accents purple/teal,
+ * so the warm/cool grammar and model/hardware accents keep their meaning.
+ */
+export const CATEGORICAL: readonly string[] = [
+  PALETTE.active, // amber
+  '#5b9bd5', // blue
+  '#e07ab0', // pink
+  '#5fb98e', // green
+  PALETTE.activeHot, // coral
+];
 
 /** Each part of the descent is tinted model / hardware / neutral. */
 export type PartKind = 'model' | 'hardware' | 'neutral';

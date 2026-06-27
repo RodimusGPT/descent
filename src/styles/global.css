@@ -24,6 +24,15 @@
     border-radius: 2px;
   }
 
+  /* Tailwind's preflight drops the native button pointer cursor; restore it so
+   * every control reads as clickable (affordance). */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  label:has(> input),
+  summary {
+    cursor: pointer;
+  }
+
   ::selection {
     background-color: var(--color-active);
     color: var(--color-bg);
@@ -39,9 +48,11 @@
    * <figure> (Figure.astro / Beat.astro), so these typography rules must NOT reach into
    * them — otherwise a bare <p> in a viz would inherit prose color/margins.
    */
+  /* Left-align flat prose to the content column's left edge (not centered) so the
+   * hero, intros, headings, and the two-column beats all share ONE left edge. */
   .descent-prose > :where(p, h2, h3, ul, ol, blockquote, details, hr) {
     max-width: 42rem;
-    margin-inline: auto;
+    margin-inline: 0;
   }
   .descent-prose :where(h2):not(figure *) {
     font-size: 1.5rem;
@@ -51,12 +62,15 @@
     margin-top: 3rem;
     margin-bottom: 1rem;
   }
+  /* Beat headings must clearly out-rank inline-bold keywords in the scan. */
   .descent-prose :where(h3):not(figure *) {
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: 1.4rem;
+    line-height: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--color-ink);
-    margin-top: 2rem;
-    margin-bottom: 0.5rem;
+    margin-top: 2.25rem;
+    margin-bottom: 0.6rem;
   }
   .descent-prose :where(p):not(figure *) {
     color: var(--color-muted);
