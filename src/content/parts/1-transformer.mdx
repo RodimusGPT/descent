@@ -134,11 +134,9 @@ its attention flows; switch heads to see a completely different pattern.
 How does a token decide *where* to look? It **projects** its vector into three — each projection
 just multiplies the vector by a grid of learned weights (a **matrix**) to get a new list: a
 **query** (what am I looking for?), a **key** (what do I offer?), and a **value** (what will I
-hand over?). It scores its query against every key with a **dot product** — line the two vectors
-up, multiply them position by position, and add it all into one number that runs large when they
-point the same way and near zero when they don't. It scales those scores down, runs them through
-a **softmax** — which squashes a row of arbitrary numbers into positive weights that sum to 1, so
-they act like proportions — and takes the weighted sum of the values.
+hand over?). It scores its query against every key with a **dot product** (one number for how well
+they match), scales the scores down, and runs them through a **softmax** to turn them into
+attention weights — then takes the weighted sum of the values.
 
 One such computation is a **head**; a layer runs many in parallel, each specializing. A modern
 twist — **GQA/MQA** — lets several query heads *share* one set of keys and values, shrinking the
@@ -148,6 +146,14 @@ Part 2 and exploit in Part 3. Remember this; it pays off later.
 </div>
 <QKVMultiHead slot="visual" client:visible />
 </Beat>
+
+<DeeperBlock summary="Dot products and softmax, intuitively">
+A **dot product** lines two vectors up, multiplies them position by position, and adds it all into
+one number — large when they point the same way, near zero when they don't — so the score reads as
+*how well a query matches a key*. A **softmax** then squashes a row of those raw scores into
+positive weights that sum to 1, so they behave like proportions: a soft blend that leans hardest on
+the closest matches.
+</DeeperBlock>
 
 <DeeperBlock summary="The attention equation">
 For a head with key dimension $d_k$:
