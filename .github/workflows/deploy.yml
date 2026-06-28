@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+# Builds the static Astro site and publishes it to GitHub Pages on every push to
+# the default branch. The site is a <username>.github.io user/org page served at
+# the domain root, so no `base` path is required.
+#
+# One-time repo setup: Settings → Pages → Build and deployment → Source =
+# "GitHub Actions".
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+# Least-privilege token + the OIDC permission deploy-pages needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; let an in-flight production deploy finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      # withastro/action installs deps (auto-detecting Bun from bun.lock), runs
+      # `astro build`, writes a `.nojekyll` marker, and uploads dist/ as the
+      # Pages artifact.
+      - name: Build with Astro
+        uses: withastro/action@v3
+        with:
+          package-manager: bun@latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
