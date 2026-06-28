@@ -29,11 +29,13 @@ can feed them. Keeping them fed is the whole game.
 Open one up and you find a grid of **streaming multiprocessors** (SMs), each packed with
 **tensor cores** built to multiply small matrices. Around them sits memory in tiers, and the
 tiers trade size against speed brutally. **HBM** — the headline "80 GB" — is large but
-comparatively slow (~3 TB/s). On-chip **SRAM** is roughly ten times faster, but measured in
-*kilobytes* per SM, not gigabytes.
+comparatively slow (~3 TB/s). This is the **VRAM** you budgeted against in Part 2, the same pool:
+its *size* decides what fits, its *speed* decides how fast decode runs. On-chip **SRAM** is roughly
+ten times faster, but measured in *kilobytes* per SM, not gigabytes.
 
-A value in HBM is far away; a value in SRAM is right next to the core. Every fast kernel is, at
-heart, a scheme for hauling the right data up this pyramid and reusing it before it falls back.
+A value in HBM is far away; a value in SRAM is right next to the core. Every fast **kernel** — a
+routine that runs on the GPU — is, at heart, a scheme for hauling the right data up this pyramid
+and reusing it before it falls back.
 
 </div>
 <GpuFloorplan slot="visual" client:visible />
@@ -45,8 +47,10 @@ heart, a scheme for hauling the right data up this pyramid and reusing it before
 ### GEMM on tensor cores
 
 The workhorse is the **matrix multiply** (GEMM) — the Q/K/V projections, the FFN, and the final
-vocabulary projection are all matmuls. Tensor cores don't multiply whole matrices at once; they
-chew through **tiles**. Each output tile reads a strip of rows from one input and a strip of
+vocabulary projection are all matmuls. A matrix multiply combines two grids of numbers into a
+third: each output number is one row of the left grid **dotted** with one column of the right —
+the very dot product from Part 1, multiply the paired numbers and add. Tensor cores don't multiply
+whole matrices at once; they chew through **tiles**. Each output tile reads a strip of rows from one input and a strip of
 columns from the other, multiplies them in fast memory, and writes one block of the result.
 
 Bigger tiles **reuse** each loaded value across more multiplications — more arithmetic per byte
@@ -63,8 +67,8 @@ precision: FP16, FP8, even FP4 — the formats from Part 2.
 ### FlashAttention
 
 Attention has a memory problem the matmuls don't. Done naively, it builds the full **n×n** matrix
-of attention scores, writes it to HBM, reads it back to softmax, then reads it *again* to multiply
-by V — O(n²) trips to slow memory. For long sequences, that traffic, not the math, is the
+of attention scores — one score for every pair of tokens in a length-*n* sequence — writes it to
+HBM, reads it back to softmax, then reads it *again* to multiply by V — O(n²) trips to slow memory. For long sequences, that traffic, not the math, is the
 bottleneck.
 
 **FlashAttention** refuses to ever write that matrix. It tiles Q, K, and V into blocks that fit
@@ -73,9 +77,12 @@ computed **online**, one block at a time. The n×n matrix never exists; HBM traf
 O(n²) to O(n) — the same answer, a fraction of the memory movement.
 
 <DeeperBlock summary="Online softmax">
-Softmax can be accumulated incrementally. Carry a running max $m$ and running normalizer $\ell$;
-when a new block arrives with its own max, rescale the partial output by $e^{m_\text{old} -
-m_\text{new}}$ and fold in the block's contribution. The end result is bit-for-bit the ordinary
+Softmax exponentiates each score and divides by the *sum* of those exponentials — so to normalize
+you must carry that running sum, and because $e^{x}$ explodes for large $x$ you first subtract the
+running max (it cancels in the ratio, leaving the answer unchanged). So softmax can be accumulated
+incrementally. Carry a running max $m$ and running normalizer $\ell$; when a new block arrives with
+its own max, rescale the partial output by $e^{m_\text{old} - m_\text{new}}$ and fold in the
+block's contribution. The end result is bit-for-bit the ordinary
 softmax — just never materialized in full.
 </DeeperBlock>
 
@@ -89,8 +96,9 @@ softmax — just never materialized in full.
 ### The roofline
 
 Why is prefill fast per token and decode slow? The **roofline** answers it with one ratio. Plot a
-workload by its **arithmetic intensity** — FLOPs performed per byte moved from memory — against
-the FLOP/s it can attain. Low intensity and you are **memory-bound**: the math finishes long
+workload by its **arithmetic intensity** — the number of FLOPs (those floating-point operations
+again) it performs per byte moved from memory — against the FLOP/s (operations *per second*) it
+can attain. Low intensity and you are **memory-bound**: the math finishes long
 before the next bytes arrive, so bandwidth caps you. High intensity and you are **compute-bound**,
 pinned at the chip's peak. The crossover is the **ridge point**.
 
@@ -119,10 +127,12 @@ compute-bound.
 When a model is too big for one GPU, you split it — three ways. **Tensor parallel** shards every
 weight matrix across devices, so each holds a slice; an **all-reduce** stitches the partial
 results back together *every layer*, which is why TP wants the fat NVLink fabric. **Pipeline
-parallel** instead gives each device a *range of layers*; activations flow device to device like
-a pipeline — efficient, but with **bubbles** of idle time, shrunk by feeding more microbatches.
-**Expert parallel** spreads a MoE model's experts across devices and routes each token to its
-experts with an **all-to-all**. Real deployments stack all three at once.
+parallel** instead gives each device a *range of layers*; **activations** — the vectors passing
+from one layer to the next — flow device to device like a pipeline, efficient but with **bubbles**
+of idle time, shrunk by feeding more microbatches. **Expert parallel** spreads a MoE model's
+experts across devices and routes each token to its experts with an **all-to-all** — every device
+shipping each token across to whichever device holds the expert it needs. Real deployments stack
+all three at once.
 
 </div>
 <Parallelism slot="visual" client:visible />

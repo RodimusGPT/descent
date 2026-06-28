@@ -41,8 +41,10 @@ Step through it. The whole machine, from the word you typed to the next word it 
 Everything you have learned about memory and bandwidth now fits in one back-of-the-envelope tool.
 A model's **weights** take params × bytes-per-weight; its **KV cache** grows with context and
 batch; together they must fit in a GPU's VRAM. And for decode, **tokens per second ≈ memory
-bandwidth ÷ bytes read per token** — so lower precision runs faster, a bigger context costs
-memory, and a Mixture-of-Experts model flies because only its *active* experts are read each step.
+bandwidth ÷ bytes read per token** — where bytes read per token is essentially the whole model,
+dragged off memory once for every token it emits. So lower precision runs faster (fewer bytes per
+weight), a bigger context costs memory (a fatter KV cache), and a Mixture-of-Experts model — those
+feed-forward experts from the replay above — flies because only its *active* experts are read each step.
 
 Pick a model, a precision, and a card. See whether it fits, and roughly how fast it runs.
 

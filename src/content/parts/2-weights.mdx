@@ -44,14 +44,20 @@ of these numbers, cheaply, without breaking the model?
 ### Floating point
 
 The default answer is a **floating-point** number: a sign bit, an **exponent** (the scale), and
-a **mantissa** (the significant digits). Full precision is 32 bits — wasteful for inference.
-Sixteen bits halves it, in two flavors. **FP16** spends 5 bits on exponent and 10 on mantissa;
-**BF16** keeps FP32's full 8-bit exponent — its huge dynamic range — and trades mantissa bits
-for it.
+a **mantissa** (the significant digits). It is just scientific notation in binary — the mantissa
+holds the significant digits and the exponent is the power of two that slides the point, the way
+$6.02\times10^{23}$ splits a number into digits and a scale. Full precision is 32 bits — the
+precision models are *trained* in, but wasteful for **inference** (running the finished weights to
+generate text, rather than learning them in the first place). Sixteen bits halves it, in two
+flavors. **FP16** spends 5 bits on exponent and 10 on mantissa; **BF16** keeps FP32's full 8-bit
+exponent — its huge **dynamic range**, the span from the tiniest to the largest magnitude it can
+represent — and trades mantissa bits for it.
 
 That trade is why BF16 is the modern default: for deep nets, *range* matters more than the last
-digits of precision. Newer hardware pushes further still — to **8-bit floats** (FP8, in E4M3 or
-E5M2 flavors) for the heaviest matmuls. Flip the bits below and watch the value change.
+digits of precision — a weight rounded a hair off rarely hurts, but one that overflows to infinity
+or underflows to zero breaks the math. Newer hardware pushes further still — to **8-bit floats**
+(FP8, in E4M3 or E5M2 flavors) for the heaviest matmuls. Flip the bits below and watch the value
+change.
 
 </div>
 <FloatExploder slot="visual" client:visible />
@@ -71,8 +77,9 @@ magnitudes with coarser steps.
 ### Quantization
 
 We can go further by leaving floating point behind. **Quantization** stores each weight in fewer
-bits — 8, 4, even 2 — mapping the range of values onto a small set of levels. You lose precision,
-but a surprising rule holds: a **bigger model at lower precision usually beats a smaller model at
+bits — 8, 4, even 2 — mapping the range of values onto a small set of levels, with a single
+**scale factor** stretching those few levels to cover the real spread of the weights. You lose
+precision, but a surprising rule holds: a **bigger model at lower precision usually beats a smaller model at
 higher precision**, and the quality loss from quantizing is *smaller* on bigger models — they
 carry more redundancy, so rounding any single weight matters less.
 
@@ -95,8 +102,9 @@ choosing $s$, and how finely to share it, so the levels land where the weights a
 
 ### Block scaling: how 4-bit survives
 
-Four-bit numbers have a problem: a single scale for an entire tensor wastes most of its range
-wherever values are small. The fix behind **MXFP4 / NVFP4** is **block scaling** — chop the
+Four-bit numbers have a problem: a single scale for an entire **tensor** — one whole weight
+matrix, the grid from the zoom — wastes most of its range wherever values are small. The fix
+behind **MXFP4 / NVFP4** is **block scaling** — chop the
 tensor into small blocks of 32 values and give each block its *own* scale factor. Each block now
 spends its few bits on its own local range, so error drops sharply where magnitudes differ.
 
@@ -122,9 +130,12 @@ Now the budget. Weight memory is just **params × bytes per weight**: 7 billion 
 scales, which nudges that up. A safe rule of thumb is a model's size in billions times **~0.6** ≈
 its **Q4 footprint in gigabytes** (so 7B ≈ 4 GB).
 
-But weights are not the whole story: the **KV cache** sits on top and grows with context length
-and batch. The bar stacks weights and KV cache against a card's VRAM — pick the knobs and see
-whether it fits.
+But weights are not the whole story: the **KV cache** — the running scratchpad of keys and values
+the model keeps for every token so far, so it needn't recompute them (Part 3) — sits on top and
+grows with context length and **batch** (how many separate sequences run through the model at
+once). The bar stacks weights and KV cache against a card's **VRAM** — the memory soldered onto
+the GPU itself, separate from your system RAM and all you get — pick the knobs and see whether it
+fits.
 
 </div>
 <MemoryBudget slot="visual" client:visible />

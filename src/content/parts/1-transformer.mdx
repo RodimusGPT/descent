@@ -82,15 +82,17 @@ models simply added a fixed or learned position vector to each embedding.
 ### The stack
 
 With every token now a vector, the real work begins. The model is a stack of **N layers of the
-same shape** — dozens in a large model, each with its own learned weights. Each does two things
-in turn: an **attention** sublayer,
+same shape** — dozens in a large model, each with its own learned **weights** (the numbers fixed
+during training that don't change while you chat — a model's billions of **parameters** are
+exactly these weights). Each layer does two things in turn: an **attention** sublayer,
 where tokens exchange information, and a **feed-forward** sublayer, which transforms each token
 on its own.
 
 Two details keep a stack this deep trainable. A **residual connection** wraps each sublayer,
-adding its input back to its output so signal has a clear path down. And **RMSNorm** runs
-*before* each sublayer — "pre-norm" — to keep magnitudes stable. The vectors flow up, getting
-richer at every layer.
+adding its input back onto its output — so each sublayer only has to learn a small *change* to
+the vector, and the original always has a clear path through. And **RMSNorm** runs *before* each
+sublayer — "pre-norm" — to keep the numbers from ballooning or vanishing. The vectors flow up,
+getting richer at every layer.
 
 </div>
 <TransformerStack slot="visual" client:visible />
@@ -111,9 +113,11 @@ cousin of LayerNorm that drops mean-centering.
 
 Attention is the mechanism that makes transformers work. At each layer, **every token looks back
 at the tokens before it** (itself included) and decides how much to borrow from each — it can't
-peek ahead, and that one restriction is exactly what lets the model generate left to right. A
-pronoun reaches back to the noun it refers to; a verb pulls in its subject. The weights are
-*soft* — spread across many tokens, more on some, less on others.
+peek ahead, and that one restriction is exactly what lets the model generate left to right: when
+it's choosing the next token, the tokens after it don't exist yet, so looking only backward means
+reading your prompt and extending it work the very same way. A pronoun reaches back to the noun it
+refers to; a verb pulls in its subject. These **attention weights** are *soft* — spread across
+many tokens, more on some, less on others.
 
 Click a token in the fan to make it the one doing the looking. Warmer, thicker lines show where
 its attention flows; switch heads to see a completely different pattern.
@@ -127,14 +131,19 @@ its attention flows; switch heads to see a completely different pattern.
 
 ### Queries, keys, values — and many heads
 
-How does a token decide *where* to look? It projects its vector into three: a **query** (what am
-I looking for?), a **key** (what do I offer?), and a **value** (what will I hand over?). It
-compares its query against every key with a dot product, scales, softmaxes into weights, and
-takes the weighted sum of the values.
+How does a token decide *where* to look? It **projects** its vector into three — each projection
+just multiplies the vector by a grid of learned weights (a **matrix**) to get a new list: a
+**query** (what am I looking for?), a **key** (what do I offer?), and a **value** (what will I
+hand over?). It scores its query against every key with a **dot product** — line the two vectors
+up, multiply them position by position, and add it all into one number that runs large when they
+point the same way and near zero when they don't. It scales those scores down, runs them through
+a **softmax** — which squashes a row of arbitrary numbers into positive weights that sum to 1, so
+they act like proportions — and takes the weighted sum of the values.
 
 One such computation is a **head**; a layer runs many in parallel, each specializing. A modern
 twist — **GQA/MQA** — lets several query heads *share* one set of keys and values, shrinking the
-**KV cache** we'll meet in Part 3. Remember this; it pays off later.
+**KV cache** — the running store of keys and values for every token so far, which we size in
+Part 2 and exploit in Part 3. Remember this; it pays off later.
 
 </div>
 <QKVMultiHead slot="visual" client:visible />
@@ -153,8 +162,9 @@ softmax into a near-one-hot spike, which would kill the gradient.
 ### The feed-forward network — and Mixture-of-Experts
 
 Between attention sublayers sits the **feed-forward network**: a couple of big matrix multiplies
-with a nonlinearity between, run on each token independently. This is where **most of a model's
-parameters live**, and much of its stored knowledge with them.
+(those grids of weights again) with a **nonlinearity** between — a simple bend that lets the layer
+learn more than a straight line could — run on each token independently. This is where **most of a
+model's parameters live**, and much of its stored knowledge with them.
 
 **Mixture-of-Experts** replaces that single FFN with many **expert** FFNs plus a small
 **router** that, per token, picks only the top few. So a model can carry an enormous *total*
@@ -180,8 +190,9 @@ times $d_{\text{model}}$ — which is why this block holds the lion's share of t
 
 At the top of the stack, the vector at the **last position** — the one that has been gathering
 context across the whole prompt — is projected back out to the whole vocabulary, giving one
-score — a **logit** — for every possible next token. Softmax turns those into probabilities. But
-we rarely just take the most likely one; that gets repetitive.
+score — a **logit** — for every possible next token. A softmax turns those scores into
+probabilities, just as it did inside attention. But we rarely just take the most likely one; that
+gets repetitive.
 
 **Temperature** flattens or sharpens the distribution. **Top-k** keeps only the k most likely
 candidates. **Top-p** (nucleus) keeps the smallest set covering probability p. Then we **sample**
@@ -206,8 +217,8 @@ $T = 1$ is the model's raw distribution; $T > 1$ flattens it toward uniform. Top
 
 Now the loop. Append the chosen token to the sequence and feed the whole thing back in to predict
 the next — then again, and again, **one token at a time**, until the model emits a stop token or
-hits a limit. "Generating" is just this same forward pass run over a sequence that grows by one
-each step.
+hits a limit. "Generating" is just this same **forward pass** — one full sweep of the tokens up
+through every layer to a next-token distribution — run over a sequence that grows by one each step.
 
 Notice the waste: every step re-reads the *entire* context from scratch. The fix — caching what
 has already been computed — is the whole drama of Part 3.

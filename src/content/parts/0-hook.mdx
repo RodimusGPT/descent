@@ -13,14 +13,15 @@ import PromptHook from '@/components/viz/PromptHook';
 You typed something and hit enter. A fraction of a second later, words appeared — and it felt
 like the machine *understood* you. What actually happened is stranger, and more mechanical.
 
-<Beat caption="Pick a prompt, predict its next token. That reveal is the whole trick.">
+<Beat caption="Pick a prompt, predict its next token, then see what the model actually picked — that gap is the whole trick.">
 <div slot="text">
 
 ### One token at a time
 
 The model did exactly one thing, very fast, over and over: it read everything so far and
-predicted the single most plausible **next token** — a whole word, or a fragment of one. Then it
-appended that token to the text and did it again, and again, until it decided to stop.
+predicted the **most plausible next token** — a whole word, or a fragment of one. Then it
+appended that token to the text and did it again, and again, until it picked a token that means
+*stop*.
 
 Pick a prompt and predict its next token. Everything below this point — the transformer, the
 weights, the serving stack, the silicon — exists to answer that one question, fast: *given

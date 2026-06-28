@@ -25,12 +25,15 @@ batches. Its central drama is an asymmetry.
 
 ### Prefill vs decode
 
-Reading your prompt — **prefill** — happens in one big parallel pass over all the prompt tokens
-at once. It is **compute-bound** — lots of arithmetic for each weight it loads — and it sets the
-*time to first token*. Generating the answer — **decode** — emits one token at a time, each step
-depending on the last. It is **memory-bound**: producing a single token still means reading *all*
-of the model's weights, so the limit is how fast they stream from memory, not raw FLOPs — and
-this sets the speed *between* tokens.
+Running the model has two separate costs that pull apart here: **reading** each weight from memory,
+and **doing arithmetic** with it once it is loaded. Reading your prompt — **prefill** — happens in
+one big parallel pass over all the prompt tokens at once, so each weight, once read, is reused
+across every token. That makes it **compute-bound** — the arithmetic is the bottleneck, not the
+reading — and it sets the *time to first token*. Generating the answer — **decode** — emits one
+token at a time, each step depending on the last. It is **memory-bound**: producing a single token
+still means reading *every* one of the model's weights but doing only a little arithmetic with each,
+so the limit is how fast they stream from memory, not the chip's raw **FLOPs** (floating-point
+operations per second — its arithmetic rate) — and this sets the speed *between* tokens.
 
 To avoid recomputing the past at every step, the engine keeps a **KV cache**: the attention keys
 and values for every token already seen. Without it, each new token would reprocess the whole
@@ -101,9 +104,11 @@ is the production workhorse — PagedAttention and continuous batching for many 
 
 Decode is memory-bound, so the GPU's compute sits half-idle waiting on memory — spare capacity we
 can spend. **Speculative decoding** does exactly that: a small, cheap **draft** model guesses the
-next *k* tokens, and the big **target** verifies all *k* in a single forward pass. Where the draft
-guessed right, the tokens are kept for free; at the first miss, we resample from the target and
-continue.
+next *k* tokens, and the big **target** verifies all *k* in a single forward pass. It can, because
+the *k* guesses are already in hand: checking them all at once is one parallel, compute-bound pass
+(just like prefill) that costs about as much as generating a single token — and it runs on the
+compute decode was leaving idle. Where the draft guessed right, the tokens are kept for free; at
+the first miss, we resample from the target and continue.
 
 The win depends on the **acceptance rate** and on the draft being much cheaper than the target —
 push either the wrong way and the speedup can dip below 1.
