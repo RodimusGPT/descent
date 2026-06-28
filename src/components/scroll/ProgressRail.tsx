@@ -112,7 +112,7 @@ export function ProgressRail({ parts, currentSlug }: ProgressRailProps) {
   const jumpTo = (slug: string) => {
     const el = typeof document !== 'undefined' ? document.getElementById(slug) : null;
     if (el) el.scrollIntoView({ block: 'start' });
-    else window.location.href = `/#${slug}`;
+    else window.location.href = `${import.meta.env.BASE_URL}#${slug}`;
   };
 
   const activePart = parts[active];
@@ -125,7 +125,7 @@ export function ProgressRail({ parts, currentSlug }: ProgressRailProps) {
         className="fixed left-0 top-0 z-30 hidden h-screen w-52 flex-col justify-center px-5 md:flex"
       >
         <a
-          href="/"
+          href={import.meta.env.BASE_URL}
           className="mb-8 block font-mono text-xs uppercase tracking-[0.25em] text-faint transition-colors hover:text-ink"
         >
           ↑ Descent
@@ -155,11 +155,11 @@ export function ProgressRail({ parts, currentSlug }: ProgressRailProps) {
             return (
               <a
                 key={part.slug}
-                href={`/#${part.slug}`}
+                href={`#${part.slug}`}
                 onClick={(e) => {
                   e.preventDefault();
                   jumpTo(part.slug);
-                  history.replaceState(null, '', `/#${part.slug}`);
+                  history.replaceState(null, '', `#${part.slug}`);
                 }}
                 aria-current={isCurrent ? 'step' : undefined}
                 className="group absolute flex -translate-y-1/2 items-center gap-3"
@@ -209,7 +209,10 @@ export function ProgressRail({ parts, currentSlug }: ProgressRailProps) {
           />
         </div>
         <div className="flex items-center justify-between gap-3 px-4 py-2">
-          <a href="/" className="font-mono text-xs uppercase tracking-widest text-faint">
+          <a
+            href={import.meta.env.BASE_URL}
+            className="font-mono text-xs uppercase tracking-widest text-faint"
+          >
             ↑ Descent
           </a>
           <label className="flex items-center gap-2 text-xs text-muted">

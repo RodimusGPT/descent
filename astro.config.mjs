@@ -7,11 +7,13 @@ import remarkMath from 'remark-math';
 
 // https://astro.build/config
 export default defineConfig({
-  // Deploys to GitHub Pages as a <username>.github.io user/org site, served at the
-  // domain root — so NO `base` path is needed (a project page under /<repo>/ would
-  // need `base: '/<repo>/'` plus base-aware links). Optionally set `site` for
-  // canonical/sitemap absolute URLs:  site: 'https://<username>.github.io',
-  //
+  // Deploys to GitHub Pages as a PROJECT page, served from a /<repo>/ subpath.
+  // `site`/`base` come from env so no repo name is hard-coded: the deploy workflow
+  // injects PUBLIC_SITE=https://<owner>.github.io and PUBLIC_BASE=/<repo>/. Locally
+  // they're unset, so the site builds at the root for `bun run dev`/`build`. Every
+  // internal link routes through import.meta.env.BASE_URL to work in both.
+  site: process.env.PUBLIC_SITE,
+  base: process.env.PUBLIC_BASE || '/',
   // Static-first: prose is .astro/.mdx, interactivity ships as React islands only.
   integrations: [
     react(),

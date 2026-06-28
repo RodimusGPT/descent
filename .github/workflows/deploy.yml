@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
 # Builds the static Astro site and publishes it to GitHub Pages on every push to
-# the default branch. The site is a <username>.github.io user/org page served at
-# the domain root, so no `base` path is required.
+# the default branch. This is a PROJECT page served from https://<owner>.github.io/<repo>/,
+# so the build needs a `base` path — injected below from the repo name (no hard-coding).
 #
 # One-time repo setup: Settings → Pages → Build and deployment → Source =
 # "GitHub Actions".
@@ -26,6 +26,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Project-page deploy: serve from /<repo>/. Inject base + site so the repo name
+    # is never hard-coded — astro.config reads these from process.env.
+    env:
+      PUBLIC_BASE: /${{ github.event.repository.name }}/
+      PUBLIC_SITE: https://${{ github.repository_owner }}.github.io
     steps:
       - name: Checkout
         uses: actions/checkout@v4
