@@ -74,8 +74,9 @@
   }
   .descent-prose :where(p):not(figure *) {
     color: var(--color-muted);
-    line-height: 1.75;
-    margin-block: 1rem;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    margin-block: 1.1rem;
   }
   .descent-prose :where(strong):not(figure *) {
     color: var(--color-ink);
@@ -99,7 +100,9 @@
     color: var(--color-muted);
   }
   .descent-prose :where(li):not(figure *) {
-    margin-block: 0.35rem;
+    font-size: 1.125rem;
+    line-height: 1.65;
+    margin-block: 0.4rem;
   }
 }
 
