@@ -12,6 +12,6 @@ node_modules/
 *.log
 .DS_Store
 
-# env
+# env (never commit secrets — covers .env.local, .env.production, etc.)
 .env
-.env.production
+.env.*
