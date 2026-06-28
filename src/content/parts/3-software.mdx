@@ -17,8 +17,9 @@ import SpeculativeDecoding from '@/components/viz/SpeculativeDecoding';
 
 Between the math and the metal sits the **inference engine** — the software that actually
 runs the model for you. It is, underneath, a memory manager and a scheduler: its whole job is
-to squeeze a memory-bound, one-token-at-a-time workload onto hardware that craves big parallel
-batches. Its central drama is an asymmetry.
+to squeeze a **memory-bound** workload — one that spends its time waiting on memory rather than on
+arithmetic, generated one token at a time — onto hardware that craves big parallel batches. Its
+central drama is an asymmetry.
 
 <Beat wide caption="Prefill fills the KV cache in parallel; decode ticks one token at a time. Toggle the cache off to see the waste.">
 <div slot="text">
@@ -31,16 +32,19 @@ one big parallel pass over all the prompt tokens at once, so each weight, once r
 across every token. That makes it **compute-bound** — the arithmetic is the bottleneck, not the
 reading — and it sets the *time to first token*. Generating the answer — **decode** — emits one
 token at a time, each step depending on the last. It is **memory-bound**: producing a single token
-still means reading *every* one of the model's weights but doing only a little arithmetic with each,
-so the limit is how fast they stream from memory, not the chip's raw **FLOPs** (floating-point
-operations per second — its arithmetic rate) — and this sets the speed *between* tokens.
+still means reading *every* one of the model's weights (or, for a Mixture-of-Experts model, all of
+its *active* ones) but doing only a little arithmetic with each, so the limit is how fast they
+stream from memory, not the chip's raw **FLOPs** (floating-point operations per second — its
+arithmetic rate) — and this sets the speed *between* tokens.
 
 To avoid recomputing the past at every step, the engine keeps a **KV cache**: the attention keys
 and values for every token already seen. Without it, each new token would reprocess the whole
-sequence — O(n²) work to write an n-token reply; the cache cuts that recompute to O(1) per step,
-leaving only the attention scan over the growing cache. That cache *is* the memory pressure — it
-swells with context and batch — which is why **GQA / MQA** (and MLA), sharing keys and values
-across heads as Part 1 promised, pay off right here.
+sequence — O(n²) work to write an n-token reply. The cache means each step runs the network on just
+the one new token instead of re-running all n, dropping that recompute to O(1) per step; only the
+attention scan over the cached keys and values still grows with the sequence. That cache *is* the
+memory pressure — it swells with context and batch — which is why **GQA / MQA** (sharing keys and
+values across heads, as Part 1 promised) — and **MLA**, which compresses them into a smaller shared
+latent — pay off right here.
 
 </div>
 <PrefillDecode slot="visual" client:visible />
@@ -51,15 +55,18 @@ across heads as Part 1 promised, pay off right here.
 
 ### Batching & scheduling
 
-A single memory-bound stream barely keeps the GPU busy, so engines run **many at once** — and a
-GPU is happiest with a **big batch** anyway. But sequences finish at different times, and naive
+A single memory-bound stream barely keeps the GPU busy — its arithmetic units mostly idle, waiting
+on the next read of weights — so engines run **many sequences at once**, sharing each weight read
+across all of them (which tips decode back toward compute-bound). A GPU is happiest with a **big
+batch** anyway. But sequences finish at different times, and naive
 **static batching** makes the whole batch wait for its slowest member, leaving finished slots
 idle. **Continuous batching** schedules *per iteration*: the instant a
 sequence finishes, a waiting one takes its slot. Utilization climbs.
 
 Two tricks ride along. **Chunked prefill** breaks a long prompt into pieces and interleaves them
 with ongoing decodes, so one big prefill doesn't stall everyone. And **prefix caching** reuses
-the KV of a shared prompt across requests — a system prompt is computed once, not per user.
+the KV of a shared prompt across requests — a **system prompt** (the fixed instructions silently
+prepended to every chat) is computed once, not per user.
 
 </div>
 <BatchingTimeline slot="visual" client:visible />
@@ -90,7 +97,9 @@ physical blocks. Switch between contiguous and paged to watch the wasted blocks 
 All of this is packaged into **inference engines**, each with a personality. **llama.cpp** is the
 portable one — runs the GGUF format anywhere, ideal for a single user on local hardware. **vLLM**
 is the production workhorse — PagedAttention and continuous batching for many concurrent users.
-**SGLang** leans into prefix caching (RadixAttention) and structured, agentic workloads.
+**SGLang** leans into prefix caching (RadixAttention) and structured, agentic workloads — long
+chains of tool-calling steps, and outputs forced into a fixed shape like JSON, where big shared
+prefixes repeat across requests.
 **TensorRT-LLM** squeezes maximum throughput from NVIDIA hardware, at the cost of a compile step.
 
 </div>

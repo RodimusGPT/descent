@@ -31,8 +31,9 @@ and you find the attention and feed-forward weight matrices. Zoom into one matri
 grid of numbers. Zoom into one cell and it is a single value — a weight, like `0.0123`.
 
 There are billions of them, and "running" the model is mostly multiplying these matrices by the
-vectors flowing through. So the question for this whole part is concrete: how do you store one
-of these numbers, cheaply, without breaking the model?
+vectors flowing through — each output number a weighted blend of the whole input vector. So the
+question for this whole part is concrete: how do you store one of these numbers, cheaply, without
+breaking the model?
 
 </div>
 <ZoomToWeight slot="visual" client:visible />
@@ -56,7 +57,8 @@ represent — and trades mantissa bits for it.
 That trade is why BF16 is the modern default: for deep nets, *range* matters more than the last
 digits of precision — a weight rounded a hair off rarely hurts, but one that overflows to infinity
 or underflows to zero breaks the math. Newer hardware pushes further still — to **8-bit floats**
-(FP8, in E4M3 or E5M2 flavors) for the heaviest matmuls. Flip the bits below and watch the value
+for the heaviest **matmuls** (matrix multiplications, the bulk of the work): FP8 comes as E4M3
+(4 exponent bits, 3 mantissa) or E5M2 (the reverse trade). Flip the bits below and watch the value
 change.
 
 </div>
@@ -83,7 +85,8 @@ precision, but a surprising rule holds: a **bigger model at lower precision usua
 higher precision**, and the quality loss from quantizing is *smaller* on bigger models — they
 carry more redundancy, so rounding any single weight matters less.
 
-Formats like GGUF's **k-quants** even mix precision per layer, spending bits where they matter.
+Formats like **k-quants** (in GGUF, the file format behind most run-it-on-your-laptop models) even
+mix precision per layer, spending bits where they matter.
 Drag the precision down and watch the distribution stair-step — and the model size fall with it.
 
 </div>
@@ -126,8 +129,8 @@ a bit per value but recovers most of the accuracy of formats several bits wider.
 ### The memory budget
 
 Now the budget. Weight memory is just **params × bytes per weight**: 7 billion params at FP16
-(2 bytes) is 14 GB; at Q4 it is ~3.5 GB in theory — though real 4-bit formats also store per-block
-scales, which nudges that up. A safe rule of thumb is a model's size in billions times **~0.6** ≈
+(2 bytes) is 14 GB; at **Q4** (4-bit, half a byte each) it is ~3.5 GB in theory — though real
+4-bit formats also store per-block scales, which nudges that up. A safe rule of thumb is a model's size in billions times **~0.6** ≈
 its **Q4 footprint in gigabytes** (so 7B ≈ 4 GB).
 
 But weights are not the whole story: the **KV cache** — the running scratchpad of keys and values

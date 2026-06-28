@@ -24,8 +24,9 @@ We started with text and ended with a token, and in between the same value moved
 layer of this descent: split into tokens, looked up as a vector, mixed with its neighbors by
 attention across dozens of layers, transformed by the feed-forward experts, and projected back
 into a distribution to sample from. Those weights were billions of numbers in low precision; the
-engine fed your prompt in one parallel pass and then emitted answers one token at a time, reusing
-its KV cache; and all of it ran as tiled matmuls on tensor cores, paced by memory bandwidth.
+engine fed your prompt in one parallel pass and then emitted answers one token at a time — that
+slow, one-at-a-time **decode** — reusing its KV cache; and all of it ran as tiled matmuls on tensor
+cores, paced by memory bandwidth.
 
 Step through it. The whole machine, from the word you typed to the next word it chose.
 
@@ -39,8 +40,9 @@ Step through it. The whole machine, from the word you typed to the next word it 
 ### Size it yourself
 
 Everything you have learned about memory and bandwidth now fits in one back-of-the-envelope tool.
-A model's **weights** take params × bytes-per-weight; its **KV cache** grows with context and
-batch; together they must fit in a GPU's VRAM. And for decode, **tokens per second ≈ memory
+A model's **weights** are one number per parameter, so they take params × bytes-per-weight; its
+**KV cache** grows with context and batch (how many requests share the card at once); together they
+must fit in the GPU's VRAM — the on-card HBM from Part 4. And for decode, **tokens per second ≈ memory
 bandwidth ÷ bytes read per token** — where bytes read per token is essentially the whole model,
 dragged off memory once for every token it emits. So lower precision runs faster (fewer bytes per
 weight), a bigger context costs memory (a fatter KV cache), and a Mixture-of-Experts model — those
@@ -54,5 +56,5 @@ Pick a model, a precision, and a card. See whether it fits, and roughly how fast
 
 The same token that felt like magic at the top is, by the bottom, just bandwidth and arithmetic —
 a list of numbers multiplied by other numbers, fast enough to feel like thought. Somehow that
-makes it more impressive, not less. You have reached the bottom of the descent; now you can see
-the whole climb.
+makes it more impressive, not less. You have reached the bottom of the descent; turn around, and
+you can see the whole climb you just made.

@@ -28,9 +28,10 @@ can feed them. Keeping them fed is the whole game.
 
 Open one up and you find a grid of **streaming multiprocessors** (SMs), each packed with
 **tensor cores** built to multiply small matrices. Around them sits memory in tiers, and the
-tiers trade size against speed brutally. **HBM** — the headline "80 GB" — is large but
-comparatively slow (~3 TB/s). This is the **VRAM** you budgeted against in Part 2, the same pool:
-its *size* decides what fits, its *speed* decides how fast decode runs. On-chip **SRAM** is roughly
+tiers trade size against speed brutally. **HBM** — the GPU's main memory, the headline
+"80 GB" — is large but comparatively slow: it delivers bytes at roughly 3 TB/s, its **bandwidth**.
+This is the **VRAM** you budgeted against in Part 2, the same pool: its *size* decides what fits,
+its *bandwidth* decides how fast decode runs. On-chip **SRAM** is roughly
 ten times faster, but measured in *kilobytes* per SM, not gigabytes.
 
 A value in HBM is far away; a value in SRAM is right next to the core. Every fast **kernel** — a
@@ -73,7 +74,8 @@ bottleneck.
 
 **FlashAttention** refuses to ever write that matrix. It tiles Q, K, and V into blocks that fit
 in SRAM and streams through them, keeping a running maximum and running sum so the softmax is
-computed **online**, one block at a time. The n×n matrix never exists; HBM traffic drops from
+computed **online** — incrementally, as the blocks stream past, never assembled in full. The n×n
+matrix never exists; HBM traffic drops from
 O(n²) to O(n) — the same answer, a fraction of the memory movement.
 
 <DeeperBlock summary="Online softmax">
@@ -100,7 +102,8 @@ workload by its **arithmetic intensity** — the number of FLOPs (those floating
 again) it performs per byte moved from memory — against the FLOP/s (operations *per second*) it
 can attain. Low intensity and you are **memory-bound**: the math finishes long
 before the next bytes arrive, so bandwidth caps you. High intensity and you are **compute-bound**,
-pinned at the chip's peak. The crossover is the **ridge point**.
+pinned at the chip's peak. The crossover is the **ridge point**. Plotted, the limit looks like a
+roof — a sloped line that climbs with intensity until it hits the flat ceiling of the chip's peak.
 
 Prefill, processing many tokens against the same weights, sits high and compute-bound. Decode at
 batch 1 reloads *all* the weights to produce a single token — dreadful intensity, deeply
@@ -129,7 +132,8 @@ weight matrix across devices, so each holds a slice; an **all-reduce** stitches 
 results back together *every layer*, which is why TP wants the fat NVLink fabric. **Pipeline
 parallel** instead gives each device a *range of layers*; **activations** — the vectors passing
 from one layer to the next — flow device to device like a pipeline, efficient but with **bubbles**
-of idle time, shrunk by feeding more microbatches. **Expert parallel** spreads a MoE model's
+of idle time at the ends, shrunk by feeding more **microbatches** so that while a late device
+finishes one chunk an early one is already on the next. **Expert parallel** spreads a MoE model's
 experts across devices and routes each token to its experts with an **all-to-all** — every device
 shipping each token across to whichever device holds the expert it needs. Real deployments stack
 all three at once.
@@ -140,8 +144,9 @@ all three at once.
 
 Step back and one law rules this floor: for decode, **tokens per second ≈ memory bandwidth ÷
 bytes read per token**. The compute is almost incidental; what you wait on is weights streaming
-from memory. That single fact explains the landscape — why unified-memory machines, slow but
-vast, run *enormous* models that would never fit a fast GPU; why MoE feels like cheating, since
+from memory. That single fact explains the landscape — why unified-memory machines (an
+Apple-Silicon Mac, say, where CPU and GPU share one big pool of slower RAM), slow but vast, run
+*enormous* models that would never fit a fast GPU; why MoE feels like cheating, since
 only the few **active** experts' weights are read per token; and why every trick in Parts 2 and 3
 — quantization, GQA, paging — was, underneath, about *moving fewer bytes*. We have reached the
 bottom. Time to climb back up and watch the whole machine run at once.

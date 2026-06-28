@@ -69,7 +69,8 @@ exact geometry does not.
 </DeeperBlock>
 
 <DeeperBlock summary="How word order gets in">
-Attention by itself is order-blind — shuffle the tokens and it returns the same answer. Models
+(Attention — and the query and key vectors — arrives in the next few sections; this aside runs a
+little ahead.) Attention by itself is order-blind — shuffle the tokens and it returns the same answer. Models
 fix this with **positional encoding**. Most modern LLMs use **RoPE** (rotary position
 embeddings): each token's query and key vectors are *rotated* by an angle proportional to its
 position, so the attention score between two tokens depends on their *relative* distance. Earlier
@@ -159,7 +160,9 @@ the closest matches.
 For a head with key dimension $d_k$:
 $$\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V.$$
 The $\sqrt{d_k}$ divisor stops the dot products from growing with dimension and saturating the
-softmax into a near-one-hot spike, which would kill the gradient.
+softmax — piling nearly all the weight onto a single token (a near *one-hot* spike: one entry
+close to 1, the rest near 0). That flattens the function locally, leaving training almost no
+signal to learn from.
 </DeeperBlock>
 
 <Beat caption="The router scores experts for a token and activates only the top-k; the rest stay dormant.">
@@ -202,7 +205,8 @@ gets repetitive.
 
 **Temperature** flattens or sharpens the distribution. **Top-k** keeps only the k most likely
 candidates. **Top-p** (nucleus) keeps the smallest set covering probability p. Then we **sample**
-one token from what survives. Drag the sliders and watch the distribution reshape.
+one token — drawn at random, each weighted by its probability — from what survives. Drag the
+sliders and watch the distribution reshape.
 
 </div>
 <SamplingPlayground slot="visual" client:visible />
