@@ -39,12 +39,12 @@ export interface GpuOption {
  * fits at all. Ordered from least to most VRAM so the selector reads as a ladder.
  */
 export const GPU_OPTIONS: readonly GpuOption[] = [
-  { name: 'RTX 4090', vramGB: 24, bandwidthTBs: 1.0, note: 'high-end consumer GPU' },
-  { name: 'A100 80GB', vramGB: 80, bandwidthTBs: 2.0, note: 'datacenter accelerator' },
-  { name: 'H100 80GB', vramGB: 80, bandwidthTBs: 3.35, note: 'flagship datacenter accelerator' },
+  { name: 'RTX 5090', vramGB: 32, bandwidthTBs: 1.8, note: 'top consumer GPU' },
+  { name: 'H100', vramGB: 80, bandwidthTBs: 3.35, note: 'datacenter workhorse' },
+  { name: 'B200', vramGB: 192, bandwidthTBs: 8.0, note: 'Blackwell flagship — big and very fast' },
   {
-    name: 'Mac Studio (unified)',
-    vramGB: 128,
+    name: 'M3 Ultra (unified)',
+    vramGB: 256,
     bandwidthTBs: 0.8,
     note: 'vast but slow unified memory',
   },

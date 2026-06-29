@@ -2,15 +2,16 @@
  * engines.ts — the inference-ENGINES landscape (spec 10.3).
  *
  * Once a model exists, you still need software to RUN it: an inference engine
- * that turns weights + a prompt into tokens, fast. Four engines dominate, and
- * each is shaped by a different priority:
+ * that turns weights + a prompt into tokens, fast. A handful dominate, and each
+ * is shaped by a different priority:
  *
- *   - llama.cpp     — portable, GGUF, runs anywhere; single-user / local.
- *   - vLLM          — production multi-user serving; PagedAttention.
- *   - SGLang        — RadixAttention prefix caching; agentic / structured.
- *   - TensorRT-LLM  — maximum NVIDIA throughput, behind a compile step.
+ *   - llama.cpp      — portable, GGUF, runs anywhere; single-user / local.
+ *   - vLLM           — production multi-user serving; PagedAttention.
+ *   - SGLang         — RadixAttention prefix caching; agentic / structured.
+ *   - TensorRT-LLM   — maximum NVIDIA throughput, behind a compile step.
+ *   - NVIDIA Dynamo  — datacenter-scale, disaggregated prefill/decode across nodes.
  *
- * The four `dims` are ILLUSTRATIVE 1..5 character ratings, NOT benchmarks. They
+ * The `dims` are ILLUSTRATIVE 1..5 character ratings, NOT benchmarks. They
  * exist only to convey the SHAPE of each engine's trade-offs at a glance.
  */
 
@@ -78,6 +79,16 @@ export const ENGINES: Engine[] = [
     bestFor: 'Squeezing peak tokens/sec out of NVIDIA hardware',
     keyTech: 'Ahead-of-time compiled, fused TensorRT engines',
     dims: { portability: 2, multiUser: 4, prefixCaching: 4, throughput: 5 },
+  },
+  {
+    key: 'dynamo',
+    name: 'NVIDIA Dynamo',
+    tagline: 'Disaggregated serving across many GPUs.',
+    bestFor: 'Datacenter-scale serving of large & reasoning models',
+    keyTech: 'Disaggregated prefill/decode + KV-aware routing across nodes',
+    // Its win is scale-out (multiUser), not single-node peak — TensorRT-LLM still
+    // owns the raw single-node throughput ceiling.
+    dims: { portability: 2, multiUser: 5, prefixCaching: 4, throughput: 4 },
   },
 ];
 

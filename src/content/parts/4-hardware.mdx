@@ -10,6 +10,7 @@ summary: Tensor cores, a steep memory hierarchy, and the bandwidth wall that sha
 import Beat from '@/components/Beat.astro';
 import DeeperBlock from '@/components/scroll/DeeperBlock';
 import GpuFloorplan from '@/components/viz/GpuFloorplan';
+import AcceleratorLandscape from '@/components/viz/AcceleratorLandscape';
 import GemmTiling from '@/components/viz/GemmTiling';
 import FlashAttention from '@/components/viz/FlashAttention';
 import Roofline from '@/components/viz/Roofline';
@@ -40,6 +41,26 @@ and reusing it before it falls back.
 
 </div>
 <GpuFloorplan slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Today's inference chips by the two specs that decide everything — memory capacity and bandwidth. Illustrative public specs, ~2026.">
+<div slot="text">
+
+### The accelerator landscape
+
+You just toured one GPU; here is the field of them. Strip away the marketing and every accelerator
+comes down to two numbers: **memory capacity** — does the model even fit? — and **memory bandwidth** —
+how fast it can decode, since each token streams the active weights once from memory. The frontier
+datacenter parts (NVIDIA's Blackwell, AMD's MI355X, Google's inference-first TPU) cluster at the
+top-right: vast HBM and ~8 TB/s. A Mac's unified memory sits far to the right but low — huge, but slow.
+And a different bet sits off the chart entirely: SRAM machines like Groq and Cerebras trade capacity
+for blistering speed.
+
+Pick a chip: does a 70B model fit, and how fast would it decode? Both fall straight out of the
+memory-bound law from Part 3 — tokens/sec ≈ bandwidth ÷ bytes read per token.
+
+</div>
+<AcceleratorLandscape slot="visual" client:visible />
 </Beat>
 
 <Beat caption="Matmul runs as tiles: each output tile reads a row-strip and a column-strip. Bigger tiles reuse more.">

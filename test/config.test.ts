@@ -39,7 +39,7 @@ describe('MODEL_OPTIONS', () => {
 
 describe('GPU_OPTIONS', () => {
   it('spans a consumer card, datacenter cards, and a big unified-memory box', () => {
-    expect(GPU_OPTIONS.some((g) => g.vramGB <= 24)).toBe(true); // consumer
+    expect(GPU_OPTIONS.some((g) => g.vramGB <= 32)).toBe(true); // consumer
     expect(GPU_OPTIONS.some((g) => g.vramGB >= 80)).toBe(true); // datacenter
     expect(GPU_OPTIONS.some((g) => g.vramGB >= 128)).toBe(true); // unified memory
   });
@@ -83,22 +83,22 @@ describe('estimateVramGB — KV cache', () => {
 
 describe('estimateTokensPerSec', () => {
   it('H100 (3.35 TB/s) on a 7B dense FP16 ≈ 239 tok/s', () => {
-    const t = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('H100 80GB'));
+    const t = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('H100'));
     expect(t).toBeCloseTo(3.35e12 / (7e9 * 2), 6);
     expect(t).toBeGreaterThan(235);
     expect(t).toBeLessThan(245);
   });
 
   it('lower precision raises tokens/sec', () => {
-    const fp16 = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('H100 80GB'));
-    const q4 = estimateTokensPerSec(model('7B dense'), 'Q4', gpu('H100 80GB'));
+    const fp16 = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('H100'));
+    const q4 = estimateTokensPerSec(model('7B dense'), 'Q4', gpu('H100'));
     expect(q4).toBeGreaterThan(fp16);
   });
 
   it('an MoE decodes much faster than a dense model of the same total size', () => {
     const moe = model('120B MoE (~5B active)');
     const dense = model('70B dense');
-    const h100 = gpu('H100 80GB');
+    const h100 = gpu('H100');
     const moeTps = estimateTokensPerSec(moe, 'FP16', h100);
     const denseTps = estimateTokensPerSec(dense, 'FP16', h100);
     // MoE reads ~5B active vs 70B dense -> dramatically higher throughput.
@@ -106,9 +106,9 @@ describe('estimateTokensPerSec', () => {
   });
 
   it('scales with GPU bandwidth', () => {
-    const a100 = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('A100 80GB'));
-    const h100 = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('H100 80GB'));
-    expect(h100).toBeGreaterThan(a100);
+    const slow = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('RTX 5090'));
+    const h100 = estimateTokensPerSec(model('7B dense'), 'FP16', gpu('H100'));
+    expect(h100).toBeGreaterThan(slow);
   });
 });
 
@@ -120,11 +120,11 @@ describe('fits', () => {
     expect(fits(140, 80)).toBe(false);
   });
 
-  it('a 7B Q4 fits a 4090 but a 70B FP16 does not', () => {
-    const fourNinety = gpu('RTX 4090');
+  it('a 7B Q4 fits a consumer card but a 70B FP16 does not', () => {
+    const consumer = gpu('RTX 5090');
     const small = estimateVramGB(model('7B dense'), 'Q4', 4096).totalGB;
     const big = estimateVramGB(model('70B dense'), 'FP16', 4096).totalGB;
-    expect(fits(small, fourNinety.vramGB)).toBe(true);
-    expect(fits(big, fourNinety.vramGB)).toBe(false);
+    expect(fits(small, consumer.vramGB)).toBe(true);
+    expect(fits(big, consumer.vramGB)).toBe(false);
   });
 });

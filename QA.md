@@ -246,3 +246,29 @@ performance, verified with automated gates (`bun run a11y` + Lighthouse) plus th
   clocks gated per-component; manual Step controls stay live under reduced motion.
 - ◑ Cosmetic leftovers logged earlier (roofline y-tick clipping, zoom decimal vs FP16 bits ~6e-5,
   extreme over-capacity bar clamp) are illustrative/non-blocking and unchanged.
+
+## M10 — Software & hardware landscape (current systems)
+
+Two new interactive beats + a refresh of the GPU/engine data to the ~2026 lineup. Exercise the new
+pieces at `/dev/deploy` and `/dev/accelerators`, and read Parts 3 & 4 in context.
+
+**Automated gates (all green):**
+- ☑ **axe WCAG 2.1 A/AA**: 0 violations / 31 routes. **Keyboard roving**: 16 pages, all groups pass
+  (incl. /dev/deploy and /dev/accelerators — chip + precision selectors). **Reduced motion**: 67
+  pages, 0 console errors, 0 overflow. `bun run check` green (414 tests), build green (32 pages).
+
+**Human spot-checks:**
+- ☐ **DeploymentExplorer** (`/dev/deploy`, Part 3 "Where it runs"): do the three lanes — Local /
+  Self-hosted / Managed API — each reveal sensible tools + trait bars (control / convenience / cost
+  at scale / latency / model choice)? Keyboard: Tab once to the lanes, arrows move selection AND
+  focus; the detail panel announces (aria-live). Each mode's categorical identity color reads distinct.
+- ☐ **AcceleratorLandscape** (`/dev/accelerators`, Part 4 "The accelerator landscape"): does the
+  scatter read — frontier parts (B200 / B300 / MI355X / TPU v7) top-right at ~8 TB/s, M3 Ultra far
+  right but low, RTX 5090 bottom-left? Pick a chip + a precision: the readout's fit verdict +
+  decode-ceiling tok/s update believably (H100, 70B at FP8 ≈ 48 tok/s). Are the SRAM outliers
+  (Groq / Cerebras) called out off-chart? ⚠ Known: MI355X and B300 share 288 GB / 8 TB/s, so their
+  dots coincide unless one is selected.
+- ☐ **Data refresh**: ConfigSandbox + MemoryBudget GPUs now read RTX 5090 / H100 / B200 / M3 Ultra
+  etc.; EnginesOverview shows five engines incl. **NVIDIA Dynamo**; Part 3 prose + the disaggregation
+  DeeperBlock match the viz.
+- ☐ Reduced motion: both new interactives are static (no entrance animation); selection still works.

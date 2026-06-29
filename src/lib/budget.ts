@@ -35,11 +35,11 @@ export interface GpuPreset {
  * Ordered from least to most memory so the selector reads as a ladder.
  */
 export const GPU_PRESETS: readonly GpuPreset[] = [
-  { name: 'RTX 4060 Ti', vramGB: 8, note: 'entry consumer GPU' },
-  { name: 'RTX 4080', vramGB: 16, note: 'mid consumer GPU' },
-  { name: 'RTX 4090', vramGB: 24, note: 'high-end consumer GPU' },
-  { name: 'A100 80GB', vramGB: 80, note: 'datacenter accelerator' },
-  { name: 'Mac Studio (unified)', vramGB: 192, note: 'large unified memory' },
+  { name: 'RTX 5060 Ti', vramGB: 16, note: 'entry consumer GPU' },
+  { name: 'RTX 5090', vramGB: 32, note: 'high-end consumer GPU' },
+  { name: 'H100', vramGB: 80, note: 'datacenter accelerator' },
+  { name: 'B200', vramGB: 192, note: 'Blackwell flagship' },
+  { name: 'M3 Ultra (unified)', vramGB: 256, note: 'vast unified memory' },
 ] as const;
 
 /** A model size the user can pick: a parameter count plus a label. */

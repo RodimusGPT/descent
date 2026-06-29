@@ -13,8 +13,8 @@ import { type KeyboardEvent, useId, useState } from 'react';
 /**
  * EnginesOverview (spec 10.3) — the inference-ENGINES landscape.
  *
- * A model is just numbers until software runs it. Four engines dominate, each
- * built around a different priority. This is a selectable card set: pick an
+ * A model is just numbers until software runs it. A handful of engines dominate,
+ * each built around a different priority. This is a selectable card set: pick an
  * engine to highlight it and read its tagline, best-for scenario, and signature
  * tech, alongside a small bar rating of its four illustrative character
  * dimensions (portability / multi-user / prefix-caching / throughput).
@@ -77,14 +77,14 @@ export function EnginesOverview({ initialKey = ENGINES[0]?.key }: EnginesOvervie
       <div className="flex flex-col gap-1">
         <h3 className="font-mono text-sm text-ink">Inference engines — the landscape</h3>
         <p className="text-xs text-muted">
-          A model is just numbers until an <span style={{ color: accent }}>engine</span> runs it.
-          Four dominate, each shaped by a different priority. Pick one to compare its character.
+          A model is just numbers until an <span style={{ color: accent }}>engine</span> runs it. A
+          handful dominate, each shaped by a different priority. Pick one to compare its character.
         </p>
       </div>
 
       {/* Engine cards — a radiogroup with roving focus */}
       <div
-        className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5"
         role="radiogroup"
         aria-label="Inference engines"
         id={groupId}

@@ -182,4 +182,17 @@ export const DEV_SANDBOXES: DevSandbox[] = [
     description: 'Model + quant + GPU → estimated VRAM and tokens/sec.',
     milestone: 'M8',
   },
+  {
+    slug: 'deploy',
+    title: 'Where it runs',
+    description:
+      'Local / self-hosted / managed API — the three deployment modes and their trade-offs.',
+    milestone: 'M10',
+  },
+  {
+    slug: 'accelerators',
+    title: 'Accelerator landscape',
+    description: "Today's inference chips plotted by memory capacity × bandwidth.",
+    milestone: 'M10',
+  },
 ];

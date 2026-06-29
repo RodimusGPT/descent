@@ -13,6 +13,7 @@ import PrefillDecode from '@/components/viz/PrefillDecode';
 import BatchingTimeline from '@/components/viz/BatchingTimeline';
 import PagedAttention from '@/components/viz/PagedAttention';
 import EnginesOverview from '@/components/viz/EnginesOverview';
+import DeploymentExplorer from '@/components/viz/DeploymentExplorer';
 import SpeculativeDecoding from '@/components/viz/SpeculativeDecoding';
 
 Between the math and the metal sits the **inference engine** — the software that actually
@@ -72,6 +73,15 @@ prepended to every chat) is computed once, not per user.
 <BatchingTimeline slot="visual" client:visible />
 </Beat>
 
+<DeeperBlock summary="Disaggregated serving — splitting prefill from decode">
+Prefill is compute-bound and decode is memory-bound, so newer systems (**NVIDIA Dynamo**, ByteDance's
+**Mooncake**) run them on *separate* pools of GPUs — a prefill tier and a decode tier — and stream the
+KV cache between them over fast interconnect. Each tier is then sized and batched for its own
+bottleneck instead of compromising on one box. The same instinct drives **KV-cache offloading**: spill
+cold cache down to CPU RAM or SSD and page it back, serving far more concurrent users than VRAM alone
+would hold.
+</DeeperBlock>
+
 <Beat wide caption="Fixed-size blocks + a block table map logical positions to physical blocks — fragmentation collapses, prefixes share.">
 <div slot="text">
 
@@ -89,7 +99,7 @@ physical blocks. Switch between contiguous and paged to watch the wasted blocks 
 <PagedAttention slot="visual" client:visible />
 </Beat>
 
-<Beat caption="Four engines, four personalities. Pick one to see what it is for.">
+<Beat caption="A handful of engines, each with a personality. Pick one to see what it is for.">
 <div slot="text">
 
 ### The engines
@@ -100,10 +110,28 @@ is the production workhorse — PagedAttention and continuous batching for many 
 **SGLang** leans into prefix caching (RadixAttention) and structured, agentic workloads — long
 chains of tool-calling steps, and outputs forced into a fixed shape like JSON, where big shared
 prefixes repeat across requests.
-**TensorRT-LLM** squeezes maximum throughput from NVIDIA hardware, at the cost of a compile step.
+**TensorRT-LLM** squeezes maximum throughput from NVIDIA hardware, at the cost of a compile step. And
+when one box isn't enough, **NVIDIA Dynamo** spreads serving across many GPUs — the disaggregated
+prefill/decode split from the aside above.
 
 </div>
 <EnginesOverview slot="visual" client:visible />
+</Beat>
+
+<Beat caption="The same open-weights model, three places to run it — trading control for convenience.">
+<div slot="text">
+
+### Where it runs
+
+Those engines are one option among three. The same open-weights model can run **locally** on your own
+machine (Ollama, llama.cpp, LM Studio, MLX) — private and free after the download, but capped by your
+RAM and bandwidth; **self-hosted**, a serving engine on GPUs you rent or own (vLLM, SGLang,
+TensorRT-LLM, NVIDIA Dynamo) — full control and the best cost at scale, but you own the ops; or behind
+a **managed API**, where someone else runs the GPU and you just call an endpoint (Together, Fireworks,
+Groq, Bedrock) — zero ops and instant scale, paid per token. Pick a lane and weigh what you're trading.
+
+</div>
+<DeploymentExplorer slot="visual" client:visible />
 </Beat>
 
 <Beat caption="A cheap draft guesses k tokens; the target verifies all k in one pass. Slide the acceptance rate.">

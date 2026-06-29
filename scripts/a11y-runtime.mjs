@@ -36,6 +36,8 @@ const ROVING_PAGES = [
   '/dev/distill',
   '/dev/config',
   '/dev/budget',
+  '/dev/deploy',
+  '/dev/accelerators',
 ];
 
 async function discoverDevRoutes(ctx) {

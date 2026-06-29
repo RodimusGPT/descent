@@ -9,8 +9,8 @@ import {
 } from '../src/lib/engines';
 
 describe('ENGINES — shape', () => {
-  it('has exactly four engines', () => {
-    expect(ENGINES.length).toBe(4);
+  it('has exactly five engines', () => {
+    expect(ENGINES.length).toBe(5);
   });
 
   it('covers the four expected engines by key', () => {

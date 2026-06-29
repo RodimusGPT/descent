@@ -1,6 +1,8 @@
 ---
 import TokenDemo from '../../components/dev/TokenDemo.tsx';
+import AcceleratorLandscape from '../../components/viz/AcceleratorLandscape.tsx';
 import AttentionFan from '../../components/viz/AttentionFan.tsx';
+import DeploymentExplorer from '../../components/viz/DeploymentExplorer.tsx';
 import Autoregression from '../../components/viz/Autoregression.tsx';
 import BatchingTimeline from '../../components/viz/BatchingTimeline.tsx';
 import BlockScaling from '../../components/viz/BlockScaling.tsx';
@@ -76,6 +78,8 @@ const meta = DEV_SANDBOXES.find((s) => s.slug === component);
       {component === 'hook' && <PromptHook client:load />}
       {component === 'replay' && <FullStackReplay client:load />}
       {component === 'config' && <ConfigSandbox client:load />}
+      {component === 'deploy' && <DeploymentExplorer client:load />}
+      {component === 'accelerators' && <AcceleratorLandscape client:load />}
     </div>
   </main>
 </BaseLayout>

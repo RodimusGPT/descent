@@ -204,3 +204,32 @@ keyboard-roving harness) and Lighthouse. Choices made:
 - **Lighthouse target met.** Production-representative (gzipped) home page: perf 96–97 / a11y 100 /
   best-practices 100 / SEO 100, CLS 0. The uncompressed-localhost perf 85 is entirely missing server
   text-compression (~2.25 s of LCP); not a site-architecture issue (total weight 685 KiB passes).
+
+## M10 — Software & hardware landscape (current systems), user-directed
+
+Add the latest inference systems (software + hardware, cloud + local), woven in *relevantly* rather
+than bolted on. Web-researched the ~2026 field; kept it evergreen.
+
+- **Two new interactive beats, NOT a new Part.** The descent's 6-part arc (model → … → silicon →
+  synthesis) is vertical; a "landscape" is horizontal/practical. So the additions live as beats inside
+  the parts whose *question* they answer: Part 3 ("How is it served?") gains **"Where it runs"**
+  (`DeploymentExplorer` — local / self-hosted / managed API); Part 4 ("How does the silicon run it?")
+  gains **"The accelerator landscape"** (`AcceleratorLandscape` — today's chips by memory × bandwidth).
+- **The accelerator scatter teaches the site's core law with real chips.** Plotting capacity (x) vs
+  bandwidth (y) makes "does it fit?" and "how fast does it decode?" literal; a fixed *70B-at-FP8*
+  reference shows fit + the decode ceiling per chip (`decodeTokPerSec` in `accelerators.ts`). The
+  SRAM / wafer-scale outliers (Groq, Cerebras) are deliberately kept OFF the HBM plane and annotated
+  separately — plotting their tiny SRAM on a capacity axis would mislead.
+- **Evergreen handling.** All product names/numbers are ILLUSTRATIVE (~2026 public specs, not
+  benchmarks) and centralized in two libs (`accelerators.ts`, `deploy.ts`) plus the refreshed
+  config/budget/engines presets, so a future refresh is a one-file edit.
+- **Data refresh.** GPU presets moved off the 4090/A100 era to RTX 5090 / H100 / H200 / B200 / MI300X
+  / M3 Ultra; `EnginesOverview` gained **NVIDIA Dynamo** (5th — disaggregated, datacenter-scale) and
+  its grid + the Part 3 prose/caption were updated to match. A disaggregated-serving + KV-offload
+  `DeeperBlock` covers the big 2025–26 serving idea.
+- **Reused the established patterns + built via orchestration.** The two new viz were built by parallel
+  agents against the lib contracts, then adversarially verified, then I integrated + ran the gates.
+  They follow the lib+component+test+dev-registry+[component] recipe; mirror `Roofline` (scatter) and
+  `EnginesOverview` (cards); and use the shared `moveRadioFocus` radiogroup + aria-live + reduced-motion
+  gating + encoding (`hwAccent` teal for Part 4, `CATEGORICAL` for the 3 deployment modes). Verified by
+  the same gates as M9: axe 0 violations, roving pass, reduced-motion clean.
