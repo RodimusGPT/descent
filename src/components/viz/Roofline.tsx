@@ -170,7 +170,7 @@ export function Roofline({
               x={x(t)}
               y={HEIGHT - PAD_B + 16}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={12}
               fill={COLOR.faint}
               className="font-mono"
             >
@@ -192,7 +192,7 @@ export function Roofline({
               x={PAD_L - 8}
               y={y(t) + 3}
               textAnchor="end"
-              fontSize={10}
+              fontSize={12}
               fill={COLOR.faint}
               className="font-mono"
             >
@@ -206,7 +206,7 @@ export function Roofline({
           x={(PAD_L + WIDTH - PAD_R) / 2}
           y={HEIGHT - 8}
           textAnchor="middle"
-          fontSize={11}
+          fontSize={12}
           fill={COLOR.muted}
           className="font-mono"
         >
@@ -216,7 +216,7 @@ export function Roofline({
           x={16}
           y={(PAD_T + HEIGHT - PAD_B) / 2}
           textAnchor="middle"
-          fontSize={11}
+          fontSize={12}
           fill={COLOR.muted}
           className="font-mono"
           transform={`rotate(-90 16 ${(PAD_T + HEIGHT - PAD_B) / 2})`}
@@ -238,7 +238,7 @@ export function Roofline({
           x={x(ridge) + 6}
           y={PAD_T + 12}
           textAnchor="start"
-          fontSize={10}
+          fontSize={12}
           fill={COLOR.hwAccent}
           className="font-mono"
         >
@@ -285,7 +285,7 @@ export function Roofline({
             x={0}
             y={-14}
             textAnchor="middle"
-            fontSize={11}
+            fontSize={12}
             fill={decodeColor}
             className="font-mono"
             fontWeight={600}
@@ -335,13 +335,13 @@ export function Roofline({
       </div>
 
       {/* legend */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.7rem] text-muted">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         <Swatch color={COLOR.hwAccent} label="roofline (memory + compute roofs)" />
         <Swatch color={COLOR.active} label="prefill — compute-bound" />
         <Swatch color={COLOR.inert} label="decode — memory-bound at low batch" />
       </div>
 
-      <p className="font-mono text-[0.7rem] leading-relaxed text-faint">
+      <p className="font-mono text-xs leading-relaxed text-faint">
         Decode reuses each loaded weight for just one token per sequence, so batch 1 sits at ~1
         FLOP/byte — starved for bandwidth. Bigger batches amortise the same weight load over more
         tokens, sliding decode up the memory roof toward the ridge, where the compute roof takes
@@ -383,7 +383,7 @@ function OperatingPoint({
         x={px}
         y={py - 22}
         textAnchor="middle"
-        fontSize={11}
+        fontSize={12}
         fill={color}
         className="font-mono"
         fontWeight={600}
@@ -394,7 +394,7 @@ function OperatingPoint({
         x={px}
         y={py - 10}
         textAnchor="middle"
-        fontSize={9}
+        fontSize={12}
         fill={COLOR.faint}
         className="font-mono"
       >

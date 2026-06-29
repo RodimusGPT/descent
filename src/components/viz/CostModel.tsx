@@ -150,9 +150,7 @@ export function CostModel() {
       >
         {rows.map((r) => (
           <li key={r.batch} className="flex items-center gap-3">
-            <span className="w-20 shrink-0 font-mono text-[0.7rem] text-muted">
-              batch {r.batch}
-            </span>
+            <span className="w-20 shrink-0 font-mono text-xs text-muted">batch {r.batch}</span>
             <div
               className="h-3 flex-1 overflow-hidden rounded-full"
               style={{ backgroundColor: withAlpha(COLOR.muted, 0.14) }}
@@ -171,7 +169,7 @@ export function CostModel() {
                 }}
               />
             </div>
-            <span className="flex w-32 shrink-0 items-baseline justify-end gap-1 font-mono text-[0.7rem] tabular-nums">
+            <span className="flex w-32 shrink-0 items-baseline justify-end gap-1 font-mono text-xs tabular-nums">
               <span className="text-ink">{fmtCost(r.cost)}</span>
               <span className="text-faint">/Mtok</span>
               <span className="ml-1 text-faint">{fmtTok(r.tok)} tok/s</span>
@@ -180,7 +178,7 @@ export function CostModel() {
         ))}
       </ul>
 
-      <p className="text-[0.7rem] text-faint">
+      <p className="text-xs text-faint">
         Batching {model.name} on {gpu.name} takes it from {fmtCost(dearest.cost)} per million tokens
         at batch 1 to {fmtCost(cheapest.cost)} batched —{' '}
         <span className="text-muted">~{Math.round(drop)}× cheaper</span> — until the compute roof,

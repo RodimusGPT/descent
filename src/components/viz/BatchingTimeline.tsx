@@ -171,7 +171,7 @@ export function BatchingTimeline({
         <div className="flex items-baseline gap-2 font-mono" aria-live="polite" aria-atomic="true">
           <span className="text-xs text-muted">utilization</span>
           <span
-            className="text-2xl font-semibold tabular-nums"
+            className="inline-block min-w-[3.75rem] text-right text-2xl font-semibold tabular-nums"
             style={{ color: mode === 'continuous' ? COLOR.hwAccent : COLOR.active }}
           >
             {pct(shownUtil)}
@@ -209,7 +209,7 @@ export function BatchingTimeline({
 
       {/* timeline grid: rows = slots, columns = iterations */}
       <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between font-mono text-[0.7rem] text-faint">
+        <div className="flex items-center justify-between font-mono text-xs text-faint">
           <span>rows = slots · columns = decode iterations</span>
           <span className="tabular-nums">
             iter {Math.min(shownCols, nCols)} / {nCols}
@@ -237,7 +237,7 @@ export function BatchingTimeline({
           ))}
         </div>
         {/* legend */}
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.7rem] text-muted">
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-muted">
           {workload.map((s) => (
             <span key={s.id} className="inline-flex items-center gap-1">
               <span
@@ -311,7 +311,7 @@ export function BatchingTimeline({
         </p>
       )}
 
-      <p className="font-mono text-[0.7rem] leading-relaxed text-faint">
+      <p className="font-mono text-xs leading-relaxed text-faint">
         Chunked prefill interleaves long prompt prefills with ongoing decodes so a big prompt never
         stalls the batch; prefix caching reuses the shared prompt&rsquo;s KV across requests.
       </p>
@@ -333,7 +333,7 @@ function SlotRow({
 }) {
   return (
     <>
-      <span className="pr-1.5 font-mono text-[0.65rem] leading-none text-faint flex items-center justify-end tabular-nums">
+      <span className="pr-1.5 font-mono text-xs leading-none text-faint flex items-center justify-end tabular-nums">
         s{slot}
       </span>
       {Array.from({ length: nCols }, (_, col) => {

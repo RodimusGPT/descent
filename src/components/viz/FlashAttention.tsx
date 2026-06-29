@@ -143,7 +143,7 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
         <h3 className="font-mono text-sm font-semibold text-ink">
           FlashAttention · naive vs fused
         </h3>
-        <p className="font-mono text-[0.7rem] text-faint">
+        <p className="font-mono text-xs text-faint">
           n = <span className="tabular-nums text-muted">{n.toLocaleString()}</span> tokens · head
           dim d = {HEAD_DIM} · fp16. Attention is memory-bound: what costs is bytes moved through
           HBM.
@@ -163,7 +163,7 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
             <span className="font-mono text-xs font-semibold" style={{ color: COLOR.activeHot }}>
               Naive
             </span>
-            <span className="font-mono text-[0.65rem] text-faint">scores live in HBM</span>
+            <span className="font-mono text-xs text-faint">scores live in HBM</span>
           </div>
 
           {/* full n×n scores matrix, materialized (warm) */}
@@ -186,13 +186,13 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
                 />
               ))}
             </div>
-            <span className="font-mono text-[0.65rem] text-muted tabular-nums">
+            <span className="font-mono text-xs text-muted tabular-nums">
               n × n = {(n * n).toLocaleString()} scores
             </span>
           </div>
 
           <div
-            className="flex items-center justify-center gap-1 font-mono text-[0.65rem]"
+            className="flex items-center justify-center gap-1 font-mono text-xs"
             style={{ color: COLOR.activeHot }}
           >
             <span>write → HBM → read</span>
@@ -217,7 +217,7 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
             <span className="font-mono text-xs font-semibold" style={{ color: COLOR.hwAccent }}>
               Fused
             </span>
-            <span className="font-mono text-[0.65rem] text-faint">tiled through SRAM</span>
+            <span className="font-mono text-xs text-faint">tiled through SRAM</span>
           </div>
 
           {/* ghost n×n: never materialized */}
@@ -239,13 +239,13 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
                 />
               ))}
               <span
-                className="-translate-x-1/2 -translate-y-1/2 -rotate-12 absolute top-1/2 left-1/2 whitespace-nowrap font-mono text-[0.6rem]"
+                className="-translate-x-1/2 -translate-y-1/2 -rotate-12 absolute top-1/2 left-1/2 whitespace-nowrap font-mono text-xs"
                 style={{ color: COLOR.muted }}
               >
                 never stored
               </span>
             </div>
-            <span className="font-mono text-[0.65rem] text-faint tabular-nums">
+            <span className="font-mono text-xs text-faint tabular-nums">
               kept in SRAM, tile by tile
             </span>
           </div>
@@ -253,8 +253,8 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
           {/* streaming K/V tiles */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-[0.65rem] text-muted">K/V tiles → SRAM</span>
-              <span className="font-mono text-[0.6rem] text-faint tabular-nums">
+              <span className="font-mono text-xs text-muted">K/V tiles → SRAM</span>
+              <span className="font-mono text-xs text-faint tabular-nums">
                 {Math.min(revealed, nTiles)}/{nTiles}
               </span>
             </div>
@@ -266,7 +266,7 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
                 return (
                   <div
                     key={i}
-                    className={`flex h-7 flex-1 items-center justify-center rounded-[3px] border font-mono text-[0.6rem] tabular-nums ${tw}`}
+                    className={`flex h-7 flex-1 items-center justify-center rounded-[3px] border font-mono text-xs tabular-nums ${tw}`}
                     style={{
                       minWidth: '1.75rem',
                       borderColor: done ? c : withAlpha(COLOR.inert, 0.5),
@@ -288,8 +288,8 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
             className="flex items-center justify-between gap-2 rounded border px-2 py-1.5"
             style={{ borderColor: withAlpha(COLOR.hwAccent, 0.4) }}
           >
-            <span className="font-mono text-[0.6rem] text-muted">online softmax</span>
-            <span className="flex gap-3 font-mono text-[0.65rem] tabular-nums">
+            <span className="font-mono text-xs text-muted">online softmax</span>
+            <span className="flex gap-3 font-mono text-xs tabular-nums">
               <span style={{ color: COLOR.hwAccent }}>
                 max <span className="text-ink">{stat ? stat.runningMax.toFixed(1) : '—'}</span>
               </span>
@@ -353,7 +353,7 @@ export function FlashAttention({ initialSeqStep = DEFAULT_STEP }: FlashAttention
         </div>
 
         {reduced && (
-          <p className="font-mono text-[0.7rem] text-faint">
+          <p className="font-mono text-xs text-faint">
             Reduced motion: all K/V tiles are shown already streamed, with the final online-softmax
             statistics.
           </p>
@@ -382,8 +382,8 @@ function TrafficReadout({
       style={{ borderColor: COLOR.border, backgroundColor: withAlpha(COLOR.faint, 0.08) }}
     >
       <span className="flex flex-col">
-        <span className="font-mono text-[0.6rem] text-faint">{label}</span>
-        <span className="font-mono text-[0.6rem]" style={{ color }}>
+        <span className="font-mono text-xs text-faint">{label}</span>
+        <span className="font-mono text-xs" style={{ color }}>
           {order}
         </span>
       </span>
@@ -441,7 +441,7 @@ function Bar({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="w-12 shrink-0 font-mono text-[0.65rem]" style={{ color }}>
+      <span className="w-12 shrink-0 font-mono text-xs" style={{ color }}>
         {label}
       </span>
       <div

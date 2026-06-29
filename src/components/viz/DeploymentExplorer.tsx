@@ -111,7 +111,7 @@ export function DeploymentExplorer({ initialKey = DEPLOY_MODES[0]?.key }: Deploy
               >
                 {mode.label}
               </span>
-              <span className="text-[0.7rem] leading-snug text-faint">{tagline(mode.blurb)}</span>
+              <span className="text-xs leading-snug text-faint">{tagline(mode.blurb)}</span>
             </button>
           );
         })}
@@ -127,14 +127,14 @@ export function DeploymentExplorer({ initialKey = DEPLOY_MODES[0]?.key }: Deploy
           <span className="font-mono text-sm" style={{ color: accent }}>
             {selected.label}
           </span>
-          <span className="text-[0.7rem] text-faint">illustrative, not a ranking — ~2026</span>
+          <span className="text-xs text-faint">illustrative, not a ranking — ~2026</span>
         </div>
 
         <p className="text-xs leading-relaxed text-ink">{selected.blurb}</p>
 
         {/* Representative tools */}
         <div className="flex flex-col gap-1.5">
-          <span className="text-[0.7rem] text-faint">Representative tools</span>
+          <span className="text-xs text-faint">Representative tools</span>
           <ul className="flex flex-col gap-1.5">
             {selected.tools.map((tool) => (
               <li
@@ -142,7 +142,7 @@ export function DeploymentExplorer({ initialKey = DEPLOY_MODES[0]?.key }: Deploy
                 className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-2"
               >
                 <span className="shrink-0 font-mono text-xs text-ink">{tool.name}</span>
-                <span className="text-[0.7rem] leading-snug text-muted">{tool.note}</span>
+                <span className="text-xs leading-snug text-muted">{tool.note}</span>
               </li>
             ))}
           </ul>
@@ -155,7 +155,7 @@ export function DeploymentExplorer({ initialKey = DEPLOY_MODES[0]?.key }: Deploy
             const color = traitColor(value);
             return (
               <li key={key} className="flex items-center gap-3">
-                <span className="w-24 shrink-0 text-[0.7rem] text-muted">{TRAIT_LABELS[key]}</span>
+                <span className="w-24 shrink-0 text-xs text-muted">{TRAIT_LABELS[key]}</span>
                 <div
                   className="h-2 flex-1 overflow-hidden rounded-full"
                   style={{ backgroundColor: withAlpha(COLOR.muted, 0.16) }}
@@ -175,7 +175,7 @@ export function DeploymentExplorer({ initialKey = DEPLOY_MODES[0]?.key }: Deploy
                   />
                 </div>
                 <span
-                  className="w-6 shrink-0 text-right font-mono text-[0.7rem] tabular-nums"
+                  className="w-6 shrink-0 text-right font-mono text-xs tabular-nums"
                   style={{ color }}
                 >
                   {value}

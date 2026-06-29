@@ -143,7 +143,7 @@ export function DecodeThroughput() {
           return (
             <li key={r.accel.name} className="flex items-center gap-3">
               <span
-                className="w-24 shrink-0 truncate font-mono text-[0.7rem]"
+                className="w-24 shrink-0 truncate font-mono text-xs"
                 style={{ color: r.fits ? COLOR.muted : COLOR.faint }}
                 title={`${r.accel.name} — ${r.accel.memGB} GB, ${r.accel.bandwidthTBs} TB/s`}
               >
@@ -169,14 +169,14 @@ export function DecodeThroughput() {
                   }}
                 />
               </div>
-              <span className="flex w-28 shrink-0 items-baseline justify-end gap-1 font-mono text-[0.7rem] tabular-nums">
+              <span className="flex w-28 shrink-0 items-baseline justify-end gap-1 font-mono text-xs tabular-nums">
                 <span style={{ color: r.fits ? COLOR.ink : COLOR.faint }}>
                   {fmtTok(r.tokPerSec)}
                 </span>
                 <span className="text-faint">tok/s</span>
                 {!r.fits && (
                   <span
-                    className="ml-1 rounded px-1 text-[0.6rem]"
+                    className="ml-1 rounded px-1 text-xs"
                     style={{
                       color: COLOR.activeHot,
                       backgroundColor: withAlpha(COLOR.activeHot, 0.14),
@@ -191,7 +191,7 @@ export function DecodeThroughput() {
         })}
       </ul>
 
-      <p className="text-[0.7rem] text-faint">
+      <p className="text-xs text-faint">
         {model.name} at {prec.label} streams ~{gbPerToken.toFixed(gbPerToken >= 10 ? 0 : 1)} GB per
         token. Grey bars are chips the full weights overflow — fast, but it won't load.
         Illustrative, ~2026 — not benchmarks.
