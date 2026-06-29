@@ -10,6 +10,7 @@ summary: Replay one token through every layer you just learned, top to bottom.
 import Beat from '@/components/Beat.astro';
 import FullStackReplay from '@/components/viz/FullStackReplay';
 import ConfigSandbox from '@/components/viz/ConfigSandbox';
+import CostModel from '@/components/viz/CostModel';
 
 You have followed a single token from the prompt box, through the transformer, down into the
 numbers its weights are made of, across the serving stack, and onto the silicon. None of those
@@ -52,6 +53,25 @@ Pick a model, a precision, and a card. See whether it fits, and roughly how fast
 
 </div>
 <ConfigSandbox slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Cost per million tokens as the batch grows — it collapses until the roofline's compute roof, then flattens. Best-case, illustrative.">
+<div slot="text">
+
+### Price it out
+
+You know whether it fits and how fast it decodes; the last question is what it costs. Self-hosting,
+the answer is just the GPU's price per hour divided by the tokens it produces — and the lever is the
+**batch**. A single decode stream is memory-bound: the weights are dragged off memory once per step
+whether one sequence rides along or a hundred, so serving just one wastes the GPU and every token is
+dear. Pack the batch full and that same weight read is amortized across every sequence — cost per
+token falls almost in step with the batch size, until the batch is large enough to saturate the
+cores at the **roofline's compute roof**, where it plateaus (and where, in practice, the KV cache
+runs out of room). It is the whole descent in one number: memory bandwidth, the roofline, and the
+MoE trick, priced in dollars.
+
+</div>
+<CostModel slot="visual" client:visible />
 </Beat>
 
 The same token that felt like magic at the top is, by the bottom, just bandwidth and arithmetic —

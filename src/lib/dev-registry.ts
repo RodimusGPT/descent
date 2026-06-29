@@ -202,4 +202,10 @@ export const DEV_SANDBOXES: DevSandbox[] = [
       'Tokens/sec across chips for a chosen model + precision — bandwidth ÷ bytes/token.',
     milestone: 'M10',
   },
+  {
+    slug: 'cost',
+    title: 'Cost model',
+    description: 'GPU $/hr + model + batch → cost per million tokens; batching is the lever.',
+    milestone: 'M10',
+  },
 ];
