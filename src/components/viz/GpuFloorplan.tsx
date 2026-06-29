@@ -1,8 +1,9 @@
 import { COLOR, lerpColor, withAlpha } from '@/lib/encoding';
 import { GPU_SPEC, MEMORY_TIERS, type MemoryTier, totalTensorCores } from '@/lib/gpu';
+import { moveRadioFocus } from '@/lib/roving';
 import { useInView } from '@/lib/use-in-view';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 /**
  * GpuFloorplan (spec 10.4) — the chip, and the steep memory hierarchy that feeds it.
@@ -414,26 +415,6 @@ export function GpuFloorplan({ initialSelection = 'HBM' }: GpuFloorplanProps) {
       </div>
     </div>
   );
-}
-
-/**
- * Standard ARIA radiogroup keyboard nav: arrows move + select with wraparound,
- * moving focus to the newly selected radio (roving tabindex driven by props).
- */
-function moveRadioFocus(
-  e: KeyboardEvent<HTMLButtonElement>,
-  currentIndex: number,
-  count: number,
-  setIndex: (i: number) => void,
-): void {
-  let next: number;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (currentIndex + 1) % count;
-  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (currentIndex - 1 + count) % count;
-  else return;
-  e.preventDefault();
-  setIndex(next);
-  const radios = e.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="radio"]');
-  radios?.[next]?.focus();
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

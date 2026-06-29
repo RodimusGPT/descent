@@ -7,8 +7,9 @@ import {
   type Engine,
   type EngineDims,
 } from '@/lib/engines';
+import { moveRadioFocus } from '@/lib/roving';
 import { usePrefersReducedMotion } from '@/lib/use-reduced-motion';
-import { type KeyboardEvent, useId, useState } from 'react';
+import { useId, useState } from 'react';
 
 /**
  * EnginesOverview (spec 10.3) — the inference-ENGINES landscape.
@@ -58,20 +59,6 @@ export function EnginesOverview({ initialKey = ENGINES[0]?.key }: EnginesOvervie
     : 'border-color 200ms ease, background-color 200ms ease';
   const barTransition = reduced ? undefined : 'width 260ms ease, background-color 260ms ease';
 
-  const onCardKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
-    let next = i;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % ENGINES.length;
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')
-      next = (i - 1 + ENGINES.length) % ENGINES.length;
-    else if (e.key === 'Home') next = 0;
-    else if (e.key === 'End') next = ENGINES.length - 1;
-    else return;
-    e.preventDefault();
-    setIndex(next);
-    const el = e.currentTarget.parentElement?.children[next];
-    if (el instanceof HTMLElement) el.focus();
-  };
-
   return (
     <div className="flex w-full max-w-[900px] flex-col gap-4 rounded-lg border border-border bg-surface p-4 text-ink">
       <div className="flex flex-col gap-1">
@@ -100,7 +87,7 @@ export function EnginesOverview({ initialKey = ENGINES[0]?.key }: EnginesOvervie
               aria-controls={panelId}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setIndex(i)}
-              onKeyDown={(e) => onCardKey(e, i)}
+              onKeyDown={(e) => moveRadioFocus(e, i, ENGINES.length, setIndex)}
               className="flex flex-col gap-1 rounded-md border p-2.5 text-left "
               style={{
                 borderColor: isActive ? accent : COLOR.border,

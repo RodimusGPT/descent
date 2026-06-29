@@ -273,13 +273,10 @@ export function DescentTour() {
         <span aria-hidden="true">◀</span>
         <span className="hidden sm:inline">Prev</span>
       </button>
-      <span
-        className="min-w-[3.5rem] text-center font-mono text-xs tabular-nums text-muted"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        aria-label={total > 0 ? `Step ${active + 1} of ${total}` : undefined}
-      >
+      {/* Plain visual counter — not a live region: `active` tracks the nearest stop on
+          every scroll frame, so announcing it would spam screen readers as they scroll.
+          The Prev/Next buttons carry their own labels for action feedback. */}
+      <span className="min-w-[3.5rem] text-center font-mono text-xs tabular-nums text-muted">
         {total > 0 ? `${active + 1} / ${total}` : '—'}
       </span>
       <button

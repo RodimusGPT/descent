@@ -169,12 +169,11 @@ all three at once.
 
 ### Putting a number on it
 
-Everything on this floor has pointed at one number: how fast a token comes out. For decode it is
-almost embarrassingly simple — **tokens per second ≈ memory bandwidth ÷ bytes read per token** — so
-the same model's speed just tracks each chip's bandwidth. Switch to the MoE and watch every bar leap:
-reading only its few active experts per token, it decodes like a small model on hardware that would
-crawl through a dense one its size. But a fast bar is no use if the weights overrun the card — those
-chips grey out.
+Everything on this floor has pointed at one number: how fast a token comes out — and for decode it
+just tracks each chip's bandwidth. Here is the whole field at once. Switch to the MoE and watch every
+bar leap: reading only its few active experts per token, it decodes like a small model on hardware
+that would crawl through a dense one its size. But a fast bar is no use if the weights overrun the
+card — those chips grey out.
 
 </div>
 <DecodeThroughput slot="visual" client:visible />

@@ -321,8 +321,10 @@ export function AcceleratorLandscape() {
       </fieldset>
 
       {/* Readout + teaching line — the detail panel that updates on selection */}
-      <div className="flex flex-col gap-3" aria-live="polite" aria-atomic="true">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="flex flex-col gap-3">
+        {/* Live region is the COMPACT stat grid only — selection-follows-focus would
+            otherwise re-announce the whole teaching paragraph on every arrow key. */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-live="polite">
           <div className="rounded-md border border-border bg-surface-raised p-3">
             <div className="text-xs text-muted">Vendor</div>
             <div className="font-mono text-base" style={{ color: COLOR.ink }}>

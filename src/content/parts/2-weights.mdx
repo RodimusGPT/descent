@@ -48,8 +48,8 @@ The default answer is a **floating-point** number: a sign bit, an **exponent** (
 a **mantissa** (the significant digits). It is just scientific notation in binary — the mantissa
 holds the significant digits and the exponent is the power of two that slides the point, the way
 $6.02\times10^{23}$ splits a number into digits and a scale. Full precision is 32 bits — the
-precision models are *trained* in, but wasteful for **inference** (running the finished weights to
-generate text, rather than learning them in the first place). Sixteen bits halves it, in two
+original full-precision baseline, and overkill for **inference**: once the weights are fixed, running
+them to generate text tolerates far coarser numbers than training them did. Sixteen bits halves it, in two
 flavors. **FP16** spends 5 bits on exponent and 10 on mantissa; **BF16** keeps FP32's full 8-bit
 exponent — its huge **dynamic range**, the span from the tiniest to the largest magnitude it can
 represent — and trades mantissa bits for it.

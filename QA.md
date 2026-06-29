@@ -272,3 +272,20 @@ pieces at `/dev/deploy` and `/dev/accelerators`, and read Parts 3 & 4 in context
   etc.; EnginesOverview shows five engines incl. **NVIDIA Dynamo**; Part 3 prose + the disaggregation
   DeeperBlock match the viz.
 - ☐ Reduced motion: both new interactives are static (no entrance animation); selection still works.
+
+## Final whole-site review (post-M10)
+
+A 5-dimension review (content, math, consistency, code, a11y/UX) with adversarial verification.
+All areas verdict **good**; gates green — `bun run check` (424 tests), build (34 pages), axe WCAG
+**0 violations / 33 routes**, keyboard roving **20 pages all pass**, Lighthouse home (compressed)
+perf 96 / a11y 100 / best-practices 100 / SEO 100, CLS 0. The 7 confirmed findings were all fixed:
+- ☑ FP32 reframed (it is the full-precision baseline, not "what models are trained in") — `2-weights.mdx`.
+- ☑ Trimmed the duplicated decode-law statement in Part 4's "Putting a number on it" beat.
+- ☑ `GpuFloorplan` + `EnginesOverview` now use the shared `moveRadioFocus` (single impl; restores
+  Home/End on the floorplan) — no more local copies.
+- ☑ Removed the unused `framer-motion` dependency.
+- ☑ `AcceleratorLandscape`: scoped the `aria-live` region to the compact stat grid (dropped
+  `aria-atomic`; the teaching paragraph no longer re-announces on every arrow key).
+- ☑ `DescentTour` step counter is now a plain visual span (no longer a live region that spammed
+  screen readers on every scroll frame).
+- ☑ `DeploymentExplorer` mode cards stack on mobile (`grid-cols-1 sm:grid-cols-3`).
