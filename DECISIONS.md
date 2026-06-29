@@ -226,7 +226,10 @@ than bolted on. Web-researched the ~2026 field; kept it evergreen.
 - **Data refresh.** GPU presets moved off the 4090/A100 era to RTX 5090 / H100 / H200 / B200 / MI300X
   / M3 Ultra; `EnginesOverview` gained **NVIDIA Dynamo** (5th — disaggregated, datacenter-scale) and
   its grid + the Part 3 prose/caption were updated to match. A disaggregated-serving + KV-offload
-  `DeeperBlock` covers the big 2025–26 serving idea.
+  `DeeperBlock` covers the big 2025–26 serving idea. The `GpuFloorplan` teaching baseline was later
+  refreshed from H100 to **Blackwell B200** (148 SMs, 192 GB HBM3e, ~8 TB/s, 96 MB L2, 228 KB SRAM/SM),
+  with the Part 4 "The GPU" prose updated to match — superseding the earlier "keep H100 as the baseline"
+  note, at the user's request.
 - **Reused the established patterns + built via orchestration.** The two new viz were built by parallel
   agents against the lib contracts, then adversarially verified, then I integrated + ran the gates.
   They follow the lib+component+test+dev-registry+[component] recipe; mirror `Roofline` (scatter) and

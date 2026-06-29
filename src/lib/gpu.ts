@@ -8,7 +8,7 @@
  * the smaller it is — that trade is the lesson the GpuFloorplan visual teaches.
  */
 
-/** A representative datacenter GPU (H100-class numbers, rounded for teaching). */
+/** A representative datacenter GPU (Blackwell B200-class numbers, rounded for teaching). */
 export interface GpuSpec {
   /** Display name. */
   name: string;
@@ -26,14 +26,14 @@ export interface GpuSpec {
   smemKBPerSm: number;
 }
 
-/** The representative part the floorplan is drawn from. */
+/** The representative part the floorplan is drawn from (NVIDIA Blackwell B200). */
 export const GPU_SPEC: GpuSpec = {
-  name: 'H100 SXM',
-  sms: 132,
+  name: 'B200',
+  sms: 148,
   tensorCoresPerSm: 4,
-  hbmGB: 80,
-  hbmBandwidthTBs: 3.35,
-  l2MB: 50,
+  hbmGB: 192,
+  hbmBandwidthTBs: 8.0,
+  l2MB: 96,
   smemKBPerSm: 228,
 };
 
@@ -77,7 +77,7 @@ export const MEMORY_TIERS: readonly MemoryTier[] = [
     bytes: GPU_SPEC.l2MB * 1e6,
     relSpeed: 4,
     bandwidthTBs: Math.round(GPU_SPEC.hbmBandwidthTBs * 4 * 100) / 100,
-    blurb: 'On-die cache shared by every SM. A few MB, several times HBM bandwidth.',
+    blurb: 'On-die cache shared by every SM. Tens of MB, several times HBM bandwidth.',
   },
   {
     name: 'SRAM / shared',

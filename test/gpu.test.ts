@@ -22,11 +22,11 @@ describe('GPU_SPEC', () => {
     expect(GPU_SPEC.smemKBPerSm).toBeGreaterThan(0);
   });
 
-  it('describes an H100-class part (~130 SMs, ~80 GB HBM, ~3 TB/s)', () => {
-    expect(GPU_SPEC.sms).toBeGreaterThanOrEqual(100);
-    expect(GPU_SPEC.sms).toBeLessThanOrEqual(160);
-    expect(GPU_SPEC.hbmGB).toBeGreaterThanOrEqual(40);
-    expect(GPU_SPEC.hbmBandwidthTBs).toBeGreaterThanOrEqual(1);
+  it('describes a Blackwell B200-class part (~148 SMs, 192 GB HBM3e, ~8 TB/s)', () => {
+    expect(GPU_SPEC.sms).toBeGreaterThanOrEqual(120);
+    expect(GPU_SPEC.sms).toBeLessThanOrEqual(200);
+    expect(GPU_SPEC.hbmGB).toBeGreaterThanOrEqual(150);
+    expect(GPU_SPEC.hbmBandwidthTBs).toBeGreaterThanOrEqual(6);
   });
 
   it('totalTensorCores multiplies SMs by cores-per-SM', () => {
