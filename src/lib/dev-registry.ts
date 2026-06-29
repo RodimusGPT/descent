@@ -195,4 +195,11 @@ export const DEV_SANDBOXES: DevSandbox[] = [
     description: "Today's inference chips plotted by memory capacity × bandwidth.",
     milestone: 'M10',
   },
+  {
+    slug: 'throughput',
+    title: 'Decode throughput',
+    description:
+      'Tokens/sec across chips for a chosen model + precision — bandwidth ÷ bytes/token.',
+    milestone: 'M10',
+  },
 ];

@@ -38,6 +38,7 @@ const ROVING_PAGES = [
   '/dev/budget',
   '/dev/deploy',
   '/dev/accelerators',
+  '/dev/throughput',
 ];
 
 async function discoverDevRoutes(ctx) {

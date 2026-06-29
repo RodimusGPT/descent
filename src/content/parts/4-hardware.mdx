@@ -11,6 +11,7 @@ import Beat from '@/components/Beat.astro';
 import DeeperBlock from '@/components/scroll/DeeperBlock';
 import GpuFloorplan from '@/components/viz/GpuFloorplan';
 import AcceleratorLandscape from '@/components/viz/AcceleratorLandscape';
+import DecodeThroughput from '@/components/viz/DecodeThroughput';
 import GemmTiling from '@/components/viz/GemmTiling';
 import FlashAttention from '@/components/viz/FlashAttention';
 import Roofline from '@/components/viz/Roofline';
@@ -161,6 +162,22 @@ all three at once.
 
 </div>
 <Parallelism slot="visual" client:visible />
+</Beat>
+
+<Beat wide caption="Tokens per second for the chosen model on each chip — the bandwidth law made literal. Grey bars overflow the chip's memory.">
+<div slot="text">
+
+### Putting a number on it
+
+Everything on this floor has pointed at one number: how fast a token comes out. For decode it is
+almost embarrassingly simple — **tokens per second ≈ memory bandwidth ÷ bytes read per token** — so
+the same model's speed just tracks each chip's bandwidth. Switch to the MoE and watch every bar leap:
+reading only its few active experts per token, it decodes like a small model on hardware that would
+crawl through a dense one its size. But a fast bar is no use if the weights overrun the card — those
+chips grey out.
+
+</div>
+<DecodeThroughput slot="visual" client:visible />
 </Beat>
 
 Step back and one law rules this floor: for decode, **tokens per second ≈ memory bandwidth ÷

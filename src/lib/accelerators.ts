@@ -152,3 +152,50 @@ export function decodeTokPerSec(bandwidthTBs: number, bytesPerTokenValue: number
 export function fitsInMemory(weightGB: number, memGB: number): boolean {
   return weightGB <= memGB;
 }
+
+/** A decode-precision option: bytes per weight sets both footprint and bytes/token. */
+export interface DecodePrecision {
+  key: string;
+  label: string;
+  bytesPerParam: number;
+}
+
+/** The precisions a decode workload is commonly run at, coarsest last. */
+export const DECODE_PRECISIONS: readonly DecodePrecision[] = [
+  { key: 'fp16', label: 'FP16', bytesPerParam: 2 },
+  { key: 'fp8', label: 'FP8', bytesPerParam: 1 },
+  { key: 'fp4', label: 'FP4', bytesPerParam: 0.5 },
+] as const;
+
+/** One accelerator's decode result for a given workload. */
+export interface ChipThroughput {
+  accel: Accelerator;
+  /** Memory-bound decode ceiling in tokens/sec. */
+  tokPerSec: number;
+  /** Whether the model's weights fit this chip's memory. */
+  fits: boolean;
+}
+
+/**
+ * Decode throughput (tokens/sec) for EVERY accelerator on one workload, sorted
+ * fastest-first. A model with `paramsB` total / `activeParamsB` read per token at
+ * `bytesPerParam`:
+ *   - weighs   paramsB × bytesPerParam GB        (decimal GB; sets `fits`)
+ *   - reads    activeParamsB × bytesPerParam GB   per token
+ *   - decodes  bandwidth ÷ bytes-per-token        tokens/sec
+ * MoE models (activeParamsB ≪ paramsB) decode fast yet still need capacity for the
+ * full weights — which is exactly what `fits` surfaces.
+ */
+export function throughputAcrossChips(
+  paramsB: number,
+  activeParamsB: number,
+  bytesPerParam: number,
+): ChipThroughput[] {
+  const weightGB = paramsB * bytesPerParam;
+  const bpt = bytesPerToken(activeParamsB, bytesPerParam);
+  return ACCELERATORS.map((accel) => ({
+    accel,
+    tokPerSec: decodeTokPerSec(accel.bandwidthTBs, bpt),
+    fits: fitsInMemory(weightGB, accel.memGB),
+  })).sort((a, b) => b.tokPerSec - a.tokPerSec);
+}
