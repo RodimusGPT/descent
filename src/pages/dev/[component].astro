@@ -52,6 +52,9 @@ const meta = DEV_SANDBOXES.find((s) => s.slug === component);
     <h1 class="mt-2 text-2xl font-bold text-ink">{meta?.title}</h1>
     <p class="text-sm text-muted">{meta?.description}</p>
     <div class="mt-8 rounded-xl border border-border bg-surface/40 p-6">
+      {/* Bridges the heading order: the page <h1> is the title, each interactive's own
+          header is an <h3>, so this visually-hidden <h2> keeps the sequence h1 → h2 → h3. */}
+      <h2 class="sr-only">Interactive demo</h2>
       {component === 'token' && <TokenDemo client:load />}
       {component === 'attention' && <AttentionFan client:load />}
       {component === 'float' && <FloatExploder client:load />}
